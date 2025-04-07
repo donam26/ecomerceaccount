@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn-primary {
+    @apply py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75;
+  }
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300;
+  }
+  .input-field {
+    @apply w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400;
+  }
+}
+
+/* CSS tùy chỉnh cho biểu tượng mạng xã hội */
+.social-float-buttons {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+}
+
+.social-float-button {
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.3s ease !important;
+}
+
+.social-float-button:hover {
+    transform: scale(1.1) !important;
+}
+
+.social-float-button.facebook {
+    background-color: #1877f2 !important;
+}
+
+.social-float-button.facebook:hover {
+    background-color: #0d6ae4 !important;
+}
+
+.social-float-button.zalo {
+    background-color: #0068ff !important;
+}
+
+.social-float-button.zalo:hover {
+    background-color: #0057d5 !important;
+}
+
+/* Hiệu ứng logo ShopBuffsao */
+.logo-text {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, #ffffff, #c3e0ff, #ffcc00, #ffffff);
+    background-size: 300% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    letter-spacing: 0.5px;
+    position: relative;
+    transition: all 0.3s ease;
+    padding: 5px 0;
+    animation: shimmer 6s infinite;
+    display: inline-block;
+}
+
+.logo-text:hover {
+    transform: scale(1.05);
+    background: linear-gradient(90deg, #ffffff, #ffcc00, #ffaa00, #ffffff);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+    animation: shine 1.5s ease-in-out infinite;
+}
+
+.logo-text::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    z-index: -1;
+    background: linear-gradient(90deg, transparent, rgba(255, 204, 0, 0.2), transparent);
+    background-size: 300% 100%;
+    animation: shimmer 3s infinite;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.logo-text:hover::before {
+    opacity: 1;
+}
+
+.logo-text::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ffcc00, transparent);
+    transition: width 0.4s ease;
+}
+
+.logo-text:hover::after {
+    width: 100%;
+}
+
+/* Hiệu ứng animation cho logo */
+@keyframes shimmer {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes shine {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
