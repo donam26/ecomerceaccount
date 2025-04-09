@@ -243,7 +243,12 @@ class PaymentController extends Controller
             'order_number' => $order->order_number
         ]);
         
-        return $qrUrl;
+        return [
+            'qr_url' => $qrUrl,
+            'payment_content' => $paymentContent,
+            'amount' => $amount,
+            'order_number' => $order->order_number
+        ];
     }
 
     /**

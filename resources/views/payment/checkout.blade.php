@@ -178,9 +178,7 @@
                                                 @if(isset($paymentInfo['qr_image']) && $paymentInfo['qr_image'])
                                                     <img src="{{ $paymentInfo['qr_image'] }}" alt="QR Thanh toán" class="max-w-full h-auto">
                                                 @else
-                                                    <div class="p-4 rounded-md bg-gray-100 text-center">
-                                                        <p class="text-sm text-gray-500">Không thể tạo mã QR. Vui lòng sử dụng thông tin chuyển khoản bên cạnh.</p>
-                                                    </div>
+                                                    <img src="{{ $paymentInfo['qr_url'] ?? '' }}" alt="QR Thanh toán" class="max-w-full h-auto">
                                                 @endif
                                             </div>
                                         </div>
