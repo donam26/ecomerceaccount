@@ -19,6 +19,8 @@ class WebhookController extends Controller
     {
         // Đọc dữ liệu từ request
         $data = $request->all();
+        Log::info('SePay Webhook nhận được dữ liệu:', $data);
+        
         // Kiểm tra loại giao dịch
         if (!isset($data['transferType'])) {
             Log::error('SePay Webhook API: Thiếu thông tin loại giao dịch');
@@ -63,27 +65,32 @@ class WebhookController extends Controller
                         
                         // Thêm lại prefix để có mã đơn hàng đầy đủ
                         $depositCode = 'WALLET-' . $walletCode;
-                        $sessions = DB::table('sessions')
-                            ->get();
+                        
+                        // Tìm bản ghi trong database
+                        $deposit = DB::table('wallet_deposits')
+                            ->where('deposit_code', $depositCode)
+                            ->where('status', 'pending')
+                            ->first();
+                        
+                        if ($deposit) {
+                            Log::info('Tìm thấy thông tin giao dịch trong database:', [
+                                'user_id' => $deposit->user_id,
+                                'wallet_id' => $deposit->wallet_id,
+                                'deposit_code' => $depositCode
+                            ]);
                             
-                        $userId = null;
-                        
-                        foreach ($sessions as $session) {
-                            $sessionData = @unserialize(base64_decode($session->payload));
-                            if ($sessionData && 
-                                isset($sessionData['deposit']) && 
-                                isset($sessionData['deposit']['code']) && 
-                                $sessionData['deposit']['code'] === $depositCode) {
-                                
-                                $userId = $session->user_id;
-                             
-                                break;
-                            }
-                        }
-                        
-                        if ($userId) {
-                            // Nếu tìm thấy người dùng, xử lý nạp tiền vào ví
+                            // Nếu tìm thấy trong database, ưu tiên sử dụng thông tin này
+                            $userId = $deposit->user_id;
                             $amount = (int)$data['transferAmount'];
+                            
+                            // Cập nhật trạng thái deposit
+                            DB::table('wallet_deposits')
+                                ->where('id', $deposit->id)
+                                ->update([
+                                    'status' => 'completed',
+                                    'response' => json_encode($data),
+                                    'completed_at' => now()
+                                ]);
                             
                             // Gọi phương thức xử lý nạp tiền
                             $result = \App\Http\Controllers\WalletController::processDepositWebhook(
@@ -93,16 +100,79 @@ class WebhookController extends Controller
                                 $depositCode
                             );
                             
-                        
+                            return response()->json(['success' => true, 'message' => 'Giao dịch đã được xử lý']);
                         } else {
-                            Log::warning('SePay Webhook API: Không tìm thấy người dùng cho mã nạp tiền', [
-                                'deposit_code' => $depositCode
-                            ]);
+                            // Nếu không tìm thấy trong database, tìm trong logs
+                            $logFiles = glob(storage_path('logs/laravel*.log'));
+                            $userId = null;
+                            $walletId = null;
+                            $expectedAmount = null;
+                            
+                            foreach ($logFiles as $logFile) {
+                                $content = file_get_contents($logFile);
+                                
+                                // Tìm dòng log chứa mã giao dịch và thông tin nạp ví
+                                if (strpos($content, '"deposit_code":"' . $depositCode . '"') !== false && 
+                                    strpos($content, 'SePay QR Nạp Ví') !== false) {
+                                    
+                                    // Tìm user_id
+                                    if (preg_match('/"user_id":(\d+)/', $content, $userMatches)) {
+                                        $userId = $userMatches[1];
+                                        
+                                        // Tìm thêm wallet_id nếu có
+                                        preg_match('/"wallet_id":(\d+)/', $content, $walletMatches);
+                                        if (!empty($walletMatches[1])) {
+                                            $walletId = $walletMatches[1];
+                                        }
+                                        
+                                        // Tìm amount
+                                        preg_match('/"amount":"?(\d+)"?/', $content, $amountMatches);
+                                        if (!empty($amountMatches[1])) {
+                                            $expectedAmount = $amountMatches[1];
+                                        }
+                                        
+                                        Log::info('Tìm thấy thông tin giao dịch trong logs với method mới:', [
+                                            'user_id' => $userId,
+                                            'wallet_id' => $walletId,
+                                            'deposit_code' => $depositCode,
+                                            'expected_amount' => $expectedAmount
+                                        ]);
+                                        
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if ($userId) {
+                                Log::info('Tìm thấy thông tin giao dịch trong logs:', [
+                                    'user_id' => $userId,
+                                    'wallet_id' => $walletId,
+                                    'deposit_code' => $depositCode,
+                                    'expected_amount' => $expectedAmount
+                                ]);
+                                
+                                // Nếu tìm thấy người dùng, xử lý nạp tiền vào ví
+                                $amount = (int)$data['transferAmount'];
+                                
+                                // Gọi phương thức xử lý nạp tiền
+                                $result = \App\Http\Controllers\WalletController::processDepositWebhook(
+                                    $userId, 
+                                    $amount, 
+                                    $data, 
+                                    $depositCode
+                                );
+                                
+                                return response()->json(['success' => true, 'message' => 'Giao dịch đã được xử lý']);
+                            } else {
+                                Log::warning('SePay Webhook API: Không tìm thấy người dùng cho mã nạp tiền', [
+                                    'deposit_code' => $depositCode
+                                ]);
+                            }
                         }
                         
                         return response()->json(['success' => true]);
                     } else {
-                        Log::warning('SePay Webhook API: Không tìm thấy đơn hàng cày thuê', [
+                        Log::warning('SePay Webhook API: Không thể trích xuất mã nạp tiền', [
                             'content' => $content
                         ]);
                         return response()->json(['success' => true]);

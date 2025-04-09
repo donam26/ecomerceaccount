@@ -116,4 +116,28 @@ class CardDeposit extends Model
 
         return $telcoMap[$this->telco] ?? $this->telco;
     }
+
+    /**
+     * Scope để lọc theo trạng thái
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
+    
+    /**
+     * Scope để lọc theo trạng thái thất bại
+     */
+    public function scopeFailed($query)
+    {
+        return $query->where('status', 'failed');
+    }
+    
+    /**
+     * Scope để lọc theo trạng thái đang chờ xử lý
+     */
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
 } 

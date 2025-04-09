@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\WalletController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,5 +21,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // SePay Webhook
-Route::post('webhooks/sepay', [WebhookController::class, 'sepay'])
-    ->name('api.sepay.webhook');
+Route::post('webhooks/sepay', [WebhookController::class, 'sepay']);
+
+// Thêm route xử lý webhook từ TheSieuRe
+Route::post('/thesieure/webhook', [WalletController::class, 'theSieuReWebhook'])->name('api.thesieure.webhook');
+
+// Webhook routes
+Route::post('webhooks/thesieure', [WalletController::class, 'theSieuReWebhook']);

@@ -80,16 +80,17 @@ Route::middleware(['auth'])->group(function () {
         ->name('boosting.account_info.success');
 
     // Wallet routes
-    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
-    Route::get('/wallet/transactions', [WalletController::class, 'transactions'])->name('wallet.transactions');
-    Route::get('/wallet/deposit', [WalletController::class, 'deposit'])->name('wallet.deposit');
-    Route::post('/wallet/deposit', [WalletController::class, 'processDeposit'])->name('wallet.deposit.process');
-    Route::get('/wallet/deposit/callback', [WalletController::class, 'depositCallback'])->name('wallet.deposit.callback');
-    
-    // Thêm route xử lý nạp thẻ cào TheSieuRe
-    Route::post('/wallet/deposit/card', [WalletController::class, 'depositCard'])->name('wallet.deposit.card');
-    Route::get('/wallet/card/{requestId}', [WalletController::class, 'showCardPending'])->name('wallet.card.pending');
-    Route::get('/wallet/card/{requestId}/check', [WalletController::class, 'checkCardStatus'])->name('wallet.card.check');
+    Route::middleware(['auth'])->prefix('wallet')->name('wallet.')->group(function () {
+        Route::get('/', [WalletController::class, 'index'])->name('index');
+        Route::get('/transactions', [WalletController::class, 'transactions'])->name('transactions');
+        Route::get('/deposit', [WalletController::class, 'deposit'])->name('deposit');
+        Route::post('/deposit', [WalletController::class, 'processDeposit'])->name('deposit.process');
+        Route::get('/deposit/check', [WalletController::class, 'checkDepositStatus'])->name('deposit.check');
+        Route::get('/deposit/card', [WalletController::class, 'depositCard'])->name('deposit.card');
+        Route::post('/deposit/card', [WalletController::class, 'processDepositCard'])->name('deposit.card.process');
+        Route::get('/deposit/card/{requestId}', [WalletController::class, 'showCardPending'])->name('deposit.card.pending');
+        Route::get('/deposit/card/{requestId}/check', [WalletController::class, 'checkCardStatus'])->name('deposit.card.check');
+    });
 });
 
 // Admin routes

@@ -3,31 +3,43 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | SePay Configuration
+    | Cấu hình cổng thanh toán SePay
     |--------------------------------------------------------------------------
     |
-    | Các cấu hình cho cổng thanh toán SePay
+    | Các cấu hình để kết nối với dịch vụ thanh toán SePay
     |
     */
-    'webhook_token' => env('SEPAY_WEBHOOK_TOKEN'),
+    'pattern' => 'SEVQR',
+    
+    'sepay' => [
+        'account' => env('SEPAY_ACCOUNT', '103870429701'),
+        'bank' => env('SEPAY_BANK', 'VietinBank'),
+        'token' => env('SEPAY_TOKEN', ''),
+        'webhook_url' => env('SEPAY_WEBHOOK_URL', '/api/webhooks/sepay'),
+    ],
     
     /*
     |--------------------------------------------------------------------------
-    | SePay API Key
+    | Cấu hình nạp thẻ qua TheSieuRe
     |--------------------------------------------------------------------------
     |
-    | API key để truy cập vào các API của SePay
+    | Các cấu hình để kết nối với dịch vụ nạp thẻ TheSieuRe
     |
     */
-    'sepay_api_key' => env('SEPAY_API_KEY'),
-    
-    /*
-    |--------------------------------------------------------------------------
-    | SePay Match Pattern
-    |--------------------------------------------------------------------------
-    |
-    | Mẫu nội dung chuyển khoản cho SePay
-    |
-    */
-    'pattern' => env('SEPAY_MATCH_PATTERN', 'SE'),
+    'thesieure' => [
+        'partner_id' => env('TSR_PARTNER_ID', ''),
+        'partner_key' => env('TSR_PARTNER_KEY', ''),
+        'url' => env('TSR_API_URL', 'https://thesieure.com/chargingws/v2'),
+        'webhook_url' => env('TSR_WEBHOOK_URL', '/api/webhooks/thesieure'),
+        
+        // Tỷ lệ khấu trừ cho từng loại thẻ
+        'rate' => [
+            'VIETTEL' => 0.02, // 2%
+            'MOBIFONE' => 0.02,
+            'VINAPHONE' => 0.02,
+            'VIETNAMOBILE' => 0.03, // 3%
+            'ZING' => 0.03,
+            'GATE' => 0.03,
+        ],
+    ],
 ]; 
