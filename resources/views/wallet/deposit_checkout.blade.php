@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Thanh toán đơn hàng #' . $order->order_number)
+@section('title', 'Thanh toán nạp tiền')
 
 @section('content')
 <div class="bg-gray-50 py-8">
@@ -21,11 +21,7 @@
                         <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                         </svg>
-                        @if(isset($isBoostingOrder) && $isBoostingOrder)
-                        <a href="{{ route('boosting.index') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Dịch vụ cày thuê</a>
-                        @else
-                        <a href="{{ route('orders.index') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng của tôi</a>
-                        @endif
+                        <a href="{{ route('wallet.index') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Ví của tôi</a>
                     </div>
                 </li>
                 <li>
@@ -33,11 +29,7 @@
                         <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                         </svg>
-                        @if(isset($isBoostingOrder) && $isBoostingOrder)
-                        <span class="ml-1 text-gray-700 md:ml-2">Đơn hàng #{{ $order->order_number }}</span>
-                        @else
-                        <a href="{{ route('orders.show', $order->order_number) }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng #{{ $order->order_number }}</a>
-                        @endif
+                        <a href="{{ route('wallet.deposit') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Nạp tiền</a>
                     </div>
                 </li>
                 <li aria-current="page">
@@ -78,7 +70,7 @@
                             <div class="px-4 py-5 sm:px-6 flex items-center justify-between">
                                 <div>
                                     <h3 class="text-lg leading-6 font-medium text-gray-900">Phương thức thanh toán</h3>
-                                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Lựa chọn phương thức thanh toán phù hợp</p>
+                                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Vui lòng chuyển khoản theo thông tin bên dưới</p>
                                 </div>
                                 <div>
                                     <button id="refreshStatusBtn" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -92,41 +84,6 @@
 
                             <div class="border-t border-gray-200">
                                 <div class="px-6 py-5 space-y-6">
-                                    @if(isset($wallet) && $wallet && $wallet->balance >= $order->amount)
-                                    <!-- Thanh toán qua ví -->
-                                    <div class="relative p-4 mt-4 border border-gray-200 rounded-lg">
-                                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                                            <div class="w-full border-t border-gray-200"></div>
-                                        </div>
-                                        <div class="relative flex items-center justify-between">
-                                            <span class="pr-2 text-sm text-gray-500 bg-white">Ví điện tử</span>
-                                            <form action="{{ route('payment.wallet', $order->order_number) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                    <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                                    </svg>
-                                                    Thanh toán qua ví ({{ number_format($wallet->balance, 0, ',', '.') }}đ)
-                                                </button>
-                                            </form>
-                                        </div>
-                                        <p class="mt-2 text-sm text-gray-500">Thanh toán nhanh chóng từ số dư ví của bạn.</p>
-                                    </div>
-                                    @elseif(isset($wallet) && $wallet && $wallet->balance < $order->amount)
-                                    <!-- Số dư ví không đủ -->
-                                    <div class="relative p-4 mt-4 border border-gray-200 rounded-lg bg-gray-50">
-                                        <div class="flex items-center justify-between">
-                                            <div>
-                                                <span class="text-sm font-medium text-gray-900">Ví điện tử</span>
-                                                <p class="mt-1 text-sm text-red-600">Số dư không đủ: {{ number_format($wallet->balance, 0, ',', '.') }}đ / {{ number_format($order->amount, 0, ',', '.') }}đ</p>
-                                            </div>
-                                            <a href="{{ route('wallet.deposit') }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                Nạp tiền
-                                            </a>
-                                        </div>
-                                    </div>
-                                    @endif
-                                    
                                     <!-- Chuyển khoản ngân hàng -->
                                     <div class="relative border rounded-md p-4">
                                         <h3 class="text-lg font-medium text-gray-900">Thanh toán chuyển khoản</h3>
@@ -154,8 +111,8 @@
                                                 </div>
                                                 <div class="mb-4">
                                                     <p class="text-sm font-medium text-gray-700">Số tiền:</p>
-                                                    <p class="text-base font-semibold">{{ number_format($order->amount, 0, ',', '.') }}đ
-                                                        <button type="button" class="ml-2 inline-flex items-center p-1 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 copy-btn" data-clipboard-text="{{ $order->amount }}">
+                                                    <p class="text-base font-semibold">{{ number_format($depositOrder->amount, 0, ',', '.') }}đ
+                                                        <button type="button" class="ml-2 inline-flex items-center p-1 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 copy-btn" data-clipboard-text="{{ $depositOrder->amount }}">
                                                             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                                                             </svg>
@@ -178,11 +135,7 @@
                                                 </div>
                                             </div>
                                             <div class="flex items-center justify-center">
-                                                @if(isset($paymentInfo['qr_image']) && $paymentInfo['qr_image'])
-                                                    <img src="{{ $paymentInfo['qr_image'] }}" alt="QR Thanh toán" class="max-w-full h-auto">
-                                                @else
-                                                    <img src="{{ $paymentInfo['qr_url'] ?? '' }}" alt="QR Thanh toán" class="max-w-full h-auto">
-                                                @endif
+                                                <img src="{{ $paymentInfo['qr_url'] }}" alt="QR Thanh toán" class="max-w-full h-auto">
                                             </div>
                                         </div>
                                         
@@ -199,82 +152,39 @@
                 </div>
             </div>
 
-            <!-- Cột tóm tắt đơn hàng -->
+            <!-- Cột tóm tắt thông tin nạp tiền -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-lg shadow-md overflow-hidden sticky top-6">
                     <div class="p-6 border-b border-gray-200">
-                        <h2 class="text-xl font-bold text-gray-800">Tóm tắt đơn hàng</h2>
+                        <h2 class="text-xl font-bold text-gray-800">Thông tin nạp tiền</h2>
                     </div>
                     
                     <div class="p-6">
-                        @if(isset($isBoostingOrder) && $isBoostingOrder)
-                        <!-- Hiển thị thông tin đơn hàng cày thuê -->
                         <div class="mb-4">
-                            <h3 class="font-medium text-gray-900">{{ $order->service->name }}</h3>
-                            <p class="text-sm text-gray-500">{{ $order->service->game->name }}</p>
-                            <p class="text-sm text-gray-500 mt-2">Thời gian ước tính: {{ $order->service->estimated_days }} ngày</p>
+                            <h3 class="font-medium text-gray-900">Nạp tiền vào ví</h3>
+                            <p class="text-sm text-gray-500 mt-2">Mã nạp tiền: {{ $depositOrder->order_number }}</p>
                         </div>
                         
                         <div class="border-t border-gray-200 pt-4 mt-4">
                             <div class="flex justify-between mb-2">
-                                <span class="text-gray-600">Giá dịch vụ</span>
-                                <span class="font-medium text-gray-900">{{ number_format($order->original_amount, 0, ',', '.') }}đ</span>
+                                <span class="text-gray-600">Số dư hiện tại</span>
+                                <span class="font-medium text-gray-900">{{ number_format($wallet->balance, 0, ',', '.') }}đ</span>
                             </div>
                             
-                            @if($order->discount > 0)
-                                <div class="flex justify-between mb-2 text-green-600">
-                                    <span>Giảm giá</span>
-                                    <span>-{{ number_format($order->discount, 0, ',', '.') }}đ</span>
-                                </div>
-                            @endif
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-600">Số tiền nạp</span>
+                                <span class="font-medium text-green-600">+{{ number_format($depositOrder->amount, 0, ',', '.') }}đ</span>
+                            </div>
                             
                             <div class="flex justify-between font-bold text-lg pt-4 border-t border-gray-200 mt-4">
-                                <span>Tổng cộng</span>
-                                <span class="text-red-600">{{ number_format($order->amount, 0, ',', '.') }}đ</span>
-                            </div>
-                        </div>
-                        @else
-                        <!-- Hiển thị thông tin đơn hàng tài khoản thường -->
-                        <div class="flex items-center mb-4">
-                            @php
-                                $accountImage = 'https://via.placeholder.com/300x200';
-                                if ($order->account->images) {
-                                    if (is_string($order->account->images)) {
-                                        $images = json_decode($order->account->images, true);
-                                        if (is_array($images) && !empty($images)) {
-                                            $accountImage = asset('storage/' . $images[0]);
-                                        }
-                                    } elseif (is_array($order->account->images) && !empty($order->account->images)) {
-                                        $accountImage = asset('storage/' . $order->account->images[0]);
-                                    }
-                                }
-                            @endphp
-                            <img src="{{ $accountImage }}" alt="{{ $order->account->title }}" class="w-16 h-16 object-cover rounded-md">
-                            <div class="ml-4">
-                                <h3 class="font-medium text-gray-900">{{ $order->account->title }}</h3>
-                                <p class="text-sm text-gray-500">{{ $order->account->game->name }}</p>
+                                <span>Số dư sau nạp</span>
+                                <span class="text-blue-600">{{ number_format($wallet->balance + $depositOrder->amount, 0, ',', '.') }}đ</span>
                             </div>
                         </div>
                         
-                        <div class="border-t border-gray-200 pt-4 mt-4">
-                            <div class="flex justify-between mb-2">
-                                <span class="text-gray-600">Giá tài khoản</span>
-                                <span class="font-medium text-gray-900">{{ number_format($order->original_amount ?? $order->amount, 0, ',', '.') }}đ</span>
-                            </div>
-                            
-                            @if(isset($order->discount) && $order->discount > 0)
-                                <div class="flex justify-between mb-2 text-green-600">
-                                    <span>Giảm giá</span>
-                                    <span>-{{ number_format($order->discount, 0, ',', '.') }}đ</span>
-                                </div>
-                            @endif
-                            
-                            <div class="flex justify-between font-bold text-lg pt-4 border-t border-gray-200 mt-4">
-                                <span>Tổng cộng</span>
-                                <span class="text-red-600">{{ number_format($order->amount, 0, ',', '.') }}đ</span>
-                            </div>
-                        </div>
-                        @endif
+                        <a href="{{ route('wallet.deposit') }}" class="mt-6 w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-blue-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Thay đổi số tiền nạp
+                        </a>
                     </div>
                 </div>
             </div>
@@ -301,8 +211,8 @@
         });
         
         // Kiểm tra trạng thái thanh toán tự động
-        const orderNumber = '{{ $order->order_number }}';
-        const checkStatusUrl = '{{ route('payment.check_status', ['orderNumber' => $order->order_number]) }}';
+        const depositCode = '{{ $depositOrder->order_number }}';
+        const checkStatusUrl = '{{ route('payment.check_status', ['orderNumber' => $depositOrder->order_number]) }}';
         
         function checkPaymentStatus() {
             fetch(checkStatusUrl)
@@ -317,13 +227,7 @@
                         // Chuyển hướng sau 2 giây
                         setTimeout(function() {
                             if (data.status === 'paid' || data.status === 'completed') {
-                                if (data.redirect_url) {
-                                    window.location.href = data.redirect_url;
-                                } else if ('{{ isset($isBoostingOrder) && $isBoostingOrder }}' === '1') {
-                                    window.location.href = '{{ route('boosting.account_info', $order->order_number) }}';
-                                } else {
-                                    window.location.href = '{{ route('payment.success', $order->order_number) }}';
-                                }
+                                window.location.href = '{{ route('wallet.index') }}';
                             }
                         }, 2000);
                     }
@@ -358,13 +262,7 @@
                         // Chuyển hướng sau 2 giây
                         setTimeout(function() {
                             if (data.status === 'paid' || data.status === 'completed') {
-                                if (data.redirect_url) {
-                                    window.location.href = data.redirect_url;
-                                } else if ('{{ isset($isBoostingOrder) && $isBoostingOrder }}' === '1') {
-                                    window.location.href = '{{ route('boosting.account_info', $order->order_number) }}';
-                                } else {
-                                    window.location.href = '{{ route('payment.success', $order->order_number) }}';
-                                }
+                                window.location.href = '{{ route('wallet.index') }}';
                             }
                         }, 2000);
                     } else {
@@ -428,6 +326,11 @@
                 }, 500);
             }, 5000);
         }
+        
+        // Thêm chức năng kiểm tra thủ công
+        window.manualCheckStatus = function() {
+            document.getElementById('refreshStatusBtn').click();
+        };
     });
 </script>
 @endsection 

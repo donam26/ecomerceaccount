@@ -6,13 +6,11 @@ use App\Http\Controllers\GameController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\GameController as AdminGameController;
 use App\Http\Controllers\Admin\AccountController as AdminAccountController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Api\OrderStatusController;
 use App\Http\Controllers\BoostingServiceController;
 use App\Http\Controllers\Admin\BoostingServiceController as AdminBoostingServiceController;
 use App\Http\Controllers\Admin\BoostingOrderController as AdminBoostingOrderController;
@@ -59,11 +57,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment/check-status/{orderNumber}', [PaymentController::class, 'checkStatus'])->name('payment.check_status');
     Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
     Route::post('/payment/wallet/{orderNumber}', [PaymentController::class, 'processWalletPayment'])->name('payment.wallet');
-    
-    // Thanh toán qua VNPay (giả lập)
-    Route::get('/payment/vnpay', [PaymentController::class, 'createVnpayPayment'])->name('payment.vnpay');
-    Route::get('/payment/vnpay/simulation', [PaymentController::class, 'simulateVnpayPayment'])->name('payment.vnpay.simulation');
-    Route::post('/payment/vnpay/result', [PaymentController::class, 'handleVnpayResult'])->name('payment.vnpay.result');
 
     // Dịch vụ cày thuê
     Route::get('/boosting', [BoostingServiceController::class, 'index'])->name('boosting.index');
@@ -89,14 +82,15 @@ Route::middleware(['auth'])->group(function () {
     // Wallet routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::get('/wallet/transactions', [WalletController::class, 'transactions'])->name('wallet.transactions');
-    Route::get('/wallet/deposit', [WalletController::class, 'showDepositForm'])->name('wallet.deposit');
+    Route::get('/wallet/deposit', [WalletController::class, 'deposit'])->name('wallet.deposit');
     Route::post('/wallet/deposit', [WalletController::class, 'processDeposit'])->name('wallet.deposit.process');
     Route::get('/wallet/deposit/callback', [WalletController::class, 'depositCallback'])->name('wallet.deposit.callback');
+    
+    // Thêm route xử lý nạp thẻ cào TheSieuRe
+    Route::post('/wallet/deposit/card', [WalletController::class, 'depositCard'])->name('wallet.deposit.card');
+    Route::get('/wallet/card/{requestId}', [WalletController::class, 'showCardPending'])->name('wallet.card.pending');
+    Route::get('/wallet/card/{requestId}/check', [WalletController::class, 'checkCardStatus'])->name('wallet.card.check');
 });
-
-// Kiểm tra trạng thái đơn hàng
-Route::get('/orders/{orderNumber}/check-status', [OrderStatusController::class, 'checkStatus'])
-    ->name('orders.check-status');
 
 // Admin routes
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {

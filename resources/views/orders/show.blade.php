@@ -120,7 +120,13 @@
                                 @foreach($accountInfo['extra_info'] as $key => $value)
                                     <div>
                                         <p class="text-gray-600 text-sm">{{ ucfirst($key) }}:</p>
-                                        <p class="font-medium">{{ $value }}</p>
+                                        <p class="font-medium">
+                                            @if(is_array($value) || is_object($value))
+                                                {{ json_encode($value) }}
+                                            @else
+                                                {{ $value }}
+                                            @endif
+                                        </p>
                                     </div>
                                 @endforeach
                             </div>

@@ -23,9 +23,11 @@ class PaymentController extends Controller
      */
     public function checkout($orderNumber)
     {
+        // Tìm đơn hàng thông thường
         $order = Order::where('order_number', $orderNumber)->first();
         
         // Nếu không tìm thấy đơn hàng thông thường, kiểm tra xem có phải là đơn hàng boosting
+        $isBoostingOrder = false;
         if (!$order) {
             $order = BoostingOrder::where('order_number', $orderNumber)->first();
             if (!$order) {
@@ -33,15 +35,22 @@ class PaymentController extends Controller
             }
             
             $isBoostingOrder = true;
-        } else {
-            $isBoostingOrder = false;
         }
         
+        // Kiểm tra trạng thái thanh toán
         if ($order->status == 'paid' || $order->status == 'completed') {
             if ($isBoostingOrder) {
-                return redirect()->route('boosting.show', $order->service->slug)->with('success', 'Đơn hàng này đã được thanh toán');
+                // Nếu đơn hàng boosting đã thanh toán, chuyển đến trang nhập thông tin tài khoản
+                if (!$order->hasAccountInfo()) {
+                    return redirect()->route('boosting.account_info', $order->order_number)
+                        ->with('success', 'Đơn hàng này đã được thanh toán, vui lòng cung cấp thông tin tài khoản');
+                }
+                return redirect()->route('boosting.show', $order->service->slug)
+                    ->with('success', 'Đơn hàng này đã được thanh toán');
             } else {
-                return redirect()->route('orders.show', $order->order_number)->with('success', 'Đơn hàng này đã được thanh toán');
+                // Nếu đơn hàng thông thường đã thanh toán, chuyển đến trang chi tiết đơn hàng
+                return redirect()->route('orders.show', $order->order_number)
+                    ->with('success', 'Đơn hàng này đã được thanh toán');
             }
         }
         
@@ -54,6 +63,7 @@ class PaymentController extends Controller
             $wallet = auth()->user()->wallet;
         }
         
+        // Hiển thị trang thanh toán với thông tin đơn hàng và QR
         return view('payment.checkout', compact('order', 'paymentInfo', 'isBoostingOrder', 'wallet'));
     }
 
@@ -68,24 +78,8 @@ class PaymentController extends Controller
             ->firstOrFail();
 
         try {
-            // Lấy thông tin cấu hình SePay từ config
-            $pattern = config('payment.pattern', 'SEVQR');
-            
-            // Tạo nội dung chuyển khoản theo định dạng của SePay
-            if (strpos($order->order_number, 'ORD') === 0) {
-                // Nếu đã có ORD thì không thêm vào nữa
-                $paymentContent = $pattern . ' ' . $order->order_number;
-            } else {
-                // Nếu chưa có thì thêm vào
-                $paymentContent = $pattern . ' ORD' . $order->order_number;
-            }
-            
-            // Chuẩn bị dữ liệu hiển thị thông tin thanh toán
-            $paymentInfo = [
-                'amount' => $order->amount,
-                'payment_content' => $paymentContent,
-                'order_number' => $order->order_number,
-            ];
+            // Tạo thông tin thanh toán bằng phương thức generateSePayQRCode
+            $paymentInfo = $this->generateSePayQRCode($order);
             
             // Lưu thông tin thanh toán
             $order->payment_method = 'sepay';
@@ -201,8 +195,8 @@ class PaymentController extends Controller
      * Tạo QR code từ SePay API
      * 
      * @param mixed $order           Đơn hàng cần thanh toán (có thể là Order hoặc BoostingOrder)
-     * @param string $paymentContent Nội dung thanh toán
-     * @return string                URL hình ảnh QR hoặc dữ liệu Base64
+     * @param string $paymentContent Nội dung thanh toán (tuỳ chọn)
+     * @return array                 Trả về mảng chứa thông tin thanh toán: qr_url, payment_content, amount, order_number
      */
     private function generateSePayQRCode($order, $paymentContent = null)
     {
@@ -210,19 +204,42 @@ class PaymentController extends Controller
         if ($paymentContent === null) {
             $pattern = config('payment.pattern', 'SEVQR');
             
-            // Kiểm tra mã đơn hàng đã có prefix "ORD" chưa
+            // Xác định loại đơn hàng dựa trên prefix của order_number hoặc class
             $orderNumber = $order->order_number;
-            if (strpos($orderNumber, 'ORD') === 0) {
-                // Nếu đã có ORD thì không thêm vào nữa
-                $paymentContent = $pattern . ' ' . $orderNumber;
-            } else {
-                // Nếu chưa có thì thêm vào
-                $paymentContent = $pattern . ' ORD' . $orderNumber;
+            $orderType = "ORDPRODUCT";
+            
+            // Kiểm tra nếu là đơn hàng cày thuê
+            if (strpos($orderNumber, 'BOOST') === 0 || $order instanceof \App\Models\BoostingOrder) {
+                $orderType = "ORDBOOST";
+            } 
+            // Kiểm tra nếu là nạp ví (nếu có)
+            elseif (strpos($orderNumber, 'WALLET') === 0) {
+                $orderType = "ORDWALLET";
             }
             
+            // Tạo nội dung chuyển khoản không có dấu gạch ngang
+            // Xử lý mã đơn hàng cho phù hợp với yêu cầu thanh toán
+            if (strpos($orderNumber, 'ORD-') === 0) {
+                // Đối với đơn hàng thường, sử dụng toàn bộ mã đơn hàng, chỉ loại bỏ "ORD-"
+                $cleanedOrderNumber = str_replace('ORD-', '', $orderNumber);
+            } else if (strpos($orderNumber, 'BOOST') === 0) {
+                // Đối với đơn hàng cày thuê, loại bỏ "BOOST"
+                $cleanedOrderNumber = str_replace('BOOST', '', $orderNumber);
+            } else if (strpos($orderNumber, 'WALLET-') === 0) {
+                // Đối với nạp ví, loại bỏ "WALLET-"
+                $cleanedOrderNumber = str_replace('WALLET-', '', $orderNumber);
+            } else {
+                // Trường hợp khác giữ nguyên
+                $cleanedOrderNumber = $orderNumber;
+            }
+            
+            $paymentContent = $pattern . ' ' . $orderType . $cleanedOrderNumber;
+            
             // Log nội dung chuyển khoản để debug
-            Log::debug('Nội dung chuyển khoản', [
+            Log::info('SePay QR: Tạo nội dung chuyển khoản', [
                 'orderNumber' => $orderNumber,
+                'cleanedOrderNumber' => $cleanedOrderNumber,
+                'orderType' => $orderType,
                 'paymentContent' => $paymentContent
             ]);
         }
@@ -332,59 +349,6 @@ class PaymentController extends Controller
         }
     }
 
-    /**
-     * Tạo thanh toán VNPay
-     */
-    public function createVnpayPayment(Request $request)
-    {
-        $amount = $request->input('amount');
-        $orderId = $request->input('order_id');
-        $orderType = $request->input('order_type', 'normal');
-        $returnUrl = $request->input('return_url');
-        
-        // URL thanh toán VNPay (giả lập)
-        // Trong môi trường thực tế, bạn cần kết nối với cổng thanh toán VNPay thật
-        $vnpayUrl = route('payment.vnpay.simulation', [
-            'amount' => $amount,
-            'order_id' => $orderId,
-            'order_type' => $orderType,
-            'return_url' => $returnUrl,
-        ]);
-        
-        return redirect($vnpayUrl);
-    }
-    
-    /**
-     * Trang giả lập thanh toán VNPay
-     */
-    public function simulateVnpayPayment(Request $request)
-    {
-        $amount = $request->input('amount');
-        $orderId = $request->input('order_id');
-        $orderType = $request->input('order_type', 'normal');
-        $returnUrl = $request->input('return_url');
-        
-        return view('payment.vnpay_simulation', compact('amount', 'orderId', 'orderType', 'returnUrl'));
-    }
-    
-    /**
-     * Xử lý kết quả thanh toán VNPay
-     */
-    public function handleVnpayResult(Request $request)
-    {
-        $responseCode = $request->input('vnp_ResponseCode');
-        $orderType = $request->input('order_type', 'normal');
-        $returnUrl = $request->input('return_url');
-        
-        // Thêm các tham số cần thiết vào URL callback
-        $callbackUrl = $returnUrl . '?' . http_build_query([
-            'vnp_ResponseCode' => $responseCode,
-            'vnp_TxnRef' => $request->input('order_id'),
-            'vnp_Amount' => $request->input('amount') * 100, // VNPay trả về số tiền * 100
-        ]);
-        
-        return redirect($callbackUrl);
-    }
 
     /**
      * Kiểm tra trạng thái thanh toán đơn hàng

@@ -76,7 +76,17 @@
                             <a href="{{ route('login') }}" class="text-sm text-white hover:text-gray-200 mr-4">Đăng nhập</a>
                             <a href="{{ route('register') }}" class="text-sm bg-white text-blue-600 hover:bg-gray-100 px-4 py-2 rounded-md font-semibold">Đăng ký</a>
                         @else
-                            
+                            <!-- Hiển thị số dư ví -->
+                            <div class="flex items-center border-r border-blue-400 pr-3 mr-3">
+                                <a href="{{ route('wallet.index') }}" class="flex items-center hover:text-gray-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm11 1H6v8h8V6z" clip-rule="evenodd" />
+                                        <path d="M14 8a1 1 0 100-2h-4a1 1 0 100 2h4z" />
+                                    </svg>
+                                    <span>Số dư quỹ: {{ Auth::user()->wallet ? number_format(Auth::user()->wallet->balance, 0, ',', '.') : 0 }}đ</span>
+                                </a>
+                            </div>
+                        
                             <div class="ml-3 relative">
                                 <div class="flex items-center">
                                     <span class="mr-2">{{ Auth::user()->name }}</span>

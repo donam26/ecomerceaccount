@@ -11,11 +11,13 @@ use Illuminate\Support\Facades\Auth;
 class OrderController extends Controller
 {
     /**
-     * Hiển thị đơn hàng của người dùng
+     * Hiển thị danh sách đơn hàng của người dùng hiện tại
      */
     public function index()
     {
-        $orders = Auth::user()->orders()->with('account.game')->latest()->paginate(10);
+        $orders = Order::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
         
         return view('orders.index', compact('orders'));
     }
@@ -36,10 +38,14 @@ class OrderController extends Controller
                 $accountInfo = json_decode($order->account_details, true);
             } elseif ($order->account) {
                 // Nếu không có thông tin cached, lấy trực tiếp từ account
+                $attributes = $order->account->attributes;
+                // Kiểm tra nếu attributes là string thì mới json_decode
+                $extraInfo = is_string($attributes) ? json_decode($attributes, true) : $attributes;
+                
                 $accountInfo = [
                     'username' => $order->account->username,
                     'password' => $order->account->password,
-                    'extra_info' => json_decode($order->account->attributes, true),
+                    'extra_info' => $extraInfo,
                     'game_name' => $order->account->game->name,
                 ];
             }

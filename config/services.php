@@ -31,4 +31,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'thesieure' => [
+        'url' => env('THESIEURE_API_URL', 'https://thesieure.com/chargingws/v2'),
+        'partner_id' => env('THESIEURE_PARTNER_ID'),
+        'partner_key' => env('THESIEURE_PARTNER_KEY'),
+    ],
+
 ];
