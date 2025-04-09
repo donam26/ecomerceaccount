@@ -4,11 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Transaction;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use SePay\SePay\Facades\SePay;
 use Illuminate\Support\Facades\Http;
+use App\Models\BoostingOrder;
+use App\Models\User;
+use App\Models\Wallet;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Redirect;
 
 class PaymentController extends Controller
 {
@@ -17,58 +23,38 @@ class PaymentController extends Controller
      */
     public function checkout($orderNumber)
     {
-        // Kiểm tra xem đơn hàng thuộc loại nào dựa vào prefix
-        if (strpos($orderNumber, 'BOOST') === 0) {
-            // Đơn hàng cày thuê
-            $order = \App\Models\BoostingOrder::where('order_number', $orderNumber)
-                ->where('user_id', auth()->id())
-                ->where('status', 'pending')
-                ->firstOrFail();
-                
+        $order = Order::where('order_number', $orderNumber)->first();
+        
+        // Nếu không tìm thấy đơn hàng thông thường, kiểm tra xem có phải là đơn hàng boosting
+        if (!$order) {
+            $order = BoostingOrder::where('order_number', $orderNumber)->first();
+            if (!$order) {
+                return redirect()->route('home')->with('error', 'Không tìm thấy đơn hàng');
+            }
+            
             $isBoostingOrder = true;
         } else {
-            // Đơn hàng thường
-            $order = Order::where('order_number', $orderNumber)
-                ->where('user_id', auth()->id())
-                ->where('status', 'pending')
-                ->firstOrFail();
-                
             $isBoostingOrder = false;
         }
-
-        // Lấy thông tin cấu hình SePay từ config
-        $pattern = config('payment.pattern', 'SEVQR');
         
-        // Tạo nội dung chuyển khoản theo định dạng của SePay
-        if (strpos($order->order_number, 'ORD') === 0) {
-            // Nếu đã có ORD thì không thêm vào nữa
-            $paymentContent = $pattern . ' ' . $order->order_number;
-        } else {
-            // Nếu chưa có thì thêm vào
-            $paymentContent = $pattern . ' ORD' . $order->order_number;
+        if ($order->status == 'paid' || $order->status == 'completed') {
+            if ($isBoostingOrder) {
+                return redirect()->route('boosting.show', $order->service->slug)->with('success', 'Đơn hàng này đã được thanh toán');
+            } else {
+                return redirect()->route('orders.show', $order->order_number)->with('success', 'Đơn hàng này đã được thanh toán');
+            }
         }
         
-        // Chuẩn bị dữ liệu hiển thị thông tin thanh toán
-        $paymentInfo = [
-            'amount' => $order->amount,
-            'payment_content' => $paymentContent,
-            'order_number' => $order->order_number,
-        ];
+        // Tạo thông tin thanh toán QR SePay
+        $paymentInfo = $this->generateSePayQRCode($order);
         
-        // Tạo QR code từ SePay
-        try {
-            // Tạo QR từ SePay API
-            $qrCode = $this->generateSePayQRCode($order);
-            $paymentInfo['qr_image'] = $qrCode;
-        } catch (\Exception $e) {
-            // Log lỗi
-            Log::error('Lỗi tạo QR code SePay: ' . $e->getMessage());
-            
-            // Fallback đến QR code VietQR nếu SePay gặp lỗi
-            $paymentInfo['qr_image'] = null;
+        // Nếu người dùng đã đăng nhập, lấy thông tin ví điện tử
+        $wallet = null;
+        if (auth()->check()) {
+            $wallet = auth()->user()->wallet;
         }
-
-        return view('payment.checkout', compact('order', 'paymentInfo', 'isBoostingOrder'));
+        
+        return view('payment.checkout', compact('order', 'paymentInfo', 'isBoostingOrder', 'wallet'));
     }
 
     /**
@@ -258,5 +244,190 @@ class PaymentController extends Controller
         ]);
         
         return $qrUrl;
+    }
+
+    /**
+     * Xử lý thanh toán đơn hàng qua ví
+     */
+    public function processWalletPayment($orderNumber)
+    {
+        // Kiểm tra xem người dùng đã đăng nhập chưa
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để sử dụng thanh toán qua ví');
+        }
+        
+        $user = auth()->user();
+        $wallet = $user->wallet;
+        
+        // Nếu người dùng chưa có ví, tạo ví mới
+        if (!$wallet) {
+            return redirect()->route('wallet.deposit')->with('error', 'Bạn chưa có ví điện tử. Vui lòng nạp tiền để tạo ví mới.');
+        }
+        
+        // Tìm đơn hàng cần thanh toán
+        $order = Order::where('order_number', $orderNumber)->first();
+        
+        // Nếu không tìm thấy đơn hàng thông thường, kiểm tra xem có phải là đơn hàng boosting
+        $isBoostingOrder = false;
+        if (!$order) {
+            $order = BoostingOrder::where('order_number', $orderNumber)->first();
+            if (!$order) {
+                return redirect()->route('home')->with('error', 'Không tìm thấy đơn hàng');
+            }
+            
+            $isBoostingOrder = true;
+        }
+        
+        // Kiểm tra trạng thái đơn hàng
+        if ($order->status == 'paid' || $order->status == 'completed') {
+            if ($isBoostingOrder) {
+                return redirect()->route('boosting.account_info', $order->order_number)->with('success', 'Đơn hàng này đã được thanh toán');
+            } else {
+                return redirect()->route('payment.success', $order->order_number)->with('success', 'Đơn hàng này đã được thanh toán');
+            }
+        }
+        
+        // Kiểm tra số dư ví
+        if ($wallet->balance < $order->amount) {
+            return redirect()->route('wallet.deposit')->with('error', 'Số dư ví không đủ để thanh toán. Vui lòng nạp thêm tiền.');
+        }
+        
+        try {
+            // Tạo giao dịch thanh toán
+            $transaction = new WalletTransaction();
+            $transaction->wallet_id = $wallet->id;
+            $transaction->amount = -$order->amount; // Số tiền âm vì là thanh toán
+            $transaction->balance_before = $wallet->balance;
+            $transaction->balance_after = $wallet->balance - $order->amount;
+            $transaction->type = WalletTransaction::TYPE_PAYMENT;
+            $transaction->description = 'Thanh toán đơn hàng #' . $order->order_number;
+            $transaction->reference_id = $order->id;
+            $transaction->reference_type = $isBoostingOrder ? 'boosting_order' : 'order';
+            $transaction->save();
+            
+            // Cập nhật số dư ví
+            $wallet->balance = $transaction->balance_after;
+            $wallet->save();
+            
+            // Cập nhật trạng thái đơn hàng
+            $order->status = 'paid';
+            $order->payment_method = 'wallet';
+            $order->paid_at = now();
+            $order->save();
+            
+            // Chuyển hướng tùy theo loại đơn hàng
+            if ($isBoostingOrder) {
+                return redirect()->route('boosting.account_info', $order->order_number)->with('success', 'Thanh toán thành công. Vui lòng nhập thông tin tài khoản.');
+            } else {
+                return redirect()->route('payment.success', $order->order_number)->with('success', 'Thanh toán thành công. Cảm ơn bạn đã mua hàng!');
+            }
+        } catch (\Exception $e) {
+            Log::error('Lỗi thanh toán qua ví: ' . $e->getMessage());
+            return back()->with('error', 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại sau.');
+        }
+    }
+
+    /**
+     * Tạo thanh toán VNPay
+     */
+    public function createVnpayPayment(Request $request)
+    {
+        $amount = $request->input('amount');
+        $orderId = $request->input('order_id');
+        $orderType = $request->input('order_type', 'normal');
+        $returnUrl = $request->input('return_url');
+        
+        // URL thanh toán VNPay (giả lập)
+        // Trong môi trường thực tế, bạn cần kết nối với cổng thanh toán VNPay thật
+        $vnpayUrl = route('payment.vnpay.simulation', [
+            'amount' => $amount,
+            'order_id' => $orderId,
+            'order_type' => $orderType,
+            'return_url' => $returnUrl,
+        ]);
+        
+        return redirect($vnpayUrl);
+    }
+    
+    /**
+     * Trang giả lập thanh toán VNPay
+     */
+    public function simulateVnpayPayment(Request $request)
+    {
+        $amount = $request->input('amount');
+        $orderId = $request->input('order_id');
+        $orderType = $request->input('order_type', 'normal');
+        $returnUrl = $request->input('return_url');
+        
+        return view('payment.vnpay_simulation', compact('amount', 'orderId', 'orderType', 'returnUrl'));
+    }
+    
+    /**
+     * Xử lý kết quả thanh toán VNPay
+     */
+    public function handleVnpayResult(Request $request)
+    {
+        $responseCode = $request->input('vnp_ResponseCode');
+        $orderType = $request->input('order_type', 'normal');
+        $returnUrl = $request->input('return_url');
+        
+        // Thêm các tham số cần thiết vào URL callback
+        $callbackUrl = $returnUrl . '?' . http_build_query([
+            'vnp_ResponseCode' => $responseCode,
+            'vnp_TxnRef' => $request->input('order_id'),
+            'vnp_Amount' => $request->input('amount') * 100, // VNPay trả về số tiền * 100
+        ]);
+        
+        return redirect($callbackUrl);
+    }
+
+    /**
+     * Kiểm tra trạng thái thanh toán đơn hàng
+     */
+    public function checkStatus($orderNumber)
+    {
+        // Tìm đơn hàng cần kiểm tra
+        $order = Order::where('order_number', $orderNumber)->first();
+        
+        // Nếu không tìm thấy đơn hàng thông thường, kiểm tra xem có phải là đơn hàng boosting
+        $isBoostingOrder = false;
+        if (!$order) {
+            $order = BoostingOrder::where('order_number', $orderNumber)->first();
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy đơn hàng',
+                    'status' => 'not_found'
+                ]);
+            }
+            
+            $isBoostingOrder = true;
+        }
+        
+        // Trả về trạng thái đơn hàng
+        if ($order->status == 'paid' || $order->status == 'completed') {
+            $redirectUrl = $isBoostingOrder 
+                ? route('boosting.account_info', $order->order_number)
+                : route('payment.success', $order->order_number);
+                
+            return response()->json([
+                'success' => true,
+                'message' => 'Đơn hàng đã được thanh toán thành công',
+                'status' => $order->status,
+                'redirect_url' => $redirectUrl
+            ]);
+        } elseif ($order->status == 'processing') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Đơn hàng đang được xử lý',
+                'status' => 'processing'
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đơn hàng chưa được thanh toán',
+                'status' => $order->status
+            ]);
+        }
     }
 }

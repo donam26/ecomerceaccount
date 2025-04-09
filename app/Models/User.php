@@ -98,4 +98,37 @@ class User extends Authenticatable
         
         return $this->balance;
     }
+
+    /**
+     * Get the user's wallet
+     */
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
+
+    /**
+     * Get the user's wallet transactions
+     */
+    public function walletTransactions()
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
+    /**
+     * Get or create user wallet
+     */
+    public function getWallet()
+    {
+        $wallet = $this->wallet;
+        
+        if (!$wallet) {
+            $wallet = $this->wallet()->create([
+                'balance' => 0,
+                'is_active' => true,
+            ]);
+        }
+        
+        return $wallet;
+    }
 }

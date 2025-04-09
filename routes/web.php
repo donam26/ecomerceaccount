@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\OrderStatusController;
 use App\Http\Controllers\BoostingServiceController;
 use App\Http\Controllers\Admin\BoostingServiceController as AdminBoostingServiceController;
 use App\Http\Controllers\Admin\BoostingOrderController as AdminBoostingOrderController;
+use App\Http\Controllers\WalletController;
+use App\Http\Controllers\Admin\WalletController as AdminWalletController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,9 +55,15 @@ Route::middleware(['auth'])->group(function () {
     
     // Thanh toán
     Route::get('/payment/checkout/{orderNumber}', [PaymentController::class, 'checkout'])->name('payment.checkout');
-    Route::post('/payment/process/{orderNumber}', [PaymentController::class, 'process'])->name('payment.process');
-    Route::get('/payment/callback/{orderNumber}', [PaymentController::class, 'callback'])->name('payment.callback');
     Route::get('/payment/success/{orderNumber}', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/check-status/{orderNumber}', [PaymentController::class, 'checkStatus'])->name('payment.check_status');
+    Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+    Route::post('/payment/wallet/{orderNumber}', [PaymentController::class, 'processWalletPayment'])->name('payment.wallet');
+    
+    // Thanh toán qua VNPay (giả lập)
+    Route::get('/payment/vnpay', [PaymentController::class, 'createVnpayPayment'])->name('payment.vnpay');
+    Route::get('/payment/vnpay/simulation', [PaymentController::class, 'simulateVnpayPayment'])->name('payment.vnpay.simulation');
+    Route::post('/payment/vnpay/result', [PaymentController::class, 'handleVnpayResult'])->name('payment.vnpay.result');
 
     // Dịch vụ cày thuê
     Route::get('/boosting', [BoostingServiceController::class, 'index'])->name('boosting.index');
@@ -77,6 +85,13 @@ Route::middleware(['auth'])->group(function () {
         ->name('boosting.account_info.submit');
     Route::get('/boosting-account-info/{orderNumber}/success', [BoostingServiceController::class, 'accountInfoSuccess'])
         ->name('boosting.account_info.success');
+
+    // Wallet routes
+    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+    Route::get('/wallet/transactions', [WalletController::class, 'transactions'])->name('wallet.transactions');
+    Route::get('/wallet/deposit', [WalletController::class, 'showDepositForm'])->name('wallet.deposit');
+    Route::post('/wallet/deposit', [WalletController::class, 'processDeposit'])->name('wallet.deposit.process');
+    Route::get('/wallet/deposit/callback', [WalletController::class, 'depositCallback'])->name('wallet.deposit.callback');
 });
 
 // Kiểm tra trạng thái đơn hàng
@@ -110,6 +125,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::post('boosting-orders/{id}/status', [AdminBoostingOrderController::class, 'updateStatus'])->name('boosting_orders.status');
     Route::post('boosting-orders/{id}/notes', [AdminBoostingOrderController::class, 'updateNotes'])->name('boosting_orders.notes');
     Route::get('boosting-orders/{id}/account', [AdminBoostingOrderController::class, 'viewGameAccount'])->name('boosting_orders.account');
+    
+    // Quản lý ví điện tử
+    Route::get('wallets', [AdminWalletController::class, 'index'])->name('wallets.index');
+    Route::get('wallets/{id}', [AdminWalletController::class, 'show'])->name('wallets.show');
+    Route::get('wallets/{id}/edit', [AdminWalletController::class, 'edit'])->name('wallets.edit');
+    Route::put('wallets/{id}', [AdminWalletController::class, 'update'])->name('wallets.update');
+    Route::get('wallets/{id}/adjust', [AdminWalletController::class, 'showAdjustForm'])->name('wallets.adjust');
+    Route::post('wallets/{id}/adjust', [AdminWalletController::class, 'adjustBalance'])->name('wallets.adjust.submit');
+    Route::get('transactions', [AdminWalletController::class, 'allTransactions'])->name('transactions.index');
+    Route::delete('transactions/{id}', [AdminWalletController::class, 'deleteTransaction'])->name('transactions.delete');
 });
 
 require __DIR__.'/auth.php';

@@ -74,113 +74,125 @@
                             </div>
                         </div>
 
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Chuyển khoản ngân hàng</h3>
-                            
-                            <div class="border border-blue-200 rounded-lg p-6 bg-blue-50">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <h4 class="font-semibold text-gray-800 mb-2">Thông tin tài khoản ngân hàng</h4>
-                                        <div class="mb-4">
-                                            <p class="text-sm text-gray-600 mb-1">Ngân hàng: <span class="font-medium text-gray-900">Vietcombank</span></p>
-                                            <p class="text-sm text-gray-600 mb-1">Số tài khoản: <span class="font-medium text-gray-900">103870429701</span></p>
-                                            <p class="text-sm text-gray-600 mb-1">Chủ tài khoản: <span class="font-medium text-gray-900">Do Hoang Nam</span></p>
-                                            <p class="text-sm text-gray-600 mb-1">Chi nhánh: <span class="font-medium text-gray-900">Hồ Chí Minh</span></p>
-                                        </div>
-                                        <button type="button" id="copyBankInfo" class="inline-flex items-center px-3 py-1 border border-blue-600 text-blue-600 bg-white rounded-md hover:bg-blue-50 transition">
-                                            <svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"></path>
-                                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"></path>
-                                            </svg>
-                                            Sao chép
-                                        </button>
-                                    </div>
-                                    
-                                    <div>
-                                        <h4 class="font-semibold text-gray-800 mb-2">Thông tin chuyển khoản</h4>
-                                        <div class="mb-4">
-                                            <p class="text-sm text-gray-600 mb-1">Số tiền: <span class="font-medium text-red-600">{{ isset($paymentInfo) ? number_format($paymentInfo['amount'], 0, ',', '.') : number_format($order->amount, 0, ',', '.') }}đ</span></p>
-                                            <p class="text-sm text-gray-600 mb-1">Nội dung chuyển khoản:</p>
-                                            <div class="flex items-center bg-white border border-gray-300 rounded-md p-2 mb-2">
-                                                <span class="font-medium text-gray-900 select-all" id="paymentContent">{{ isset($paymentInfo) ? $paymentInfo['payment_content'] : 'SEVQR ORD'.$order->order_number }}</span>
-                                                <button type="button" id="copyContent" class="ml-2 text-blue-600 hover:text-blue-800">
-                                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"></path>
-                                                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"></path>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <p class="text-xs text-red-600 font-medium">* Vui lòng nhập chính xác nội dung chuyển khoản</p>
-                                        </div>
-                                    </div>
+                        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                            <div class="px-4 py-5 sm:px-6 flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">Phương thức thanh toán</h3>
+                                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Lựa chọn phương thức thanh toán phù hợp</p>
                                 </div>
-                                
-                                <div class="border-t border-blue-200 mt-4 pt-4">
-                                    <div class="flex items-start">
-                                        <div class="flex-shrink-0 mt-0.5">
-                                            <svg class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                            </svg>
+                                <div>
+                                    <button id="refreshStatusBtn" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Kiểm tra thanh toán
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-gray-200">
+                                <div class="px-6 py-5 space-y-6">
+                                    @if(isset($wallet) && $wallet && $wallet->balance >= $order->amount)
+                                    <!-- Thanh toán qua ví -->
+                                    <div class="relative p-4 mt-4 border border-gray-200 rounded-lg">
+                                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                                            <div class="w-full border-t border-gray-200"></div>
                                         </div>
-                                        <div class="ml-3">
-                                            <h5 class="text-sm font-semibold text-gray-900">Lưu ý khi chuyển khoản</h5>
-                                            <ul class="mt-1 text-sm text-gray-600 list-disc space-y-1 pl-5">
-                                                <li>Bạn có thể chuyển khoản qua Internet Banking, Mobile Banking hoặc tại quầy.</li>
-                                                <li>Hệ thống sẽ tự động ghi nhận và kích hoạt tài khoản sau khi nhận được tiền.</li>
-                                                <li>Vui lòng giữ lại biên lai chuyển khoản để đối chiếu nếu cần.</li>
-                                                <li>Sau khi chuyển khoản, vui lòng quay lại <a href="{{ route('orders.show', $order->order_number) }}" class="text-blue-600 hover:underline">trang đơn hàng</a> để kiểm tra trạng thái.</li>
-                                            </ul>
+                                        <div class="relative flex items-center justify-between">
+                                            <span class="pr-2 text-sm text-gray-500 bg-white">Ví điện tử</span>
+                                            <form action="{{ route('payment.wallet', $order->order_number) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                    </svg>
+                                                    Thanh toán qua ví ({{ number_format($wallet->balance, 0, ',', '.') }}đ)
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <p class="mt-2 text-sm text-gray-500">Thanh toán nhanh chóng từ số dư ví của bạn.</p>
+                                    </div>
+                                    @elseif(isset($wallet) && $wallet && $wallet->balance < $order->amount)
+                                    <!-- Số dư ví không đủ -->
+                                    <div class="relative p-4 mt-4 border border-gray-200 rounded-lg bg-gray-50">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-900">Ví điện tử</span>
+                                                <p class="mt-1 text-sm text-red-600">Số dư không đủ: {{ number_format($wallet->balance, 0, ',', '.') }}đ / {{ number_format($order->amount, 0, ',', '.') }}đ</p>
+                                            </div>
+                                            <a href="{{ route('wallet.deposit') }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                Nạp tiền
+                                            </a>
+                                        </div>
+                                    </div>
+                                    @endif
+                                    
+                                    <!-- Chuyển khoản ngân hàng -->
+                                    <div class="relative border rounded-md p-4">
+                                        <h3 class="text-lg font-medium text-gray-900">Thanh toán chuyển khoản</h3>
+                                        
+                                        <div class="mt-4 grid md:grid-cols-2 gap-4">
+                                            <div>
+                                                <div class="mb-4">
+                                                    <p class="text-sm font-medium text-gray-700">Ngân hàng:</p>
+                                                    <p class="text-base font-semibold">VietinBank</p>
+                                                </div>
+                                                <div class="mb-4">
+                                                    <p class="text-sm font-medium text-gray-700">Số tài khoản:</p>
+                                                    <p class="text-base font-semibold">
+                                                        103870429701
+                                                        <button type="button" class="ml-2 inline-flex items-center p-1 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 copy-btn" data-clipboard-text="103870429701">
+                                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                                            </svg>
+                                                        </button>
+                                                    </p>
+                                                </div>
+                                                <div class="mb-4">
+                                                    <p class="text-sm font-medium text-gray-700">Chủ tài khoản:</p>
+                                                    <p class="text-base font-semibold">NGUYEN VAN A</p>
+                                                </div>
+                                                <div class="mb-4">
+                                                    <p class="text-sm font-medium text-gray-700">Số tiền:</p>
+                                                    <p class="text-base font-semibold">{{ number_format($order->amount, 0, ',', '.') }}đ
+                                                        <button type="button" class="ml-2 inline-flex items-center p-1 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 copy-btn" data-clipboard-text="{{ $order->amount }}">
+                                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                                            </svg>
+                                                        </button>
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-700">Nội dung chuyển khoản:</p>
+                                                    <p class="text-base font-semibold">
+                                                        {{ $paymentInfo['payment_content'] }}
+                                                        <button type="button" class="ml-2 inline-flex items-center p-1 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 copy-btn" data-clipboard-text="{{ $paymentInfo['payment_content'] }}">
+                                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                                            </svg>
+                                                        </button>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center justify-center">
+                                                @if(isset($paymentInfo['qr_image']) && $paymentInfo['qr_image'])
+                                                    <img src="{{ $paymentInfo['qr_image'] }}" alt="QR Thanh toán" class="max-w-full h-auto">
+                                                @else
+                                                    <div class="p-4 rounded-md bg-gray-100 text-center">
+                                                        <p class="text-sm text-gray-500">Không thể tạo mã QR. Vui lòng sử dụng thông tin chuyển khoản bên cạnh.</p>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-6">
+                                            <p class="text-sm text-gray-500">
+                                                <strong>Lưu ý:</strong> Hệ thống tự động xác nhận thanh toán sau 1-3 phút. Nếu quá thời gian trên mà chưa nhận được xác nhận, vui lòng liên hệ hotline để được hỗ trợ.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- QR Code thanh toán -->
-                        <div class="mt-8 text-center">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Quét mã QR để thanh toán nhanh</h3>
-                            @if(isset($paymentInfo['qr_image']))
-                                <!-- Hiển thị QR code từ SePay -->
-                                <div class="bg-white p-4 inline-block rounded-lg border border-gray-300 mb-2">
-                                    <img src="{{ $paymentInfo['qr_image'] }}" alt="QR Code thanh toán" class="mx-auto w-48 h-48">
-                                    <p class="text-xs text-gray-500 mt-1">(QR từ SePay)</p>
-                                </div>
-                            @else
-                                <!-- Sử dụng QR mặc định nếu không có từ API -->
-                                @php
-                                    $pattern = config('payment.pattern', 'SEVQR');
-                                    // Kiểm tra mã đơn hàng đã có prefix "ORD" chưa
-                                    if (strpos($order->order_number, 'ORD') === 0) {
-                                        // Nếu đã có ORD thì không thêm vào nữa
-                                        $content = $pattern . ' ' . $order->order_number;
-                                    } else {
-                                        // Nếu chưa có thì thêm vào
-                                        $content = $pattern . ' ORD' . $order->order_number;
-                                    }
-                                    $amount = $order->amount;
-                                    $encodedContent = urlencode($content);
-                                    $qrUrl = "https://qr.sepay.vn/img?acc=103870429701&bank=VietinBank&amount={$amount}&des={$encodedContent}&template=compact";
-                                @endphp
-                                <div class="bg-white p-4 inline-block rounded-lg border border-gray-300 mb-2">
-                                    <img src="{{ $qrUrl }}" alt="QR Code thanh toán" class="mx-auto w-48 h-48">
-                                    <p class="text-xs text-gray-500 mt-1">(QR từ SePay)</p>
-                                </div>
-                            @endif
-                        </div>
-                        
-                        <div class="mt-8">
-                            @if(isset($isBoostingOrder) && $isBoostingOrder)
-                            <a href="{{ route('boosting.show', $order->service->slug) }}" class="btn-secondary">
-                            @else
-                            <a href="{{ route('orders.show', $order->order_number) }}" class="btn-secondary">
-                            @endif
-                                <span class="flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    Quay lại thông tin đơn hàng
-                                </span>
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -269,224 +281,152 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
 <script>
-    // Lấy các button
-    const copyBankInfoBtn = document.getElementById('copyBankInfo');
-    const copyContentBtn = document.getElementById('copyContent');
-    
-    // Xử lý sao chép thông tin ngân hàng
-    copyBankInfoBtn.addEventListener('click', function() {
-        const bankInfo = "Ngân hàng: Vietcombank\nSố tài khoản: 103870429701\nChủ tài khoản: CONG TY TNHH GAME SHOP\nChi nhánh: Hồ Chí Minh";
-        navigator.clipboard.writeText(bankInfo).then(() => {
-            copyBankInfoBtn.innerHTML = '<svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> Đã sao chép';
-            setTimeout(() => {
-                copyBankInfoBtn.innerHTML = '<svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"></path><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"></path></svg> Sao chép';
-            }, 2000);
-        });
-    });
-    
-    // Xử lý sao chép nội dung chuyển khoản
-    copyContentBtn.addEventListener('click', function() {
-        const content = document.getElementById('paymentContent').innerText;
-        navigator.clipboard.writeText(content).then(() => {
-            copyContentBtn.innerHTML = '<svg class="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>';
-            setTimeout(() => {
-                copyContentBtn.innerHTML = '<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"></path><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"></path></svg>';
-            }, 2000);
-        });
-    });
-
-    // Kiểm tra trạng thái đơn hàng
-    const orderNumber = "{{ $order->order_number }}";
-    const statusCheckUrl = "/orders/{{ $order->order_number }}/check-status";
-    const successUrl = "/payment/success/{{ $order->order_number }}";
-    const statusCheckElement = document.getElementById('payment-status-check');
-    
-    // Kiểm tra trạng thái mỗi 5 giây
-    let checkCount = 0;
-    const maxChecks = 60; // Kiểm tra tối đa 5 phút (60 lần x 5 giây)
-    
-    function updateStatusMessage(message, isError = false) {
-        if (statusCheckElement) {
-            // Cập nhật nội dung thông báo
-            const messageSpan = statusCheckElement.querySelector('span');
-            if (messageSpan) {
-                messageSpan.textContent = message;
-            }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Khởi tạo Clipboard.js
+        var clipboard = new ClipboardJS('.copy-btn');
+        
+        clipboard.on('success', function(e) {
+            // Hiển thị thông báo sao chép thành công
+            const originalText = e.trigger.innerHTML;
+            e.trigger.innerHTML = '<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
             
-            // Cập nhật kiểu thông báo nếu có lỗi
-            if (isError) {
-                statusCheckElement.classList.remove('bg-blue-50', 'border-blue-500', 'text-blue-700');
-                statusCheckElement.classList.add('bg-red-50', 'border-red-500', 'text-red-700');
-            }
-        }
-    }
-
-    // Kiểm tra trạng thái đơn hàng mà không cần CSRF token
-    function checkOrderStatus() {
-        // Sử dụng XMLHttpRequest cơ bản thay vì fetch để tương thích tốt hơn
-        const xhr = new XMLHttpRequest();
-        const url = statusCheckUrl + "?t=" + new Date().getTime(); // Thêm timestamp để tránh cache
+            setTimeout(function() {
+                e.trigger.innerHTML = originalText;
+            }, 2000);
+            
+            e.clearSelection();
+        });
         
-        xhr.open("GET", url, true);
-        xhr.setRequestHeader("Accept", "application/json");
-        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+        // Kiểm tra trạng thái thanh toán tự động
+        const orderNumber = '{{ $order->order_number }}';
+        const checkStatusUrl = '{{ route('payment.check_status', ['orderNumber' => $order->order_number]) }}';
         
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                checkCount++;
-                
-                if (xhr.status === 200) {
-                    try {
-                        const data = JSON.parse(xhr.responseText);
-                        console.log('Status check response:', data);
+        function checkPaymentStatus() {
+            fetch(checkStatusUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Kiểm tra trạng thái thanh toán:', data);
+                    
+                    if (data.status === 'paid' || data.status === 'completed' || data.status === 'processing') {
+                        // Hiển thị thông báo thành công
+                        showSuccessMessage(data.message);
                         
-                        if (data.success) {
-                            // Kiểm tra xem có phải đơn hàng cày thuê không thông qua mã đơn hàng
-                            const isBoostingOrder = orderNumber.indexOf('BOOST') === 0;
-                            console.log('Is boosting order:', isBoostingOrder);
-                            
-                            // Kiểm tra các trạng thái thanh toán thành công
-                            if (data.paid || 
-                                data.status === 'completed' || 
-                                data.status === 'paid' || 
-                                data.status === 'processing') {
-                                
-                                console.log('Payment detected as successful! Status:', data.status);
-                                updateStatusMessage('Thanh toán đã được xác nhận! Đang chuyển hướng...');
-                                
-                                // Ghi log xác nhận
-                                console.log('Redirecting to success page:', successUrl);
-                                
-                                // Chuyển hướng đến trang thành công
-                                setTimeout(function() {
-                                    window.location.href = successUrl;
-                                }, 1500);
-                            } else {
-                                // Cập nhật thông báo với số lần đã kiểm tra
-                                updateStatusMessage(`Đang chờ xác nhận thanh toán... (${checkCount}/${maxChecks})`);
-                                
-                                // Tiếp tục kiểm tra nếu chưa đạt số lần tối đa
-                                if (checkCount < maxChecks) {
-                                    setTimeout(checkOrderStatus, 5000);
+                        // Chuyển hướng sau 2 giây
+                        setTimeout(function() {
+                            if (data.status === 'paid' || data.status === 'completed') {
+                                if (data.redirect_url) {
+                                    window.location.href = data.redirect_url;
+                                } else if ('{{ isset($isBoostingOrder) && $isBoostingOrder }}' === '1') {
+                                    window.location.href = '{{ route('boosting.account_info', $order->order_number) }}';
                                 } else {
-                                    updateStatusMessage('Đã hết thời gian chờ xác nhận tự động. Vui lòng làm mới trang nếu bạn đã thanh toán.', true);
+                                    window.location.href = '{{ route('payment.success', $order->order_number) }}';
                                 }
                             }
-                        } else {
-                            updateStatusMessage('Không thể kiểm tra trạng thái đơn hàng: ' + (data.message || 'Lỗi không xác định'), true);
-                        }
-                    } catch (e) {
-                        console.error('Lỗi phân tích JSON:', e);
-                        updateStatusMessage('Lỗi xử lý phản hồi từ máy chủ', true);
+                        }, 2000);
                     }
-                } else {
-                    console.error('Lỗi HTTP:', xhr.status);
-                    updateStatusMessage('Lỗi kết nối đến máy chủ (HTTP ' + xhr.status + ')', true);
-                    
-                    // Tiếp tục kiểm tra nếu có lỗi và chưa đạt giới hạn
-                    if (checkCount < maxChecks) {
-                        setTimeout(checkOrderStatus, 5000);
-                    } else {
-                        updateStatusMessage('Đã hết thời gian chờ xác nhận tự động. Vui lòng làm mới trang.', true);
-                    }
-                }
-            }
-        };
+                })
+                .catch(error => {
+                    console.error('Lỗi khi kiểm tra trạng thái:', error);
+                });
+        }
         
-        xhr.timeout = 10000; // 10 giây timeout
-        xhr.ontimeout = function() {
-            console.error('Yêu cầu kiểm tra trạng thái đã hết thời gian chờ');
-            updateStatusMessage('Yêu cầu kiểm tra đã hết thời gian chờ. Đang thử lại...', true);
+        // Kiểm tra trạng thái mỗi 10 giây
+        const statusInterval = setInterval(checkPaymentStatus, 10000);
+        
+        // Nút kiểm tra trạng thái thủ công
+        document.getElementById('refreshStatusBtn').addEventListener('click', function() {
+            // Thay đổi trạng thái nút
+            this.classList.add('animate-pulse');
+            this.disabled = true;
             
-            if (checkCount < maxChecks) {
-                setTimeout(checkOrderStatus, 5000);
-            } else {
-                updateStatusMessage('Đã hết thời gian chờ xác nhận tự động. Vui lòng làm mới trang.', true);
-            }
-        };
-        
-        try {
-            xhr.send();
-        } catch (e) {
-            console.error('Lỗi gửi yêu cầu:', e);
-            updateStatusMessage('Không thể gửi yêu cầu kiểm tra đến máy chủ', true);
-        }
-    }
-
-    // Bắt đầu kiểm tra sau khi trang đã tải
-    document.addEventListener('DOMContentLoaded', function() {
-        // Đợi 5 giây trước khi bắt đầu kiểm tra đầu tiên
-        setTimeout(checkOrderStatus, 5000);
-    });
-
-    // Hàm kiểm tra thủ công
-    function manualCheckStatus() {
-        // Hiển thị thông báo đang kiểm tra
-        updateStatusMessage('Đang kiểm tra thủ công...');
-        
-        // Thực hiện kiểm tra
-        const xhr = new XMLHttpRequest();
-        const url = statusCheckUrl + "?manual=1&t=" + new Date().getTime();
-        
-        xhr.open("GET", url, true);
-        xhr.setRequestHeader("Accept", "application/json");
-        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-        
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    try {
-                        const data = JSON.parse(xhr.responseText);
-                        console.log('Manual status check response:', data);
+            fetch(checkStatusUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Kiểm tra trạng thái thủ công:', data);
+                    
+                    // Khôi phục trạng thái nút
+                    this.classList.remove('animate-pulse');
+                    this.disabled = false;
+                    
+                    if (data.status === 'paid' || data.status === 'completed' || data.status === 'processing') {
+                        // Hiển thị thông báo thành công
+                        showSuccessMessage(data.message);
                         
-                        if (data.success) {
-                            // Kiểm tra xem có phải đơn hàng cày thuê không thông qua mã đơn hàng
-                            const isBoostingOrder = orderNumber.indexOf('BOOST') === 0;
-                            console.log('Is boosting order (manual check):', isBoostingOrder);
-                            
-                            // Kiểm tra các trạng thái thanh toán thành công
-                            if (data.paid || 
-                                data.status === 'completed' || 
-                                data.status === 'paid' || 
-                                data.status === 'processing') {
-                                
-                                console.log('Manual check: Payment detected as successful! Status:', data.status);
-                                updateStatusMessage('Thanh toán đã được xác nhận! Đang chuyển hướng...');
-                                
-                                // Chuyển hướng đến trang thành công
-                                setTimeout(function() {
-                                    window.location.href = successUrl;
-                                }, 1500);
-                            } else {
-                                updateStatusMessage('Chưa nhận được xác nhận thanh toán. Vui lòng đợi thêm hoặc kiểm tra lại sau.', false);
+                        // Chuyển hướng sau 2 giây
+                        setTimeout(function() {
+                            if (data.status === 'paid' || data.status === 'completed') {
+                                if (data.redirect_url) {
+                                    window.location.href = data.redirect_url;
+                                } else if ('{{ isset($isBoostingOrder) && $isBoostingOrder }}' === '1') {
+                                    window.location.href = '{{ route('boosting.account_info', $order->order_number) }}';
+                                } else {
+                                    window.location.href = '{{ route('payment.success', $order->order_number) }}';
+                                }
                             }
-                        } else {
-                            updateStatusMessage('Không thể kiểm tra trạng thái đơn hàng: ' + (data.message || 'Lỗi không xác định'), true);
-                        }
-                    } catch (e) {
-                        console.error('Lỗi phân tích JSON:', e);
-                        updateStatusMessage('Lỗi xử lý phản hồi từ máy chủ', true);
+                        }, 2000);
+                    } else {
+                        // Hiển thị thông báo chưa thanh toán
+                        showErrorMessage('Hệ thống chưa ghi nhận thanh toán của bạn. Vui lòng kiểm tra lại sau.');
                     }
-                } else {
-                    console.error('Lỗi HTTP:', xhr.status);
-                    updateStatusMessage('Lỗi kết nối đến máy chủ (HTTP ' + xhr.status + ')', true);
-                }
-            }
-        };
+                })
+                .catch(error => {
+                    console.error('Lỗi khi kiểm tra trạng thái:', error);
+                    
+                    // Khôi phục trạng thái nút
+                    this.classList.remove('animate-pulse');
+                    this.disabled = false;
+                    
+                    showErrorMessage('Đã xảy ra lỗi khi kiểm tra. Vui lòng thử lại sau.');
+                });
+        });
         
-        xhr.timeout = 10000;
-        xhr.ontimeout = function() {
-            console.error('Yêu cầu kiểm tra thủ công đã hết thời gian chờ');
-            updateStatusMessage('Yêu cầu kiểm tra thủ công đã hết thời gian chờ', true);
-        };
-        
-        try {
-            xhr.send();
-        } catch (e) {
-            console.error('Lỗi gửi yêu cầu thủ công:', e);
-            updateStatusMessage('Không thể gửi yêu cầu kiểm tra đến máy chủ', true);
+        function showSuccessMessage(message) {
+            // Tạo phần tử thông báo
+            var notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg transition-all duration-500 transform translate-x-full';
+            notification.textContent = message || 'Đã xác nhận thanh toán thành công!';
+            
+            // Thêm vào body
+            document.body.appendChild(notification);
+            
+            // Hiển thị
+            setTimeout(function() {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Ẩn sau 5 giây
+            setTimeout(function() {
+                notification.classList.add('translate-x-full');
+                setTimeout(function() {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 5000);
         }
-    }
+        
+        function showErrorMessage(message) {
+            // Tạo phần tử thông báo
+            var notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg transition-all duration-500 transform translate-x-full';
+            notification.textContent = message || 'Đã xảy ra lỗi!';
+            
+            // Thêm vào body
+            document.body.appendChild(notification);
+            
+            // Hiển thị
+            setTimeout(function() {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Ẩn sau 5 giây
+            setTimeout(function() {
+                notification.classList.add('translate-x-full');
+                setTimeout(function() {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 5000);
+        }
+    });
 </script>
 @endsection 
