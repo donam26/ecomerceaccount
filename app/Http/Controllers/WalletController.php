@@ -15,8 +15,6 @@ use App\Models\Wallet;
 use App\Services\SePayService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 
 class WalletController extends Controller
 {
@@ -100,29 +98,6 @@ class WalletController extends Controller
             'depositCode' => $depositCode,
         ]);
     }
-    
-    /**
-     * Tạo bảng tạm thời để lưu thông tin giao dịch nạp tiền
-     */
-    private function createWalletDepositTable()
-    {
-        if (!Schema::hasTable('wallet_deposits')) {
-            Schema::create('wallet_deposits', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('user_id')->constrained()->onDelete('cascade');
-                $table->foreignId('wallet_id')->constrained()->onDelete('cascade');
-                $table->string('deposit_code')->unique();
-                $table->string('payment_content');
-                $table->decimal('amount', 12, 2);
-                $table->string('status')->default('pending');
-                $table->string('payment_method');
-                $table->string('transaction_id')->nullable();
-                $table->text('response')->nullable();
-                $table->timestamp('completed_at')->nullable();
-                $table->timestamps();
-            });
-        }
-    }
 
     /**
      * Lưu thông tin giao dịch nạp tiền vào database
@@ -130,9 +105,6 @@ class WalletController extends Controller
     private function saveWalletDeposit($userId, $walletId, $depositCode, $paymentContent, $amount)
     {
         try {
-            // Kiểm tra và tạo bảng nếu chưa có
-            $this->createWalletDepositTable();
-            
             // Lưu thông tin vào database
             DB::table('wallet_deposits')->insert([
                 'user_id' => $userId,
@@ -279,7 +251,12 @@ class WalletController extends Controller
             
             // Cập nhật bảng wallet_deposits nếu tồn tại
             try {
-                if (Schema::hasTable('wallet_deposits')) {
+                // Kiểm tra xem có bản ghi wallet_deposits nào với deposit_code này không
+                $deposit = DB::table('wallet_deposits')
+                    ->where('deposit_code', $depositCode)
+                    ->first();
+                
+                if ($deposit) {
                     DB::table('wallet_deposits')
                         ->where('deposit_code', $depositCode)
                         ->update([
@@ -848,8 +825,8 @@ class WalletController extends Controller
             'user_id' => Auth::id()
         ]);
         
-        // Kiểm tra trong bảng wallet_deposits trước
-        if (Schema::hasTable('wallet_deposits')) {
+        // Kiểm tra trong bảng wallet_deposits
+        try {
             $deposit = DB::table('wallet_deposits')
                 ->where('deposit_code', $depositCode)
                 ->where('user_id', Auth::id())
@@ -862,6 +839,11 @@ class WalletController extends Controller
                     'message' => 'Thanh toán đã được xác nhận thành công!'
                 ]);
             }
+        } catch (\Exception $e) {
+            Log::warning('Lỗi khi truy vấn bảng wallet_deposits', [
+                'deposit_code' => $depositCode,
+                'error' => $e->getMessage()
+            ]);
         }
         
         // Xem trong database đã có giao dịch nạp tiền thành công chưa

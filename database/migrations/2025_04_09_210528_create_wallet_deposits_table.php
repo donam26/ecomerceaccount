@@ -11,9 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('wallet_deposits', function (Blueprint $table) {
-            //
-        });
+            Schema::create('wallet_deposits', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->foreignId('wallet_id')->constrained()->onDelete('cascade');
+                $table->string('deposit_code')->unique();
+                $table->string('payment_content');
+                $table->decimal('amount', 12, 2);
+                $table->string('status')->default('pending');
+                $table->string('payment_method');
+                $table->foreignId('transaction_id')->nullable();
+                $table->text('response')->nullable();
+                $table->timestamp('completed_at')->nullable();
+                $table->timestamps();
+            });
     }
 
     /**
@@ -21,8 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('wallet_deposits', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('wallet_deposits');
     }
 };
