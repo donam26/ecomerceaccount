@@ -89,7 +89,7 @@ class TheSieuReService
     /**
      * Kiểm tra trạng thái thẻ cào
      */
-    public function checkCard($requestId)
+    public function checkCardStatus($requestId)
     {
         try {
             // Đối với check status, cần truy vấn thông tin code và serial từ database
@@ -138,6 +138,14 @@ class TheSieuReService
     }
 
     /**
+     * Alias của phương thức checkCardStatus cho tương thích ngược
+     */
+    public function checkCard($requestId)
+    {
+        return $this->checkCardStatus($requestId);
+    }
+
+    /**
      * Tính toán số tiền thực tế được cộng vào tài khoản
      * dựa trên nhà mạng và mệnh giá thẻ nạp
      * 
@@ -182,5 +190,77 @@ class TheSieuReService
         ];
 
         return $messages[$status] ?? 'Mã lỗi không xác định: ' . $status;
+    }
+
+    /**
+     * Xác thực callback từ TheSieuRe
+     * 
+     * @param array $data Dữ liệu từ callback
+     * @return bool Kết quả xác thực
+     */
+    public function verifyCallback($data)
+    {
+        // Kiểm tra các trường bắt buộc
+        $requiredFields = ['status', 'request_id', 'declared_value', 'value', 'amount', 'code', 'serial', 'telco', 'trans_id', 'callback_sign'];
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])) {
+                Log::error('TheSieuRe Callback Error: Thiếu trường dữ liệu', [
+                    'field' => $field,
+                    'data' => $data
+                ]);
+                return false;
+            }
+        }
+        
+        // Tạo chuỗi để kiểm tra chữ ký
+        $string = $this->partnerKey . $data['code'] . $data['serial'];
+        $sign = md5($string);
+        
+        // Kiểm tra chữ ký
+        if ($sign !== $data['callback_sign']) {
+            Log::error('TheSieuRe Callback Error: Chữ ký không hợp lệ', [
+                'expected' => $sign,
+                'received' => $data['callback_sign']
+            ]);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Cập nhật callback URL trong cấu hình TheSieuRe
+     * 
+     * @param string $callbackUrl URL callback
+     * @return array Kết quả cập nhật
+     */
+    public function updateCallbackUrl($callbackUrl)
+    {
+        try {
+            $response = Http::post($this->apiUrl, [
+                'partner_id' => $this->partnerID,
+                'callback' => $callbackUrl,
+                'command' => 'updateCallback',
+            ]);
+
+            $data = $response->json();
+            Log::info('TheSieuRe Update Callback URL Response', ['response' => $data]);
+
+            return [
+                'success' => true,
+                'data' => $data
+            ];
+        } catch (\Exception $e) {
+            Log::error('TheSieuRe Update Callback URL Error', [
+                'exception' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'data' => [
+                    'message' => 'Lỗi kết nối API: ' . $e->getMessage(),
+                ]
+            ];
+        }
     }
 } 

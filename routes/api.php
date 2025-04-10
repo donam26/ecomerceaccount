@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\WalletController;
+use App\Http\Controllers\WebhookTheSieuReController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebhookController;
@@ -20,5 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // SePay Webhook
-Route::post('webhooks/sepay', [WebhookController::class, 'sepay'])
-    ->name('api.sepay.webhook');
+Route::post('webhooks/sepay', [WebhookController::class, 'sepay'])->name('api.sepay.webhook');
+
+// TheSieuRe Webhook
+Route::post('webhook/thesieure', [WebhookTheSieuReController::class, 'handleCallback'])->name('callback.thesieure');

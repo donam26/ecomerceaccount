@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class CardDeposit extends Model
 {
@@ -28,6 +29,7 @@ class CardDeposit extends Model
         'response',
         'transaction_id',
         'completed_at',
+        'metadata',
     ];
 
     /**
@@ -47,10 +49,29 @@ class CardDeposit extends Model
      * @var array
      */
     protected $casts = [
-        'amount' => 'float',
-        'actual_amount' => 'float',
+        'amount' => 'decimal:0',
+        'actual_amount' => 'decimal:0',
         'completed_at' => 'datetime',
+        'metadata' => 'json',
+        'response' => 'json',
     ];
+    
+    /**
+     * Các trạng thái nạp thẻ
+     */
+    const STATUS_PENDING = 'pending';
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_FAILED = 'failed';
+    
+    /**
+     * Tạo mã yêu cầu duy nhất
+     * 
+     * @return string
+     */
+    public static function generateRequestId()
+    {
+        return 'CARD-' . time() . rand(1000, 9999);
+    }
 
     /**
      * Mối quan hệ với user
@@ -73,7 +94,8 @@ class CardDeposit extends Model
      */
     public function transaction()
     {
-        return $this->belongsTo(WalletTransaction::class, 'transaction_id');
+        return $this->hasOne(WalletTransaction::class, 'reference_id')
+            ->where('reference_type', 'card_deposit');
     }
 
     /**
@@ -81,7 +103,7 @@ class CardDeposit extends Model
      */
     public function isCompleted()
     {
-        return $this->status === 'completed';
+        return $this->status === self::STATUS_COMPLETED;
     }
 
     /**
@@ -89,7 +111,7 @@ class CardDeposit extends Model
      */
     public function isFailed()
     {
-        return $this->status === 'failed';
+        return $this->status === self::STATUS_FAILED;
     }
 
     /**
@@ -97,7 +119,30 @@ class CardDeposit extends Model
      */
     public function isPending()
     {
-        return $this->status === 'pending';
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    /**
+     * Đánh dấu giao dịch là đã hoàn thành
+     */
+    public function markAsCompleted()
+    {
+        $this->status = self::STATUS_COMPLETED;
+        $this->completed_at = Carbon::now();
+        $this->save();
+        
+        return $this;
+    }
+    
+    /**
+     * Đánh dấu giao dịch là đã thất bại
+     */
+    public function markAsFailed()
+    {
+        $this->status = self::STATUS_FAILED;
+        $this->save();
+        
+        return $this;
     }
 
     /**

@@ -117,6 +117,8 @@ class User extends Authenticatable
 
     /**
      * Get or create user wallet
+     * 
+     * @return \App\Models\Wallet
      */
     public function getWallet()
     {
@@ -127,6 +129,9 @@ class User extends Authenticatable
                 'balance' => 0,
                 'is_active' => true,
             ]);
+            
+            // Làm mới mối quan hệ
+            $this->refresh();
         }
         
         return $wallet;
