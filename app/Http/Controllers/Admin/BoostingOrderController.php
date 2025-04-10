@@ -154,15 +154,6 @@ class BoostingOrderController extends Controller
         $order = BoostingOrder::findOrFail($id);
         $order->admin_notes = $request->admin_notes;
         $order->save();
-        
-        // Ghi log hành động
-        \Illuminate\Support\Facades\Log::info('Admin updated order notes', [
-            'admin_id' => Auth::id(),
-            'admin_name' => Auth::user()->name,
-            'order_id' => $order->id,
-            'order_number' => $order->order_number,
-            'timestamp' => now()
-        ]);
 
         return redirect()->route('admin.boosting_orders.show', $id)
             ->with('success', 'Ghi chú đơn hàng đã được cập nhật thành công.');

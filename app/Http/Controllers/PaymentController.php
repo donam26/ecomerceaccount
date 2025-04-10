@@ -142,31 +142,15 @@ class PaymentController extends Controller
             if ($boostingOrder->status === 'pending') {
                 $boostingOrder->status = 'paid';
                 $boostingOrder->save();
-                
-                // Log cập nhật trạng thái
-                Log::info('PaymentController: Đã cập nhật đơn hàng cày thuê thành paid', [
-                    'order_number' => $boostingOrder->order_number
-                ]);
+            
             }
                 
             // Nếu là đơn hàng cày thuê đã thanh toán và chưa cung cấp thông tin tài khoản,
             // chuyển hướng đến trang nhập thông tin tài khoản
             if ($boostingOrder->isPaid() && !$boostingOrder->hasAccountInfo()) {
-                Log::info('PaymentController: Chuyển hướng đến trang nhập thông tin tài khoản', [
-                    'order_number' => $boostingOrder->order_number,
-                    'route' => 'boosting.account_info'
-                ]);
-                
                 return redirect()->route('boosting.account_info', $orderNumber)
                     ->with('success', 'Thanh toán thành công! Vui lòng cung cấp thông tin tài khoản game để chúng tôi thực hiện dịch vụ.');
             }
-            
-            // Hiển thị trang thanh toán thành công cho dịch vụ cày thuê
-            Log::info('PaymentController: Hiển thị trang thanh toán thành công', [
-                'order_number' => $boostingOrder->order_number,
-                'status' => $boostingOrder->status,
-                'has_account_info' => $boostingOrder->hasAccountInfo()
-            ]);
             
             return view('payment.success', [
                 'order' => $boostingOrder, 
@@ -199,13 +183,6 @@ class PaymentController extends Controller
                              WHERE id = ?",
                             [$order->account_id]
                         );
-                        
-                        // Log thông tin
-                        Log::info('Tài khoản được đánh dấu đã bán khi thanh toán thành công', [
-                            'account_id' => $order->account_id,
-                            'order_id' => $order->id,
-                            'user_id' => Auth::id()
-                        ]);
                     }
                     
                     DB::commit();
@@ -276,7 +253,7 @@ class PaymentController extends Controller
         $amount = (int)$order->amount;
         
         // Tạo URL trực tiếp đến QR code của SePay
-        $qrUrl = "https://qr.sepay.vn/img?acc=103870429701&bank=VietinBank&amount={$amount}&des={$encodedContent}&template=compact";
+        $qrUrl = "https://qr.sepay.vn/img?acc=0386702324&bank=MBBank&amount={$amount}&des={$encodedContent}&template=compact";
         
      
         return [
@@ -321,11 +298,7 @@ class PaymentController extends Controller
         
         // Kiểm tra xem đơn hàng có thuộc về người dùng hiện tại không
         if ($order->user_id !== $user->id) {
-            Log::warning('Người dùng cố gắng thanh toán đơn hàng không thuộc về họ', [
-                'user_id' => $user->id,
-                'order_number' => $orderNumber,
-                'order_user_id' => $order->user_id
-            ]);
+
             return redirect()->route('home')->with('error', 'Bạn không có quyền thanh toán đơn hàng này');
         }
         
@@ -386,16 +359,7 @@ class PaymentController extends Controller
             
             // Commit transaction
             DB::commit();
-            
-            // Log giao dịch thành công
-            Log::info('Thanh toán qua ví thành công', [
-                'user_id' => $user->id,
-                'order_number' => $order->order_number,
-                'amount' => $order->amount,
-                'is_boosting_order' => $isBoostingOrder,
-                'wallet_balance_after' => $wallet->balance
-            ]);
-            
+           
             // Chuyển hướng tùy theo loại đơn hàng
             if ($isBoostingOrder) {
                 return redirect()->route('boosting.account_info', $order->order_number)
@@ -407,14 +371,6 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             // Rollback transaction nếu có lỗi
             DB::rollBack();
-            
-            // Log lỗi để debug
-            Log::error('Lỗi thanh toán qua ví: ' . $e->getMessage(), [
-                'user_id' => $user->id, 
-                'order_number' => $orderNumber,
-                'exception' => $e,
-                'trace' => $e->getTraceAsString()
-            ]);
             
             return back()->with('error', 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.');
         }

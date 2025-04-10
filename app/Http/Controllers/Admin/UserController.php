@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Wallet;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -80,10 +83,23 @@ class UserController extends Controller
     /**
      * Hiển thị thông tin chi tiết người dùng
      */
-    public function show($id)
+    public function show(string $id)
     {
-        $user = User::with(['role', 'orders'])->findOrFail($id);
-        return view('admin.users.show', compact('user'));
+        $user = User::with('orders', 'role')->findOrFail($id);
+        
+        // Lấy ví của người dùng (nếu có)
+        $wallet = $user->wallet;
+        
+        // Lấy các giao dịch gần đây của ví (nếu có)
+        $walletTransactions = [];
+        if ($wallet) {
+            $walletTransactions = $wallet->transactions()
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get();
+        }
+        
+        return view('admin.users.show', compact('user', 'wallet', 'walletTransactions'));
     }
     
     /**
@@ -149,5 +165,149 @@ class UserController extends Controller
         
         return redirect()->route('admin.users.index')
             ->with('success', 'Đã xóa người dùng thành công');
+    }
+    
+    /**
+     * Tạo ví mới cho người dùng
+     */
+    public function createWallet($id)
+    {
+        $user = User::findOrFail($id);
+        
+        // Kiểm tra nếu người dùng đã có ví
+        if ($user->wallet) {
+            return redirect()->route('admin.users.show', $id)
+                ->with('error', 'Người dùng này đã có ví điện tử');
+        }
+        
+        // Tạo ví mới
+        $wallet = new Wallet();
+        $wallet->user_id = $user->id;
+        $wallet->balance = 0;
+        $wallet->is_active = true;
+        $wallet->save();
+        
+        return redirect()->route('admin.users.show', $id)
+            ->with('success', 'Đã tạo ví điện tử mới cho người dùng');
+    }
+    
+    /**
+     * Hiển thị form điều chỉnh số dư ví
+     */
+    public function showWalletAdjustForm($id)
+    {
+        $user = User::findOrFail($id);
+        
+        // Kiểm tra nếu người dùng chưa có ví
+        if (!$user->wallet) {
+            return redirect()->route('admin.users.show', $id)
+                ->with('error', 'Người dùng này chưa có ví điện tử');
+        }
+        
+        return view('admin.users.wallet-adjust', compact('user'));
+    }
+    
+    /**
+     * Xử lý điều chỉnh số dư ví
+     */
+    public function adjustWallet(Request $request, $id)
+    {
+        $request->validate([
+            'amount' => 'required|numeric',
+            'type' => 'required|in:add,subtract',
+            'description' => 'required|string|max:255',
+        ]);
+        
+        $user = User::findOrFail($id);
+        
+        // Kiểm tra nếu người dùng chưa có ví
+        if (!$user->wallet) {
+            return redirect()->route('admin.users.show', $id)
+                ->with('error', 'Người dùng này chưa có ví điện tử');
+        }
+        
+        $wallet = $user->wallet;
+        
+        try {
+            DB::beginTransaction();
+            
+            $amount = abs($request->amount);
+            
+            if ($request->type == 'add') {
+                // Thêm tiền vào ví
+                $wallet->deposit(
+                    $amount,
+                    'deposit',
+                    $request->description . ' (Điều chỉnh bởi Admin)',
+                    auth()->id(),
+                    'admin_adjustment'
+                );
+            } else {
+                // Kiểm tra đủ số dư
+                if ($wallet->balance < $amount) {
+                    return redirect()->back()->with('error', 'Số dư ví không đủ để trừ');
+                }
+                
+                // Trừ tiền từ ví
+                $wallet->withdraw(
+                    $amount,
+                    'payment',
+                    $request->description . ' (Điều chỉnh bởi Admin)',
+                    auth()->id(),
+                    'admin_adjustment'
+                );
+            }
+            
+            DB::commit();
+            
+            return redirect()->route('admin.users.show', $id)
+                ->with('success', 'Điều chỉnh số dư ví thành công');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Hiển thị tất cả giao dịch của ví người dùng
+     */
+    public function showWalletTransactions($id)
+    {
+        $user = User::findOrFail($id);
+        
+        // Kiểm tra nếu người dùng chưa có ví
+        if (!$user->wallet) {
+            return redirect()->route('admin.users.show', $id)
+                ->with('error', 'Người dùng này chưa có ví điện tử');
+        }
+        
+        $transactions = $user->wallet->transactions()
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+            
+        return view('admin.users.wallet-transactions', compact('user', 'transactions'));
+    }
+    
+    /**
+     * Bật/tắt trạng thái ví
+     */
+    public function toggleWalletStatus($id)
+    {
+        $user = User::findOrFail($id);
+        
+        // Kiểm tra nếu người dùng chưa có ví
+        if (!$user->wallet) {
+            return redirect()->route('admin.users.show', $id)
+                ->with('error', 'Người dùng này chưa có ví điện tử');
+        }
+        
+        $wallet = $user->wallet;
+        $wallet->is_active = !$wallet->is_active;
+        $wallet->save();
+        
+        $message = $wallet->is_active ? 'Đã mở khóa ví điện tử' : 'Đã khóa ví điện tử';
+        
+        return redirect()->route('admin.users.show', $id)
+            ->with('success', $message);
     }
 }

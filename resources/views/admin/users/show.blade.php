@@ -76,6 +76,142 @@
                     </div>
                 </div>
                 
+                <!-- Thông tin ví điện tử -->
+                <div class="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
+                    <div class="px-4 py-5 sm:px-6 bg-gray-50 flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Ví điện tử</h3>
+                        <div class="flex space-x-2">
+                            @if(!$wallet)
+                                <form action="{{ route('admin.users.create-wallet', $user->id) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    <button type="submit" class="bg-green-600 text-white px-3 py-1 text-sm rounded-md hover:bg-green-700">
+                                        Tạo ví mới
+                                    </button>
+                                </form>
+                            @else
+                                <a href="{{ route('admin.users.wallet-adjust', $user->id) }}" class="bg-blue-600 text-white px-3 py-1 text-sm rounded-md hover:bg-blue-700">
+                                    Điều chỉnh số dư
+                                </a>
+                                <form action="{{ route('admin.users.toggle-wallet-status', $user->id) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    <button type="submit" class="{{ $wallet->is_active ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }} text-white px-3 py-1 text-sm rounded-md">
+                                        {{ $wallet->is_active ? 'Khóa ví' : 'Mở khóa ví' }}
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200">
+                        @if($wallet)
+                            <dl>
+                                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt class="text-sm font-medium text-gray-500">ID ví</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $wallet->id }}</dd>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt class="text-sm font-medium text-gray-500">Số dư</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 font-semibold">
+                                        {{ number_format($wallet->balance, 0, ',', '.') }} đ
+                                    </dd>
+                                </div>
+                                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt class="text-sm font-medium text-gray-500">Trạng thái</dt>
+                                    <dd class="mt-1 text-sm sm:mt-0 sm:col-span-2">
+                                        @if($wallet->is_active)
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                                Đang hoạt động
+                                            </span>
+                                        @else
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                                                Bị khóa
+                                            </span>
+                                        @endif
+                                    </dd>
+                                </div>
+                                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt class="text-sm font-medium text-gray-500">Ngày tạo</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $wallet->created_at->format('d/m/Y H:i:s') }}</dd>
+                                </div>
+                            </dl>
+
+                            <!-- Giao dịch gần đây -->
+                            <div class="mt-4 border-t border-gray-200">
+                                <div class="px-4 py-3 bg-gray-50 flex justify-between items-center">
+                                    <h4 class="text-md font-medium text-gray-700">Giao dịch gần đây</h4>
+                                    <a href="{{ route('admin.users.wallet-transactions', $user->id) }}" class="text-blue-600 hover:text-blue-900 text-sm">
+                                        Xem tất cả
+                                    </a>
+                                </div>
+                                
+                                @if(count($walletTransactions) > 0)
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Thời gian
+                                                    </th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Loại
+                                                    </th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Số tiền
+                                                    </th>
+                                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Mô tả
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                @foreach($walletTransactions as $transaction)
+                                                    <tr>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            {{ $transaction->created_at->format('d/m/Y H:i:s') }}
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            @if($transaction->isDeposit())
+                                                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                                                    Nạp tiền
+                                                                </span>
+                                                            @elseif($transaction->isWithdraw())
+                                                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
+                                                                    Rút tiền
+                                                                </span>
+                                                            @elseif($transaction->isPayment())
+                                                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                                                                    Thanh toán
+                                                                </span>
+                                                            @elseif($transaction->isRefund())
+                                                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                                                                    Hoàn tiền
+                                                                </span>
+                                                            @endif
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $transaction->amount > 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                            {{ $transaction->amount > 0 ? '+' : '' }}{{ number_format($transaction->amount, 0, ',', '.') }} đ
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            {{ $transaction->description ?? 'Không có mô tả' }}
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div class="p-6 text-center text-gray-500">
+                                        Chưa có giao dịch nào
+                                    </div>
+                                @endif
+                            </div>
+                        @else
+                            <div class="p-6 text-center text-gray-500">
+                                Người dùng chưa có ví. Hãy tạo ví mới cho người dùng này.
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                
                 <!-- Lịch sử đơn hàng -->
                 <div class="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
                     <div class="px-4 py-5 sm:px-6 bg-gray-50">
@@ -171,6 +307,15 @@
                                     {{ number_format($user->orders->where('status', 'completed')->sum('total_amount'), 0, ',', '.') }} đ
                                 </dd>
                             </div>
+                            
+                            @if($wallet)
+                            <div class="bg-purple-50 overflow-hidden rounded-lg px-4 py-5 sm:p-6">
+                                <dt class="truncate text-sm font-medium text-purple-700">Số dư ví</dt>
+                                <dd class="mt-1 text-3xl font-semibold text-purple-900">
+                                    {{ number_format($wallet->balance, 0, ',', '.') }} đ
+                                </dd>
+                            </div>
+                            @endif
                         </dl>
                     </div>
                 </div>

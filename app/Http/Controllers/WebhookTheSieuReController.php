@@ -21,11 +21,6 @@ class WebhookTheSieuReController extends Controller
      */
     public function handleCallback(Request $request)
     {
-        // Log tất cả thông tin nhận được để debug
-        Log::info('TheSieuRe Callback Received', [
-            'data' => $request->all(),
-            'headers' => $request->header()
-        ]);
         
         // Thử kiểm tra chữ ký bằng nhiều cách khác nhau
         $this->tryDifferentSignatureMethods($request->all());
@@ -35,22 +30,17 @@ class WebhookTheSieuReController extends Controller
         
         // Xác thực dữ liệu callback 
         if (!$theSieuReService->verifyCallback($request->all())) {
-            Log::warning('TheSieuRe Callback Verification Failed');
             return response()->json([
                 'success' => false,
                 'message' => 'Dữ liệu callback không hợp lệ'
             ], 400);
         }
         
-        Log::info('TheSieuRe Callback Verification Passed');
         
         // Tìm giao dịch nạp thẻ dựa trên request_id
         $cardDeposit = CardDeposit::where('request_id', $request->request_id)->first();
         
         if (!$cardDeposit) {
-            Log::error('TheSieuRe Callback Error: Không tìm thấy giao dịch nạp thẻ', [
-                'request_id' => $request->request_id
-            ]);
             
             return response()->json([
                 'success' => false,
@@ -58,14 +48,8 @@ class WebhookTheSieuReController extends Controller
             ], 404);
         }
         
-        Log::info('TheSieuRe Callback: Tìm thấy giao dịch nạp thẻ', [
-            'card_deposit_id' => $cardDeposit->id,
-            'current_status' => $cardDeposit->status
-        ]);
-        
         // Kiểm tra trạng thái trước khi xử lý
         if ($cardDeposit->status == CardDeposit::STATUS_COMPLETED) {
-            Log::info('TheSieuRe Callback: Giao dịch đã được xử lý trước đó');
             return response()->json([
                 'success' => true,
                 'message' => 'Giao dịch đã được xử lý thành công trước đó'
@@ -83,12 +67,6 @@ class WebhookTheSieuReController extends Controller
         // Xử lý theo trạng thái
         $status = (int)$request->status; // Chuyển đổi sang số nguyên để so sánh chính xác
         
-        // Log trạng thái thẻ
-        Log::info('TheSieuRe Callback Status', [
-            'status' => $status, 
-            'card_deposit_id' => $cardDeposit->id
-        ]);
-        
         if ($status == 1) { // Thẻ đúng - gạch thẻ thành công
             // Cập nhật trạng thái thẻ thành công
             $cardDeposit->status = CardDeposit::STATUS_COMPLETED;
@@ -101,18 +79,9 @@ class WebhookTheSieuReController extends Controller
             
             $cardDeposit->save();
             
-            Log::info('TheSieuRe: Thẻ nạp thành công', [
-                'card_id' => $cardDeposit->id,
-                'amount' => $request->amount,
-                'value' => $request->value
-            ]);
-            
             // Tìm user để cập nhật ví
             $user = User::find($cardDeposit->user_id);
             if (!$user) {
-                Log::error('TheSieuRe Callback Error: Không tìm thấy người dùng', [
-                    'user_id' => $cardDeposit->user_id
-                ]);
                 
                 return response()->json([
                     'success' => false,
@@ -174,15 +143,7 @@ class WebhookTheSieuReController extends Controller
                 
                 DB::commit();
                 
-                Log::info('TheSieuRe: Đã cập nhật ví người dùng', [
-                    'user_id' => $user->id, 
-                    'wallet_id' => $wallet->id,
-                    'old_balance' => $wallet->balance - $request->amount,
-                    'new_balance' => $wallet->balance,
-                    'transaction_id' => $transaction->id,
-                    'wallet_transaction_id' => $walletTransaction->id,
-                    'amount_added' => $request->amount
-                ]);
+          
             } catch (\Exception $e) {
                 DB::rollBack();
                 
@@ -205,10 +166,7 @@ class WebhookTheSieuReController extends Controller
             // Cập nhật trạng thái thẻ đang chờ xử lý
             $cardDeposit->status = CardDeposit::STATUS_PENDING;
             $cardDeposit->save();
-            
-            Log::info('TheSieuRe: Thẻ đang chờ xử lý', [
-                'card_id' => $cardDeposit->id
-            ]);
+          
         } else if ($status == 3) { // Thẻ sai mệnh giá
             // Đánh dấu thẻ thất bại với lý do cụ thể
             $cardDeposit->status = CardDeposit::STATUS_FAILED;
@@ -219,11 +177,6 @@ class WebhookTheSieuReController extends Controller
             ]);
             $cardDeposit->save();
             
-            Log::info('TheSieuRe: Thẻ sai mệnh giá', [
-                'card_id' => $cardDeposit->id,
-                'expected' => $request->declared_value,
-                'actual' => $request->value
-            ]);
         } else if ($status == 4) { // Thẻ không đúng hoặc đã sử dụng
             // Đánh dấu thẻ thất bại
             $cardDeposit->status = CardDeposit::STATUS_FAILED;
@@ -231,10 +184,7 @@ class WebhookTheSieuReController extends Controller
                 'failure_reason' => 'Thẻ không đúng hoặc đã được sử dụng'
             ]);
             $cardDeposit->save();
-            
-            Log::info('TheSieuRe: Thẻ không đúng hoặc đã sử dụng', [
-                'card_id' => $cardDeposit->id
-            ]);
+          
         } else { // Các trạng thái khác
             // Đánh dấu thẻ thất bại
             $cardDeposit->status = CardDeposit::STATUS_FAILED;
@@ -243,11 +193,7 @@ class WebhookTheSieuReController extends Controller
                 'raw_data' => $request->all()
             ]);
             $cardDeposit->save();
-            
-            Log::warning('TheSieuRe: Trạng thái không xác định', [
-                'card_id' => $cardDeposit->id,
-                'status' => $status
-            ]);
+       
         }
         
         return response()->json([
@@ -291,19 +237,6 @@ class WebhookTheSieuReController extends Controller
             $string5 = $partnerKey . $data['amount'] . $data['code'] . $data['serial'];
             $sign5 = md5($string5);
             
-            Log::debug('TheSieuRe Signature Test Results', [
-                'received_sign' => $receivedSign,
-                'method1_sign' => $sign1,
-                'method1_match' => ($sign1 === $receivedSign),
-                'method2_sign' => $sign2,
-                'method2_match' => ($sign2 === $receivedSign),
-                'method3_sign' => $sign3,
-                'method3_match' => ($sign3 === $receivedSign),
-                'method4_sign' => $sign4,
-                'method4_match' => ($sign4 === $receivedSign),
-                'method5_sign' => $sign5,
-                'method5_match' => ($sign5 === $receivedSign),
-            ]);
         }
     }
 }

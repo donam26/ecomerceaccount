@@ -7,9 +7,6 @@ use App\Models\BoostingOrder;
 use App\Models\Game;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
-use App\Events\BoostingOrderUpdated;
 
 class BoostingServiceController extends Controller
 {
@@ -119,12 +116,6 @@ class BoostingServiceController extends Controller
                 ->with('warning', 'Vui lòng thanh toán đơn hàng trước khi cung cấp thông tin tài khoản.');
         }
         
-        // Log thông tin để debug
-        Log::info('BoostingServiceController: Hiển thị trang nhập thông tin tài khoản game', [
-            'order_number' => $orderNumber,
-            'user_id' => auth()->id()
-        ]);
-        
         return view('boosting.account_info', compact('order'));
     }
 
@@ -166,13 +157,6 @@ class BoostingServiceController extends Controller
             }
             
             $order->save();
-            
-            // Log thông tin để debug
-            Log::info('BoostingServiceController: Đã cập nhật thông tin tài khoản game', [
-                'order_number' => $orderNumber,
-                'status' => $order->status
-            ]);
-            
             // Gửi thông báo đến quản trị viên về đơn hàng cày thuê mới
             event(new \App\Events\BoostingOrderUpdated($order));
             
@@ -181,12 +165,6 @@ class BoostingServiceController extends Controller
                 ->with('success', 'Cảm ơn bạn đã cung cấp thông tin tài khoản. Chúng tôi sẽ bắt đầu thực hiện dịch vụ ngay lập tức.');
                 
         } catch (\Exception $e) {
-            // Log lỗi
-            Log::error('BoostingServiceController: Lỗi khi cập nhật thông tin tài khoản game', [
-                'order_number' => $orderNumber,
-                'error' => $e->getMessage()
-            ]);
-            
             // Trả về lỗi
             return back()->with('error', 'Đã xảy ra lỗi khi lưu thông tin tài khoản. Vui lòng thử lại sau.');
         }

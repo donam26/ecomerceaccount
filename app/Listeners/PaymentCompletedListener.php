@@ -30,12 +30,6 @@ class PaymentCompletedListener implements ShouldQueue
         $order = $event->order;
         $transaction = $event->transaction;
         
-        // Ghi log
-        Log::info('Xử lý PaymentCompletedListener', [
-            'order_id' => $order->id,
-            'transaction_id' => $transaction->id
-        ]);
-        
         // Lấy thông tin tài khoản game
         $account = $order->account;
         
@@ -54,9 +48,6 @@ class PaymentCompletedListener implements ShouldQueue
                 if (in_array('account_details', Schema::getColumnListing('orders'))) {
                     $order->account_details = json_encode($accountInfo);
                     $order->save();
-                    Log::info('Đã lưu thông tin tài khoản vào đơn hàng', [
-                        'order_id' => $order->id
-                    ]);
                 }
             } catch (\Exception $e) {
                 Log::error('Không thể lưu thông tin tài khoản vào đơn hàng', [
@@ -71,11 +62,7 @@ class PaymentCompletedListener implements ShouldQueue
                 if ($user && $user->email) {
                     // Gửi email thông báo
                     // Mail::to($user->email)->send(new \App\Mail\PaymentSuccessful($order, $accountInfo));
-                    
-                    Log::info('Đã gửi email thông báo thanh toán thành công', [
-                        'user_id' => $user->id,
-                        'email' => $user->email
-                    ]);
+                 
                 }
             } catch (\Exception $e) {
                 Log::error('Không thể gửi email thông báo', [

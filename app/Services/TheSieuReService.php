@@ -64,7 +64,6 @@ class TheSieuReService
             ]);
 
             $data = $response->json();
-            Log::info('TheSieuRe API Response', ['request_id' => $requestId, 'response' => $data]);
 
             return [
                 'success' => true,
@@ -115,7 +114,6 @@ class TheSieuReService
             ]);
 
             $data = $response->json();
-            Log::info('TheSieuRe Check API Response', ['request_id' => $requestId, 'response' => $data]);
 
             return [
                 'success' => true,
@@ -259,7 +257,6 @@ class TheSieuReService
             ]);
 
             $data = $response->json();
-            Log::info('TheSieuRe Update Callback URL Response', ['response' => $data]);
 
             return [
                 'success' => true,

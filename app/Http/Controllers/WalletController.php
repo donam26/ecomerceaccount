@@ -117,16 +117,7 @@ class WalletController extends Controller
         $walletDeposit->save();
         
         // Tạo QR code cho thanh toán
-        $qrUrl = "https://qr.sepay.vn/img?acc=103870429701&bank=VietinBank&amount={$amount}&des=" . urlencode($paymentContent) . "&template=compact";
-        
-        // Log thông tin QR để debug
-        Log::info('SePay QR Nạp Ví', [
-            'user_id' => $user->id,
-            'wallet_id' => $wallet->id,
-            'deposit_code' => $depositCode,
-            'payment_content' => $paymentContent,
-            'amount' => $amount
-        ]);
+        $qrUrl = "https://qr.sepay.vn/img?acc=0386702324&bank=MBBank&amount={$amount}&des=" . urlencode($paymentContent) . "&template=compact";
         
         // Tạo thông tin thanh toán để hiển thị
         $paymentInfo = [
@@ -159,10 +150,6 @@ class WalletController extends Controller
         /** @var \App\Models\User $user */
         $user = User::find($userId);
         if (!$user) {
-            Log::error('Không tìm thấy người dùng khi xử lý nạp ví', [
-                'user_id' => $userId, 
-                'deposit_code' => $depositCode
-            ]);
             return false;
         }
         
@@ -175,11 +162,6 @@ class WalletController extends Controller
                     ->first();
                 
                 if ($existingTransaction) {
-                    Log::info('Giao dịch nạp tiền đã được xử lý trước đó', [
-                        'user_id' => $userId,
-                        'transaction_id' => $transactionId,
-                        'deposit_code' => $depositCode
-                    ]);
                     return true; // Trả về true vì đã xử lý thành công trước đó
                 }
             }
@@ -191,10 +173,6 @@ class WalletController extends Controller
                 ->first();
                 
             if (!$walletDeposit) {
-                Log::warning('Không tìm thấy bản ghi nạp tiền đang chờ xử lý', [
-                    'user_id' => $userId,
-                    'deposit_code' => $depositCode
-                ]);
                 
                 // Tạo mới bản ghi nếu không tìm thấy
                 $wallet = $user->getWallet();
@@ -228,15 +206,7 @@ class WalletController extends Controller
             $walletDeposit->completed_at = Carbon::now();
             $walletDeposit->metadata = is_array($transactionData) ? $transactionData : json_decode($transactionData, true);
             $walletDeposit->save();
-            
-            Log::info('Đã nạp tiền vào ví thành công', [
-                'user_id' => $user->id,
-                'wallet_id' => $wallet->id,
-                'amount' => $amount,
-                'new_balance' => $wallet->balance,
-                'deposit_code' => $depositCode,
-                'transaction_id' => $transaction->id
-            ]);
+          
             
             return true;
         } catch (\Exception $e) {
@@ -581,15 +551,6 @@ class WalletController extends Controller
             $wallet->save();
             
             DB::commit();
-            
-            // Log thông tin nạp tiền thành công
-            Log::info('Nạp tiền vào ví thành công qua callback', [
-                'user_id' => $user->id,
-                'wallet_id' => $wallet->id,
-                'amount' => $amount,
-                'deposit_code' => $code,
-                'transaction_id' => $transaction->id
-            ]);
             
             // Xóa thông tin session sau khi xử lý xong
             session()->forget('deposit');

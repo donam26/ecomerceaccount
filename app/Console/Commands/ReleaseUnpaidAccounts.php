@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Account;
 use App\Models\Order;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -30,7 +29,6 @@ class ReleaseUnpaidAccounts extends Command
      */
     public function handle()
     {
-        // Ghi log thời gian bắt đầu
         $startTime = Carbon::now();
         $this->info('Bắt đầu xử lý vào: ' . $startTime->format('Y-m-d H:i:s'));
 
@@ -82,13 +80,7 @@ class ReleaseUnpaidAccounts extends Command
                     $order->save();
                     
                     $this->info("- Đơn hàng #{$order->order_number} tự động hủy do quá thời gian thanh toán.");
-                    
-                    // Log hành động
-                    Log::info("Đơn hàng #{$order->order_number} tự động hủy do quá thời gian thanh toán", [
-                        'account_id' => $account->id,
-                        'order_id' => $order->id,
-                        'reserved_until' => $account->reserved_until,
-                    ]);
+                
                 }
                 
                 // Giải phóng tài khoản (sử dụng update trực tiếp thay vì qua model để tránh vấn đề về timezone)
@@ -102,13 +94,6 @@ class ReleaseUnpaidAccounts extends Command
                 
                 $this->info("- Tài khoản #{$account->id} ({$account->title}) đã được giải phóng.");
                 
-                // Log hành động
-                Log::info("Tài khoản #{$account->id} đã được giải phóng do quá thời gian thanh toán", [
-                    'account_id' => $account->id,
-                    'account_title' => $account->title,
-                    'reserved_until_was' => $account->reserved_until,
-                ]);
-                
                 DB::commit();
                 $releasedCount++;
             } catch (\Exception $e) {
@@ -116,13 +101,7 @@ class ReleaseUnpaidAccounts extends Command
                 $errors++;
                 
                 $this->error("Lỗi khi giải phóng tài khoản #{$account->id}: " . $e->getMessage());
-                
-                // Log lỗi
-                Log::error("Lỗi khi giải phóng tài khoản", [
-                    'account_id' => $account->id,
-                    'exception' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]);
+          
             }
         }
         

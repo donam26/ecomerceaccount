@@ -107,15 +107,6 @@ class OrderController extends Controller
             [$account->id]
         );
         
-        // Ghi log sự kiện
-        \Illuminate\Support\Facades\Log::info('Tài khoản được đặt giữ chỗ', [
-            'account_id' => $account->id,
-            'order_id' => $order->id,
-            'user_id' => Auth::id(),
-            'reserved_until' => $reservedInfo[0]->reserved_until ?? 'Unknown',
-            'reserved_minutes' => $reservationMinutes
-        ]);
-        
         // Làm mới để lấy thông tin cập nhật
         $account->refresh();
         
@@ -149,13 +140,7 @@ class OrderController extends Controller
                  WHERE id = ?",
                 [$order->account_id]
             );
-            
-            // Ghi log sự kiện
-            \Illuminate\Support\Facades\Log::info('Tài khoản được giải phóng do người dùng hủy đơn hàng', [
-                'account_id' => $order->account_id,
-                'order_id' => $order->id,
-                'user_id' => auth()->id()
-            ]);
+        
         }
         
         return redirect()->route('orders.show', $orderNumber)

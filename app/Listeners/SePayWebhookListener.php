@@ -24,13 +24,6 @@ class SePayWebhookListener
      */
     public function handle(SePayWebhookEvent $event): void
     {
-        Log::info('Nhận Sepay Webhook', [
-            'info' => $event->info,
-            'transferType' => $event->sePayWebhookData->transferType,
-            'amount' => $event->sePayWebhookData->transferAmount,
-            'content' => $event->sePayWebhookData->content,
-        ]);
-
         // Xử lý tiền vào tài khoản
         if ($event->sePayWebhookData->transferType === 'in') {
             // Trường hợp $event->info là order_id 
@@ -81,10 +74,6 @@ class SePayWebhookListener
                         'payment_details' => json_encode($event->sePayWebhookData),
                     ]);
 
-                    Log::info('Đơn hàng đã được thanh toán thành công', [
-                        'order_id' => $order->id,
-                        'order_number' => $order->order_number,
-                    ]);
                 }
             } else {
                 Log::warning('Không tìm thấy đơn hàng với ID ' . $event->info);

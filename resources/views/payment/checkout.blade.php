@@ -180,13 +180,13 @@
                                             <div>
                                                 <div class="mb-4">
                                                     <p class="text-sm font-medium text-gray-700">Ngân hàng:</p>
-                                                    <p class="text-base font-semibold">VietinBank</p>
+                                                    <p class="text-base font-semibold">MBBank</p>
                                                 </div>
                                                 <div class="mb-4">
                                                     <p class="text-sm font-medium text-gray-700">Số tài khoản:</p>
                                                     <p class="text-base font-semibold">
-                                                        103870429701
-                                                        <button type="button" class="ml-2 inline-flex items-center p-1 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 copy-btn" data-clipboard-text="103870429701">
+                                                        0386702324
+                                                        <button type="button" class="ml-2 inline-flex items-center p-1 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 copy-btn" data-clipboard-text="0386702324">
                                                             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                                                             </svg>
@@ -195,7 +195,7 @@
                                                 </div>
                                                 <div class="mb-4">
                                                     <p class="text-sm font-medium text-gray-700">Chủ tài khoản:</p>
-                                                    <p class="text-base font-semibold">NGUYEN VAN A</p>
+                                                    <p class="text-base font-semibold">NGUYEN THI BICH NGOC                                                    </p>
                                                 </div>
                                                 <div class="mb-4">
                                                     <p class="text-sm font-medium text-gray-700">Số tiền:</p>
@@ -353,7 +353,6 @@
             fetch(checkStatusUrl)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Kiểm tra trạng thái thanh toán:', data);
                     
                     if (data.status === 'paid' || data.status === 'completed' || data.status === 'processing') {
                         // Hiển thị thông báo thành công
@@ -390,7 +389,6 @@
             fetch(checkStatusUrl)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Kiểm tra trạng thái thủ công:', data);
                     
                     // Khôi phục trạng thái nút
                     this.classList.remove('animate-pulse');
