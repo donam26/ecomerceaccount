@@ -31,6 +31,7 @@ class ReleaseUnpaidAccounts extends Command
     {
         $startTime = Carbon::now();
         $this->info('Bắt đầu xử lý vào: ' . $startTime->format('Y-m-d H:i:s'));
+        logger('run schedule');
 
         // Tìm tài khoản hết hạn sử dụng SQL trực tiếp để đảm bảo so sánh chính xác
         $expiredAccountIds = DB::select(

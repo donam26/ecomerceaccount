@@ -65,15 +65,84 @@ class WebhookController extends Controller
                         // Thêm lại prefix để có mã đơn hàng đầy đủ
                         $depositCode = 'WALLET-' . $walletCode;
                         
+                        // Log dữ liệu đầu vào để debug
+                        Log::info('SePay Webhook API: Thông tin nạp tiền ví', [
+                            'deposit_code_raw' => $depositCode,
+                            'transfer_content' => $content,
+                            'amount' => $data['transferAmount'] ?? 0
+                        ]);
+                        
                         // Tìm bản ghi nạp tiền trong database
+                        $walletDeposit = null;
+                        $userId = null;
+                        
+                        // Phương pháp 1: Tìm chính xác theo mã ghi nhận
                         $walletDeposit = WalletDeposit::where('deposit_code', $depositCode)
                             ->where('status', 'pending')
                             ->first();
+                        
+                        // Phương pháp 2: Nếu không tìm thấy, thử tìm kiếm mở rộng với LIKE
+                        if (!$walletDeposit) {
+                            // Trích xuất phần chính của mã (không bao gồm các ký tự thêm vào bởi cổng thanh toán)
+                            $baseCode = substr($walletCode, 0, 10); // Lấy 10 chữ số đầu tiên (phần timestamp)
                             
-                        $userId = null;
+                            Log::info('SePay Webhook API: Tìm kiếm mở rộng với mã cơ bản', [
+                                'base_code' => $baseCode
+                            ]);
+                            
+                            // Tìm các giao dịch pending có mã gần giống
+                            $walletDeposit = WalletDeposit::where('deposit_code', 'LIKE', "WALLET-{$baseCode}%")
+                                ->where('status', 'pending')
+                                ->where('amount', (int)$data['transferAmount']) // Đối chiếu với số tiền
+                                ->first();
+                        }
+                        
+                        // Phương pháp 3: Tìm theo format mới (nếu đang sử dụng)
+                        // Format mới: WALLET-USER{ID}-{TIMESTAMP}-{RANDOM}
+                        if (!$walletDeposit && preg_match('/(\d+)-(\d+)-(\d+)/', $walletCode, $matches)) {
+                            if (count($matches) >= 3) {
+                                $userId = $matches[1];
+                                $timestamp = $matches[2];
+                                
+                                Log::info('SePay Webhook API: Tìm kiếm theo format mới', [
+                                    'user_id' => $userId,
+                                    'timestamp' => $timestamp
+                                ]);
+                                
+                                // Tìm giao dịch của user này
+                                $walletDeposit = WalletDeposit::where('user_id', $userId)
+                                    ->where('deposit_code', 'LIKE', "WALLET-{$userId}-%")
+                                    ->where('status', 'pending')
+                                    ->where('amount', (int)$data['transferAmount'])
+                                    ->orderBy('created_at', 'desc')
+                                    ->first();
+                            }
+                        }
+                        
+                        // Phương pháp 4: Tìm tất cả giao dịch pending trong khoảng thời gian gần đây
+                        if (!$walletDeposit) {
+                            // Lấy tất cả giao dịch pending trong 24h gần đây
+                            $recentDeposits = WalletDeposit::where('status', 'pending')
+                                ->where('amount', (int)$data['transferAmount'])
+                                ->where('created_at', '>=', now()->subDay())
+                                ->orderBy('created_at', 'desc')
+                                ->get();
+                            
+                            if ($recentDeposits->count() > 0) {
+                                // Ưu tiên giao dịch gần nhất
+                                $walletDeposit = $recentDeposits->first();
+                                
+                                Log::info('SePay Webhook API: Tìm thấy giao dịch theo phương pháp 4', [
+                                    'deposit_id' => $walletDeposit->id,
+                                    'deposit_code' => $walletDeposit->deposit_code,
+                                    'created_at' => $walletDeposit->created_at->format('Y-m-d H:i:s')
+                                ]);
+                            }
+                        }
                         
                         if ($walletDeposit) {
                             $userId = $walletDeposit->user_id;
+                            $depositCode = $walletDeposit->deposit_code; // Sử dụng mã từ database
                         }
                         
                         if ($userId) {
@@ -81,6 +150,12 @@ class WebhookController extends Controller
                             $amount = (int)$data['transferAmount'];
                             
                             try {
+                                Log::info('SePay Webhook API: Bắt đầu xử lý nạp tiền', [
+                                    'user_id' => $userId,
+                                    'deposit_code' => $depositCode,
+                                    'amount' => $amount
+                                ]);
+                                
                                 // Gọi phương thức xử lý nạp tiền
                                 $result = \App\Http\Controllers\WalletController::processDepositWebhook(
                                     $userId, 
@@ -88,6 +163,12 @@ class WebhookController extends Controller
                                     $data, 
                                     $depositCode
                                 );
+                                
+                                Log::info('SePay Webhook API: Xử lý nạp tiền thành công', [
+                                    'user_id' => $userId,
+                                    'deposit_code' => $depositCode,
+                                    'result' => $result
+                                ]);
                            
                             } catch (\Exception $e) {
                                 Log::error('SePay Webhook API: Lỗi khi xử lý nạp tiền vào ví', [
@@ -349,15 +430,84 @@ class WebhookController extends Controller
                         
                         $depositCode = 'WALLET-' . $walletCode;
                         
+                        // Log dữ liệu đầu vào để debug
+                        Log::info('SePay Webhook: Thông tin nạp tiền ví', [
+                            'deposit_code_raw' => $depositCode,
+                            'transfer_content' => $content,
+                            'amount' => $data['transferAmount'] ?? 0
+                        ]);
+                        
                         // Tìm bản ghi nạp tiền trong database
+                        $walletDeposit = null;
+                        $userId = null;
+                        
+                        // Phương pháp 1: Tìm chính xác theo mã ghi nhận
                         $walletDeposit = WalletDeposit::where('deposit_code', $depositCode)
                             ->where('status', 'pending')
                             ->first();
+                        
+                        // Phương pháp 2: Nếu không tìm thấy, thử tìm kiếm mở rộng với LIKE
+                        if (!$walletDeposit) {
+                            // Trích xuất phần chính của mã (không bao gồm các ký tự thêm vào bởi cổng thanh toán)
+                            $baseCode = substr($walletCode, 0, 10); // Lấy 10 chữ số đầu tiên (phần timestamp)
                             
-                        $userId = null;
+                            Log::info('SePay Webhook: Tìm kiếm mở rộng với mã cơ bản', [
+                                'base_code' => $baseCode
+                            ]);
+                            
+                            // Tìm các giao dịch pending có mã gần giống
+                            $walletDeposit = WalletDeposit::where('deposit_code', 'LIKE', "WALLET-{$baseCode}%")
+                                ->where('status', 'pending')
+                                ->where('amount', (int)$data['transferAmount']) // Đối chiếu với số tiền
+                                ->first();
+                        }
+                        
+                        // Phương pháp 3: Tìm theo format mới (nếu đang sử dụng)
+                        // Format mới: WALLET-USER{ID}-{TIMESTAMP}-{RANDOM}
+                        if (!$walletDeposit && preg_match('/(\d+)-(\d+)-(\d+)/', $walletCode, $matches)) {
+                            if (count($matches) >= 3) {
+                                $userId = $matches[1];
+                                $timestamp = $matches[2];
+                                
+                                Log::info('SePay Webhook: Tìm kiếm theo format mới', [
+                                    'user_id' => $userId,
+                                    'timestamp' => $timestamp
+                                ]);
+                                
+                                // Tìm giao dịch của user này
+                                $walletDeposit = WalletDeposit::where('user_id', $userId)
+                                    ->where('deposit_code', 'LIKE', "WALLET-{$userId}-%")
+                                    ->where('status', 'pending')
+                                    ->where('amount', (int)$data['transferAmount'])
+                                    ->orderBy('created_at', 'desc')
+                                    ->first();
+                            }
+                        }
+                        
+                        // Phương pháp 4: Tìm tất cả giao dịch pending trong khoảng thời gian gần đây
+                        if (!$walletDeposit) {
+                            // Lấy tất cả giao dịch pending trong 24h gần đây
+                            $recentDeposits = WalletDeposit::where('status', 'pending')
+                                ->where('amount', (int)$data['transferAmount'])
+                                ->where('created_at', '>=', now()->subDay())
+                                ->orderBy('created_at', 'desc')
+                                ->get();
+                            
+                            if ($recentDeposits->count() > 0) {
+                                // Ưu tiên giao dịch gần nhất
+                                $walletDeposit = $recentDeposits->first();
+                                
+                                Log::info('SePay Webhook: Tìm thấy giao dịch theo phương pháp 4', [
+                                    'deposit_id' => $walletDeposit->id,
+                                    'deposit_code' => $walletDeposit->deposit_code,
+                                    'created_at' => $walletDeposit->created_at->format('Y-m-d H:i:s')
+                                ]);
+                            }
+                        }
                         
                         if ($walletDeposit) {
                             $userId = $walletDeposit->user_id;
+                            $depositCode = $walletDeposit->deposit_code; // Sử dụng mã từ database
                         }
                         
                         if ($userId) {
@@ -365,6 +515,12 @@ class WebhookController extends Controller
                             $amount = (int)$data['transferAmount'];
                             
                             try {
+                                Log::info('SePay Webhook: Bắt đầu xử lý nạp tiền', [
+                                    'user_id' => $userId,
+                                    'deposit_code' => $depositCode,
+                                    'amount' => $amount
+                                ]);
+                                
                                 // Gọi phương thức xử lý nạp tiền
                                 $result = \App\Http\Controllers\WalletController::processDepositWebhook(
                                     $userId, 
@@ -372,6 +528,12 @@ class WebhookController extends Controller
                                     $data, 
                                     $depositCode
                                 );
+                                
+                                Log::info('SePay Webhook: Xử lý nạp tiền thành công', [
+                                    'user_id' => $userId,
+                                    'deposit_code' => $depositCode,
+                                    'result' => $result
+                                ]);
                               
                             } catch (\Exception $e) {
                                 Log::error('SePay Webhook: Lỗi khi xử lý nạp tiền vào ví', [

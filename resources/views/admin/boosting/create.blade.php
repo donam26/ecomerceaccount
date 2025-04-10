@@ -65,7 +65,7 @@
                             <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
                                 Mô tả <span class="text-red-600">*</span>
                             </label>
-                            <textarea id="description" name="description" rows="4" required
+                            <textarea id="description" name="description" rows="4"
                                 class="ckeditor block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('description') }}</textarea>
                         </div>
 
@@ -162,6 +162,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const textareaIds = ['description', 'requirements', 'includes'];
+        const editors = {};
         
         textareaIds.forEach(id => {
             ClassicEditor
@@ -177,9 +178,25 @@
                     },
                     language: 'vi'
                 })
+                .then(editor => {
+                    editors[id] = editor;
+                })
                 .catch(error => {
                     console.error(`Lỗi khi khởi tạo CKEditor cho ${id}:`, error);
                 });
+        });
+
+        // Thêm validation cho form trước khi submit
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            // Kiểm tra trường description
+            if (editors['description'] && editors['description'].getData().trim() === '') {
+                e.preventDefault();
+                alert('Vui lòng nhập mô tả dịch vụ');
+                return false;
+            }
+            
+            return true;
         });
     });
 </script>

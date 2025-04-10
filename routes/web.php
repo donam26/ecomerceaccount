@@ -113,6 +113,13 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     
     // Quản lý người dùng
     Route::resource('users', AdminUserController::class);
+    
+    // Quản lý ví người dùng
+    Route::post('users/{id}/create-wallet', [AdminUserController::class, 'createWallet'])->name('users.create-wallet');
+    Route::get('users/{id}/wallet-adjust', [AdminUserController::class, 'showWalletAdjustForm'])->name('users.wallet-adjust');
+    Route::post('users/{id}/wallet-adjust', [AdminUserController::class, 'adjustWallet'])->name('users.wallet-adjust.submit');
+    Route::get('users/{id}/wallet-transactions', [AdminUserController::class, 'showWalletTransactions'])->name('users.wallet-transactions');
+    Route::post('users/{id}/toggle-wallet-status', [AdminUserController::class, 'toggleWalletStatus'])->name('users.toggle-wallet-status');
 
     // Quản lý dịch vụ cày thuê
     Route::resource('boosting', AdminBoostingServiceController::class);

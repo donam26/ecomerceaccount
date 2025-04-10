@@ -63,7 +63,7 @@
                             Email
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Số điện thoại
+                            Số dư ví
                         </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Vai trò
@@ -89,7 +89,23 @@
                                 {{ $user->email }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $user->phone ?: 'Chưa cập nhật' }}
+                                @if($user->wallet)
+                                    <div class="flex items-center">
+                                        <span class="font-medium text-green-600">{{ number_format($user->wallet->balance, 0, ',', '.') }} đ</span>
+                                        <a href="{{ route('admin.users.wallet-adjust', $user->id) }}" class="ml-2 text-blue-600 hover:text-blue-900">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                @else
+                                    <form action="{{ route('admin.users.create-wallet', $user->id) }}" method="POST" class="inline-block">
+                                        @csrf
+                                        <button type="submit" class="text-blue-600 hover:text-blue-900 text-xs">
+                                            Tạo ví
+                                        </button>
+                                    </form>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($user->role)
