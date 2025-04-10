@@ -13,6 +13,10 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+        
+        // Chạy lệnh giải phóng tài khoản chưa thanh toán mỗi 5 phút
+        $schedule->command('accounts:release-unpaid')
+                ->everyFiveMinutes();
     }
 
     /**

@@ -241,39 +241,7 @@
                 </div>
             </div>
             
-            <!-- Cập nhật ghi chú -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-medium text-gray-900">Ghi chú nội bộ</h2>
-                </div>
-                
-                <!-- Hiển thị ghi chú nếu có -->
-                @if($order->admin_notes)
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="prose max-w-none">
-                        {!! $order->admin_notes !!}
-                    </div>
-                </div>
-                @endif
-                
-                <div class="px-6 py-4">
-                    <form action="{{ route('admin.boosting_orders.notes', $order->id) }}" method="POST">
-                        @csrf
-                        <div class="mb-4">
-                            <label for="admin_notes" class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-                            <textarea id="admin_notes" name="admin_notes" rows="3"
-                                class="ckeditor mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                placeholder="Nhập ghi chú nội bộ cho đơn hàng này">{{ $order->admin_notes }}</textarea>
-                            <p class="mt-1 text-xs text-gray-500">Ghi chú này chỉ hiển thị cho quản trị viên và nhân viên.</p>
-                        </div>
-                        
-                        <button type="submit"
-                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            Cập nhật ghi chú
-                        </button>
-                    </form>
-                </div>
-            </div>
+           
         </div>
         
         <!-- Thông tin thanh toán -->

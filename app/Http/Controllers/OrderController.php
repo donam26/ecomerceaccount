@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -63,11 +64,19 @@ class OrderController extends Controller
             'account_id' => 'required|exists:accounts,id',
         ]);
         
+        // Lấy thông tin tài khoản
         $account = Account::findOrFail($validated['account_id']);
         
-        // Kiểm tra tài khoản còn khả dụng
-        if (!$account->isAvailable()) {
-            return back()->with('error', 'Tài khoản này đã được bán.');
+        // Kiểm tra tài khoản còn khả dụng trực tiếp bằng raw query để tránh vấn đề timezone
+        $isAvailable = DB::select(
+            "SELECT (status = 'available' OR (status = 'pending' AND reserved_until < NOW())) as is_available 
+             FROM accounts 
+             WHERE id = ?", 
+            [$account->id]
+        );
+        
+        if (empty($isAvailable) || !$isAvailable[0]->is_available) {
+            return back()->with('error', 'Tài khoản này đã được bán hoặc đang được người khác đặt mua.');
         }
         
         // Tạo đơn hàng
@@ -79,8 +88,36 @@ class OrderController extends Controller
             'status' => 'pending',
         ]);
         
-        // Cập nhật trạng thái tài khoản
-        $account->update(['status' => 'pending']);
+        // Cập nhật trạng thái tài khoản trực tiếp bằng query
+        $reservationMinutes = 3; // Thời gian giữ chỗ 3 phút
+        
+        // Sử dụng raw query để đặt reserved_until theo múi giờ của database
+        DB::update(
+            "UPDATE accounts 
+             SET status = 'pending', 
+                 reserved_until = DATE_ADD(NOW(), INTERVAL ? MINUTE),
+                 updated_at = NOW()
+             WHERE id = ?",
+            [$reservationMinutes, $account->id]
+        );
+        
+        // Lấy thời gian reserved_until mới được đặt để log
+        $reservedInfo = DB::select(
+            "SELECT reserved_until FROM accounts WHERE id = ?",
+            [$account->id]
+        );
+        
+        // Ghi log sự kiện
+        \Illuminate\Support\Facades\Log::info('Tài khoản được đặt giữ chỗ', [
+            'account_id' => $account->id,
+            'order_id' => $order->id,
+            'user_id' => Auth::id(),
+            'reserved_until' => $reservedInfo[0]->reserved_until ?? 'Unknown',
+            'reserved_minutes' => $reservationMinutes
+        ]);
+        
+        // Làm mới để lấy thông tin cập nhật
+        $account->refresh();
         
         // Chuyển hướng đến trang thanh toán
         return redirect()->route('payment.checkout', $order->order_number);
@@ -98,11 +135,28 @@ class OrderController extends Controller
         
         // Cập nhật trạng thái đơn hàng
         $order->status = 'cancelled';
+        $order->cancelled_at = now();
         $order->save();
         
         // Đưa tài khoản về trạng thái có sẵn
-        $order->account->status = 'available';
-        $order->account->save();
+        if ($order->account_id) {
+            // Sử dụng raw query để tránh vấn đề timezone khi cập nhật
+            DB::update(
+                "UPDATE accounts 
+                 SET status = 'available', 
+                     reserved_until = NULL,
+                     updated_at = NOW()
+                 WHERE id = ?",
+                [$order->account_id]
+            );
+            
+            // Ghi log sự kiện
+            \Illuminate\Support\Facades\Log::info('Tài khoản được giải phóng do người dùng hủy đơn hàng', [
+                'account_id' => $order->account_id,
+                'order_id' => $order->id,
+                'user_id' => auth()->id()
+            ]);
+        }
         
         return redirect()->route('orders.show', $orderNumber)
             ->with('success', 'Đơn hàng đã được hủy thành công.');

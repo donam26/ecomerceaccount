@@ -144,24 +144,7 @@
         </div>
     </div>
 
-    <!-- Ghi chú và trạng thái -->
-    <div class="min-w-0 p-4 bg-white rounded-lg shadow-md mb-8">
-        <h4 class="mb-4 font-semibold text-gray-600 border-b pb-2">Ghi chú nội bộ</h4>
-        
-        <form action="{{ route('admin.boosting_orders.update-notes', $order->id) }}" method="POST">
-            @csrf
-            <div class="mb-4">
-                <label for="admin_notes" class="block text-sm font-medium text-gray-700 mb-2">Ghi chú công việc</label>
-                <textarea id="admin_notes" name="admin_notes" rows="4"
-                    class="block w-full mt-1 text-sm border-gray-300 rounded-md focus:border-purple-400 focus:outline-none focus:shadow-outline-purple form-textarea">{{ $order->admin_notes }}</textarea>
-            </div>
-            
-            <button type="submit"
-                class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 focus:outline-none focus:ring">
-                Cập nhật ghi chú
-            </button>
-        </form>
-    </div>
+  
 </div>
 
 <script>

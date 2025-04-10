@@ -123,6 +123,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::post('boosting-orders/{id}/assign', [AdminBoostingOrderController::class, 'assign'])->name('boosting_orders.assign');
     Route::post('boosting-orders/{id}/status', [AdminBoostingOrderController::class, 'updateStatus'])->name('boosting_orders.status');
     Route::post('boosting-orders/{id}/notes', [AdminBoostingOrderController::class, 'updateNotes'])->name('boosting_orders.notes');
+    Route::post('boosting-orders/{id}/update-notes', [AdminBoostingOrderController::class, 'updateNotes'])->name('boosting_orders.update-notes');
     Route::get('boosting-orders/{id}/account', [AdminBoostingOrderController::class, 'viewGameAccount'])->name('boosting_orders.account');
     
     // Quản lý ví điện tử

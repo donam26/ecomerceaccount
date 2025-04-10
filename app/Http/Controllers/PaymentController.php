@@ -142,17 +142,32 @@ class PaymentController extends Controller
             if ($boostingOrder->status === 'pending') {
                 $boostingOrder->status = 'paid';
                 $boostingOrder->save();
-             
+                
+                // Log cập nhật trạng thái
+                Log::info('PaymentController: Đã cập nhật đơn hàng cày thuê thành paid', [
+                    'order_number' => $boostingOrder->order_number
+                ]);
             }
                 
-         
+            // Nếu là đơn hàng cày thuê đã thanh toán và chưa cung cấp thông tin tài khoản,
+            // chuyển hướng đến trang nhập thông tin tài khoản
             if ($boostingOrder->isPaid() && !$boostingOrder->hasAccountInfo()) {
-            
+                Log::info('PaymentController: Chuyển hướng đến trang nhập thông tin tài khoản', [
+                    'order_number' => $boostingOrder->order_number,
+                    'route' => 'boosting.account_info'
+                ]);
+                
                 return redirect()->route('boosting.account_info', $orderNumber)
                     ->with('success', 'Thanh toán thành công! Vui lòng cung cấp thông tin tài khoản game để chúng tôi thực hiện dịch vụ.');
             }
             
-         
+            // Hiển thị trang thanh toán thành công cho dịch vụ cày thuê
+            Log::info('PaymentController: Hiển thị trang thanh toán thành công', [
+                'order_number' => $boostingOrder->order_number,
+                'status' => $boostingOrder->status,
+                'has_account_info' => $boostingOrder->hasAccountInfo()
+            ]);
+            
             return view('payment.success', [
                 'order' => $boostingOrder, 
                 'isBoostingOrder' => true
@@ -165,8 +180,39 @@ class PaymentController extends Controller
             
             // Cập nhật trạng thái thành "completed" nếu chưa được thanh toán
             if ($order->status === 'pending') {
-                $order->status = 'completed';
-                $order->save();
+                // Cập nhật trong transaction để đảm bảo tính nhất quán
+                DB::beginTransaction();
+                try {
+                    // Cập nhật đơn hàng
+                    $order->status = 'completed';
+                    $order->completed_at = now();
+                    $order->save();
+                    
+                    // Cập nhật tài khoản game
+                    if ($order->account_id) {
+                        DB::update(
+                            "UPDATE accounts 
+                             SET status = 'sold', 
+                                 sold_at = NOW(),
+                                 reserved_until = NULL,
+                                 updated_at = NOW()
+                             WHERE id = ?",
+                            [$order->account_id]
+                        );
+                        
+                        // Log thông tin
+                        Log::info('Tài khoản được đánh dấu đã bán khi thanh toán thành công', [
+                            'account_id' => $order->account_id,
+                            'order_id' => $order->id,
+                            'user_id' => Auth::id()
+                        ]);
+                    }
+                    
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    Log::error('Lỗi khi cập nhật trạng thái đơn hàng sau thanh toán: ' . $e->getMessage());
+                }
             }
             
             // Hiển thị trang thanh toán thành công
