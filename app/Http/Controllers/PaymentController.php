@@ -349,12 +349,41 @@ class PaymentController extends Controller
         }
     }
 
-
     /**
      * Kiểm tra trạng thái thanh toán đơn hàng
      */
     public function checkStatus($orderNumber)
     {
+        // Kiểm tra xem có phải là mã nạp tiền vào ví không
+        if (strpos($orderNumber, 'WALLET-') === 0) {
+            // Tìm bản ghi nạp tiền trong database
+            $walletDeposit = \App\Models\WalletDeposit::where('deposit_code', $orderNumber)->first();
+            
+            if ($walletDeposit) {
+                if ($walletDeposit->isCompleted()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Nạp tiền vào ví thành công',
+                        'status' => 'completed',
+                        'redirect_url' => route('wallet.index')
+                    ]);
+                } else {
+                    // Chưa hoàn thành, trả về trạng thái chờ
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Đang chờ thanh toán',
+                        'status' => $walletDeposit->status
+                    ]);
+                }
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy mã nạp tiền',
+                'status' => 'not_found'
+            ]);
+        }
+        
         // Tìm đơn hàng cần kiểm tra
         $order = Order::where('order_number', $orderNumber)->first();
         

@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\WalletDeposit;
 
 class WalletController extends Controller
 {
@@ -71,23 +72,18 @@ class WalletController extends Controller
         $user = Auth::user();
         
         // Lấy ví của người dùng (hoặc tạo mới nếu chưa có)
-        $wallet = $user->wallet()->first();
-        if (!$wallet) {
-            $wallet = $user->wallet()->create([
-                'balance' => 0,
-                'is_active' => true,
-            ]);
-        }
+        $wallet = $user->getWallet();
         
         // Tạo mã đơn hàng nạp tiền
-        $depositCode = 'WALLET-' . time() . rand(1000, 9999);
+        $depositCode = WalletDeposit::generateDepositCode();
         
-        // Lưu vào session để sử dụng cho callback
-        session(['deposit' => [
-            'code' => $depositCode,
-            'amount' => 0, // Sẽ được cập nhật khi người dùng chọn số tiền
-            'created_at' => now()
-        ]]);
+        // Tạo bản ghi deposit trong database
+        $walletDeposit = WalletDeposit::create([
+            'user_id' => $user->id,
+            'wallet_id' => $wallet->id,
+            'deposit_code' => $depositCode,
+            'status' => WalletDeposit::STATUS_PENDING,
+        ]);
         
         return view('wallet.deposit', [
             'wallet' => $wallet,
@@ -107,26 +103,28 @@ class WalletController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $amount = $request->input('amount');
+        $depositCode = $request->input('deposit_code');
         
-        // Lấy ví của người dùng (hoặc tạo mới nếu chưa có)
-        $wallet = $user->wallet()->first();
-        if (!$wallet) {
-            $wallet = $user->wallet()->create([
-                'balance' => 0,
-                'is_active' => true,
-            ]);
-        }
+        // Tìm bản ghi deposit trong database
+        $walletDeposit = WalletDeposit::where('deposit_code', $depositCode)
+            ->where('user_id', $user->id)
+            ->where('status', WalletDeposit::STATUS_PENDING)
+            ->firstOrFail();
         
-        // Cập nhật thông tin nạp tiền trong session
-        $deposit = session('deposit', []);
-        $deposit['amount'] = $amount;
-        session(['deposit' => $deposit]);
+        // Lấy ví của người dùng
+        $wallet = $user->getWallet();
+        
+        // Cập nhật số tiền trong bản ghi deposit
+        $walletDeposit->amount = $amount;
         
         // Tạo nội dung thanh toán cho QR
         $pattern = config('payment.pattern', 'SEVQR');
-        $depositCode = $deposit['code'];
         $cleanedCode = str_replace('WALLET-', '', $depositCode);
         $paymentContent = $pattern . ' ORDWALLET' . $cleanedCode;
+        
+        // Cập nhật nội dung thanh toán
+        $walletDeposit->payment_content = $paymentContent;
+        $walletDeposit->save();
         
         // Tạo QR code cho thanh toán
         $qrUrl = "https://qr.sepay.vn/img?acc=103870429701&bank=VietinBank&amount={$amount}&des=" . urlencode($paymentContent) . "&template=compact";
@@ -148,9 +146,17 @@ class WalletController extends Controller
             'deposit_code' => $depositCode
         ];
         
-        return view('wallet.deposit_confirm', [
+        // Tạo đối tượng depositOrder cho view
+        $depositOrder = (object)[
+            'order_number' => $depositCode,
+            'amount' => $amount,
+            'status' => 'pending'
+        ];
+        
+        return view('wallet.deposit_checkout', [
             'paymentInfo' => $paymentInfo,
-            'wallet' => $wallet
+            'wallet' => $wallet,
+            'depositOrder' => $depositOrder
         ]);
     }
     
@@ -171,39 +177,75 @@ class WalletController extends Controller
         }
         
         try {
-            // Lấy ví của người dùng (hoặc tạo mới nếu chưa có)
-            $wallet = $user->wallet()->first();
-            if (!$wallet) {
-                $wallet = $user->wallet()->create([
-                    'balance' => 0,
-                    'is_active' => true,
+            // Kiểm tra xem giao dịch đã được xử lý chưa dựa vào transaction_id từ SePay
+            $transactionId = $transactionData['id'] ?? null;
+            if ($transactionId) {
+                $existingTransaction = WalletTransaction::where('metadata->id', $transactionId)
+                    ->where('type', WalletTransaction::TYPE_DEPOSIT)
+                    ->first();
+                
+                if ($existingTransaction) {
+                    \Illuminate\Support\Facades\Log::info('Giao dịch nạp tiền đã được xử lý trước đó', [
+                        'user_id' => $userId,
+                        'transaction_id' => $transactionId,
+                        'deposit_code' => $depositCode
+                    ]);
+                    return true; // Trả về true vì đã xử lý thành công trước đó
+                }
+            }
+            
+            // Tìm bản ghi deposit trong database
+            $walletDeposit = WalletDeposit::where('deposit_code', $depositCode)
+                ->where('user_id', $userId)
+                ->where('status', WalletDeposit::STATUS_PENDING)
+                ->first();
+                
+            if (!$walletDeposit) {
+                \Illuminate\Support\Facades\Log::warning('Không tìm thấy bản ghi nạp tiền đang chờ xử lý', [
+                    'user_id' => $userId,
+                    'deposit_code' => $depositCode
+                ]);
+                
+                // Tạo mới bản ghi nếu không tìm thấy
+                $wallet = $user->getWallet();
+                $walletDeposit = WalletDeposit::create([
+                    'user_id' => $userId,
+                    'wallet_id' => $wallet->id,
+                    'deposit_code' => $depositCode,
+                    'amount' => $amount,
+                    'status' => WalletDeposit::STATUS_PENDING,
+                    'payment_content' => $transactionData['content'] ?? null,
+                    'transaction_id' => $transactionId
                 ]);
             }
             
-            // Tạo giao dịch nạp tiền
-            $transaction = new WalletTransaction();
-            $transaction->wallet_id = $wallet->id;
-            $transaction->user_id = $user->id;
-            $transaction->amount = $amount;
-            $transaction->balance_before = $wallet->balance;
-            $transaction->balance_after = $wallet->balance + $amount;
-            $transaction->type = WalletTransaction::TYPE_DEPOSIT;
-            $transaction->description = "Nạp tiền vào ví qua chuyển khoản ngân hàng";
-            $transaction->reference_id = null;
-            $transaction->reference_type = 'bank_transfer';
-            $transaction->metadata = is_array($transactionData) ? json_encode($transactionData) : $transactionData;
-            $transaction->save();
+            // Lấy ví của người dùng (hoặc tạo mới nếu chưa có)
+            $wallet = $user->getWallet();
             
-            // Cập nhật số dư ví
-            $wallet->balance = $transaction->balance_after;
-            $wallet->save();
+            // Sử dụng phương thức deposit có sẵn trong model Wallet
+            $transaction = $wallet->deposit(
+                $amount,
+                WalletTransaction::TYPE_DEPOSIT,
+                "Nạp tiền vào ví qua chuyển khoản ngân hàng",
+                $walletDeposit->id,  // referenceId
+                'wallet_deposit', // referenceType
+                $transactionData // metadata
+            );
+            
+            // Cập nhật trạng thái deposit
+            $walletDeposit->status = WalletDeposit::STATUS_COMPLETED;
+            $walletDeposit->transaction_id = $transactionId;
+            $walletDeposit->completed_at = Carbon::now();
+            $walletDeposit->metadata = is_array($transactionData) ? $transactionData : json_decode($transactionData, true);
+            $walletDeposit->save();
             
             \Illuminate\Support\Facades\Log::info('Đã nạp tiền vào ví thành công', [
                 'user_id' => $user->id,
                 'wallet_id' => $wallet->id,
                 'amount' => $amount,
                 'new_balance' => $wallet->balance,
-                'deposit_code' => $depositCode
+                'deposit_code' => $depositCode,
+                'transaction_id' => $transaction->id
             ]);
             
             return true;
@@ -211,7 +253,8 @@ class WalletController extends Controller
             \Illuminate\Support\Facades\Log::error('Lỗi khi xử lý nạp tiền vào ví', [
                 'user_id' => $user->id,
                 'deposit_code' => $depositCode,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
             
             return false;

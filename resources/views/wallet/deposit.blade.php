@@ -62,6 +62,7 @@
                     <form action="{{ route('wallet.deposit.process') }}" method="POST">
                         @csrf
                         <input type="hidden" name="payment_method" value="bank_transfer">
+                        <input type="hidden" name="deposit_code" value="{{ $depositCode }}">
                         
                         <div class="mb-6">
                             <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Số tiền</label>

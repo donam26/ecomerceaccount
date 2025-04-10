@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\BoostingOrder;
 use App\Models\Transaction;
+use App\Models\WalletDeposit;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -63,40 +64,66 @@ class WebhookController extends Controller
                         
                         // Thêm lại prefix để có mã đơn hàng đầy đủ
                         $depositCode = 'WALLET-' . $walletCode;
-                        $sessions = DB::table('sessions')
-                            ->get();
+                        
+                        // Tìm bản ghi nạp tiền trong database
+                        $walletDeposit = WalletDeposit::where('deposit_code', $depositCode)
+                            ->where('status', 'pending')
+                            ->first();
                             
                         $userId = null;
                         
-                        foreach ($sessions as $session) {
-                            $sessionData = @unserialize(base64_decode($session->payload));
-                            if ($sessionData && 
-                                isset($sessionData['deposit']) && 
-                                isset($sessionData['deposit']['code']) && 
-                                $sessionData['deposit']['code'] === $depositCode) {
-                                
-                                $userId = $session->user_id;
-                             
-                                break;
-                            }
+                        if ($walletDeposit) {
+                            $userId = $walletDeposit->user_id;
                         }
                         
                         if ($userId) {
                             // Nếu tìm thấy người dùng, xử lý nạp tiền vào ví
                             $amount = (int)$data['transferAmount'];
                             
-                            // Gọi phương thức xử lý nạp tiền
-                            $result = \App\Http\Controllers\WalletController::processDepositWebhook(
-                                $userId, 
-                                $amount, 
-                                $data, 
-                                $depositCode
-                            );
+                            // Ghi log thông tin nạp tiền
+                            Log::info('SePay Webhook API: Đang xử lý nạp tiền vào ví', [
+                                'user_id' => $userId,
+                                'amount' => $amount,
+                                'deposit_code' => $depositCode,
+                                'transaction_id' => $data['id'] ?? null
+                            ]);
                             
+                            try {
+                                // Gọi phương thức xử lý nạp tiền
+                                $result = \App\Http\Controllers\WalletController::processDepositWebhook(
+                                    $userId, 
+                                    $amount, 
+                                    $data, 
+                                    $depositCode
+                                );
+                                
+                                if ($result) {
+                                    Log::info('SePay Webhook API: Nạp tiền vào ví thành công', [
+                                        'user_id' => $userId,
+                                        'amount' => $amount,
+                                        'deposit_code' => $depositCode
+                                    ]);
+                                } else {
+                                    Log::error('SePay Webhook API: Nạp tiền vào ví thất bại', [
+                                        'user_id' => $userId,
+                                        'amount' => $amount,
+                                        'deposit_code' => $depositCode
+                                    ]);
+                                }
+                            } catch (\Exception $e) {
+                                Log::error('SePay Webhook API: Lỗi khi xử lý nạp tiền vào ví', [
+                                    'user_id' => $userId,
+                                    'deposit_code' => $depositCode,
+                                    'error' => $e->getMessage(),
+                                    'trace' => $e->getTraceAsString()
+                                ]);
+                            }
                         
                         } else {
                             Log::warning('SePay Webhook API: Không tìm thấy người dùng cho mã nạp tiền', [
-                                'deposit_code' => $depositCode
+                                'deposit_code' => $depositCode,
+                                'transfer_content' => $content,
+                                'amount' => $data['transferAmount'] ?? 0
                             ]);
                         }
                         
@@ -343,44 +370,71 @@ class WebhookController extends Controller
                         
                         $depositCode = 'WALLET-' . $walletCode;
                         
-                        $sessions = DB::table('sessions')
-                            ->get();
+                        // Tìm bản ghi nạp tiền trong database
+                        $walletDeposit = WalletDeposit::where('deposit_code', $depositCode)
+                            ->where('status', 'pending')
+                            ->first();
                             
                         $userId = null;
                         
-                        foreach ($sessions as $session) {
-                            $sessionData = @unserialize(base64_decode($session->payload));
-                            if ($sessionData && 
-                                isset($sessionData['deposit']) && 
-                                isset($sessionData['deposit']['code']) && 
-                                $sessionData['deposit']['code'] === $depositCode) {
-                                
-                                $userId = $session->user_id;
-                                break;
-                            }
+                        if ($walletDeposit) {
+                            $userId = $walletDeposit->user_id;
                         }
                         
                         if ($userId) {
                             // Nếu tìm thấy người dùng, xử lý nạp tiền vào ví
                             $amount = (int)$data['transferAmount'];
                             
-                            // Gọi phương thức xử lý nạp tiền
-                            $result = \App\Http\Controllers\WalletController::processDepositWebhook(
-                                $userId, 
-                                $amount, 
-                                $data, 
-                                $depositCode
-                            );
+                            // Ghi log thông tin nạp tiền
+                            Log::info('SePay Webhook: Đang xử lý nạp tiền vào ví', [
+                                'user_id' => $userId,
+                                'amount' => $amount,
+                                'deposit_code' => $depositCode,
+                                'transaction_id' => $data['id'] ?? null
+                            ]);
+                            
+                            try {
+                                // Gọi phương thức xử lý nạp tiền
+                                $result = \App\Http\Controllers\WalletController::processDepositWebhook(
+                                    $userId, 
+                                    $amount, 
+                                    $data, 
+                                    $depositCode
+                                );
+                                
+                                if ($result) {
+                                    Log::info('SePay Webhook: Nạp tiền vào ví thành công', [
+                                        'user_id' => $userId,
+                                        'amount' => $amount,
+                                        'deposit_code' => $depositCode
+                                    ]);
+                                } else {
+                                    Log::error('SePay Webhook: Nạp tiền vào ví thất bại', [
+                                        'user_id' => $userId,
+                                        'amount' => $amount,
+                                        'deposit_code' => $depositCode
+                                    ]);
+                                }
+                            } catch (\Exception $e) {
+                                Log::error('SePay Webhook: Lỗi khi xử lý nạp tiền vào ví', [
+                                    'user_id' => $userId,
+                                    'deposit_code' => $depositCode,
+                                    'error' => $e->getMessage(),
+                                    'trace' => $e->getTraceAsString()
+                                ]);
+                            }
                         
                         } else {
                             Log::warning('SePay Webhook: Không tìm thấy người dùng cho mã nạp tiền', [
-                                'deposit_code' => $depositCode
+                                'deposit_code' => $depositCode,
+                                'transfer_content' => $content,
+                                'amount' => $data['transferAmount'] ?? 0
                             ]);
                         }
                         
                         return response()->json(['success' => true]);
                     } else {
-                        Log::warning('SePay Webhook: Không tìm thấy đơn hàng cày thuê', [
+                        Log::warning('SePay Webhook API: Không tìm thấy đơn hàng cày thuê', [
                             'content' => $content
                         ]);
                         return response()->json(['status' => 'error', 'message' => 'Không tìm thấy đơn hàng cày thuê']);
@@ -425,7 +479,7 @@ class WebhookController extends Controller
                                     $orderNumberWithoutPrefix = str_replace('ORD-', '', $pendingOrder->order_number);
                                     if (strpos($orderNumberWithoutPrefix, $cleanedOrderNumber) !== false) {
                                         $order = $pendingOrder;
-                                        Log::info('SePay Webhook: Tìm thấy đơn hàng với phương pháp 4', [
+                                        Log::info('SePay Webhook API: Tìm thấy đơn hàng với phương pháp 4', [
                                             'order_number' => $pendingOrder->order_number
                                         ]);
                                         break;
@@ -437,7 +491,7 @@ class WebhookController extends Controller
                         if ($order) {
                             // Kiểm tra số tiền
                             if ((int)$order->amount !== (int)$data['transferAmount']) {
-                                Log::warning('SePay Webhook: Số tiền không khớp cho đơn hàng thường', [
+                                Log::warning('SePay Webhook API: Số tiền không khớp cho đơn hàng thường', [
                                     'order_id' => $order->id,
                                     'expected' => $order->amount,
                                     'received' => $data['transferAmount'],
@@ -449,7 +503,7 @@ class WebhookController extends Controller
                             $order->completed_at = Carbon::now();
                             $order->save();
                             
-                            Log::info('SePay Webhook: Đã cập nhật đơn hàng thường thành completed', [
+                            Log::info('SePay Webhook API: Đã cập nhật đơn hàng thường thành completed', [
                                 'order_id' => $order->id
                             ]);
                             
@@ -458,7 +512,7 @@ class WebhookController extends Controller
                                 $order->account->status = 'sold';
                                 $order->account->save();
                                 
-                                Log::info('SePay Webhook: Đã cập nhật trạng thái tài khoản thành sold', [
+                                Log::info('SePay Webhook API: Đã cập nhật trạng thái tài khoản thành sold', [
                                     'account_id' => $order->account->id
                                 ]);
                             }
@@ -476,18 +530,18 @@ class WebhookController extends Controller
                             
                             return response()->json(['status' => 'success', 'message' => 'Đã cập nhật đơn hàng thường']);
                         } else {
-                            Log::warning('SePay Webhook: Không tìm thấy đơn hàng thường', [
+                            Log::warning('SePay Webhook API: Không tìm thấy đơn hàng thường', [
                                 'order_number' => $fullOrderNumber
                             ]);
                         }
                     } else {
-                        Log::warning('SePay Webhook: Không thể trích xuất mã đơn hàng thường', [
+                        Log::warning('SePay Webhook API: Không thể trích xuất mã đơn hàng thường', [
                             'content' => $content
                         ]);
                         return response()->json(['success' => true]);
                     }
                 } else {
-                    Log::warning('SePay Webhook: Không tìm thấy định dạng đơn hàng hợp lệ', [
+                    Log::warning('SePay Webhook API: Không tìm thấy định dạng đơn hàng hợp lệ', [
                         'content' => $content
                     ]);
                     return response()->json(['status' => 'error', 'message' => 'Không tìm thấy định dạng đơn hàng']);
@@ -500,7 +554,7 @@ class WebhookController extends Controller
                         ->first();
                     
                     if ($order) {
-                        Log::info('SePay Webhook: Đã tìm thấy đơn hàng cày thuê', [
+                        Log::info('SePay Webhook API: Đã tìm thấy đơn hàng cày thuê', [
                             'order_id' => $order->id,
                             'order_number' => $order->order_number,
                             'status' => $order->status
@@ -508,7 +562,7 @@ class WebhookController extends Controller
                         
                         // Kiểm tra số tiền
                         if ((int)$order->amount !== (int)$data['transferAmount']) {
-                            Log::warning('SePay Webhook: Số tiền không khớp cho đơn hàng cày thuê', [
+                            Log::warning('SePay Webhook API: Số tiền không khớp cho đơn hàng cày thuê', [
                                 'order_id' => $order->id,
                                 'expected' => $order->amount,
                                 'received' => $data['transferAmount'],
@@ -519,7 +573,7 @@ class WebhookController extends Controller
                         $order->status = 'paid';
                         $order->save();
                         
-                        Log::info('SePay Webhook: Đã cập nhật đơn hàng cày thuê thành paid', [
+                        Log::info('SePay Webhook API: Đã cập nhật đơn hàng cày thuê thành paid', [
                             'order_id' => $order->id
                         ]);
                         
@@ -536,7 +590,7 @@ class WebhookController extends Controller
                         
                         return response()->json(['status' => 'success', 'message' => 'Đã cập nhật đơn hàng cày thuê']);
                     } else {
-                        Log::warning('SePay Webhook: Không tìm thấy đơn hàng cày thuê', [
+                        Log::warning('SePay Webhook API: Không tìm thấy đơn hàng cày thuê', [
                             'order_number' => $orderNumber
                         ]);
                     }
@@ -565,7 +619,7 @@ class WebhookController extends Controller
                             $order->account->status = 'sold';
                             $order->account->save();
                             
-                            Log::info('SePay Webhook: Đã cập nhật trạng thái tài khoản thành sold', [
+                            Log::info('SePay Webhook API: Đã cập nhật trạng thái tài khoản thành sold', [
                                 'account_id' => $order->account->id
                             ]);
                         }
@@ -583,7 +637,7 @@ class WebhookController extends Controller
                         
                         return response()->json(['status' => 'success', 'message' => 'Đã cập nhật đơn hàng thường']);
                     } else {
-                        Log::warning('SePay Webhook: Không tìm thấy đơn hàng thường', [
+                        Log::warning('SePay Webhook API: Không tìm thấy đơn hàng thường', [
                             'order_number' => $orderNumber
                         ]);
                     }
