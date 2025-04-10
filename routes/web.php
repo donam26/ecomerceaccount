@@ -45,6 +45,10 @@ Route::get('/accounts/{id}', [AccountController::class, 'show'])->name('accounts
 
 // Yêu cầu đăng nhập
 Route::middleware(['auth'])->group(function () {
+    // Profile routes
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    
     // Đơn hàng
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{orderNumber}', [OrderController::class, 'show'])->name('orders.show');

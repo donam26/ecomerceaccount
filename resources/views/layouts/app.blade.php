@@ -87,7 +87,8 @@
                                 </a>
                             </div>
                         
-                            <div class="ml-3 relative">
+                            <div class="ml-3 relative cursor-pointer
+">
                                 <div class="flex items-center">
                                     <span class="mr-2">{{ Auth::user()->name }}</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -96,14 +97,14 @@
                                 </div>
                                 
                                 <!-- Dropdown menu -->
-                                <div class="hidden absolute right-0 mt-2 w-48 py-2 bg-white rounded-md shadow-lg z-10">
+                                <div class="hidden absolute right-0 mt-2 w-48 py-2 bg-white rounded-md shadow-lg z-10 ">
                                     @if(Auth::user()->isAdmin())
                                         <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                             Quản trị viên
                                         </a>
                                     @endif
                                     
-                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <a href="{{ route('profile.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         Thông tin tài khoản
                                     </a>
 
@@ -168,6 +169,9 @@
                             Đăng ký
                         </a>
                     @else
+                        <a href="{{ route('profile.index') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
+                            Thông tin tài khoản
+                        </a>
                         <a href="{{ route('orders.index') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
                             Đơn hàng tài khoản
                         </a>
