@@ -88,6 +88,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Thêm route xử lý nạp thẻ cào TheSieuRe
     Route::post('/wallet/deposit/card', [WalletController::class, 'depositCard'])->name('wallet.deposit.card');
+    Route::get('/wallet/card/history', [WalletController::class, 'cardDepositHistory'])->name('wallet.card.history');
     Route::get('/wallet/card/{requestId}', [WalletController::class, 'showCardPending'])->name('wallet.card.pending');
     Route::get('/wallet/card/{requestId}/check', [WalletController::class, 'checkCardStatus'])->name('wallet.card.check');
 });

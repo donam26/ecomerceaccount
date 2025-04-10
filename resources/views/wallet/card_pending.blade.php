@@ -38,7 +38,13 @@
                     
                     <div class="flex justify-between">
                         <span class="text-sm text-gray-500">Số tiền nhận được:</span>
-                        <span id="actual-amount" class="text-sm font-medium text-gray-900">{{ number_format($cardDeposit->actual_amount, 0, ',', '.') }} VNĐ</span>
+                        <span id="actual-amount" class="text-sm font-medium text-gray-900">
+                            @if($cardDeposit->status === 'completed')
+                                {{ number_format($cardDeposit->actual_amount, 0, ',', '.') }} VNĐ
+                            @else
+                                <span class="text-yellow-600">Đang chờ xử lý</span>
+                            @endif
+                        </span>
                     </div>
                     
                     <div class="flex justify-between">

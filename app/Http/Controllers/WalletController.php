@@ -612,4 +612,42 @@ class WalletController extends Controller
                 ->with('error', 'Có lỗi xảy ra khi xử lý nạp tiền. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.');
         }
     }
+
+    /**
+     * Hiển thị lịch sử nạp thẻ của người dùng
+     * 
+     * @return \Illuminate\View\View
+     */
+    public function cardDepositHistory()
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        
+        // Lấy ví của người dùng
+        $wallet = $user->getWallet();
+        
+        // Lấy lịch sử nạp thẻ, sắp xếp theo thời gian gần nhất
+        $cardDeposits = CardDeposit::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+            
+        // Lấy tổng thông tin
+        $stats = [
+            'total_deposits' => CardDeposit::where('user_id', $user->id)->count(),
+            'completed_deposits' => CardDeposit::where('user_id', $user->id)
+                ->where('status', CardDeposit::STATUS_COMPLETED)
+                ->count(),
+            'failed_deposits' => CardDeposit::where('user_id', $user->id)
+                ->where('status', CardDeposit::STATUS_FAILED)
+                ->count(),
+            'pending_deposits' => CardDeposit::where('user_id', $user->id)
+                ->where('status', CardDeposit::STATUS_PENDING)
+                ->count(),
+            'total_amount' => CardDeposit::where('user_id', $user->id)
+                ->where('status', CardDeposit::STATUS_COMPLETED)
+                ->sum('actual_amount'),
+        ];
+        
+        return view('wallet.card_history', compact('wallet', 'cardDeposits', 'stats'));
+    }
 }
