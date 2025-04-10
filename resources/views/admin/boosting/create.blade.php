@@ -66,7 +66,7 @@
                                 Mô tả <span class="text-red-600">*</span>
                             </label>
                             <textarea id="description" name="description" rows="4" required
-                                class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('description') }}</textarea>
+                                class="ckeditor block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('description') }}</textarea>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 mb-4">
@@ -103,7 +103,7 @@
                                 Yêu cầu
                             </label>
                             <textarea id="requirements" name="requirements" rows="3"
-                                class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('requirements') }}</textarea>
+                                class="ckeditor block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('requirements') }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">Các yêu cầu đối với tài khoản game của khách hàng</p>
                         </div>
 
@@ -112,7 +112,7 @@
                                 Bao gồm
                             </label>
                             <textarea id="includes" name="includes" rows="3"
-                                class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('includes') }}</textarea>
+                                class="ckeditor block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('includes') }}</textarea>
                             <p class="text-xs text-gray-500 mt-1">Những gì khách hàng sẽ nhận được</p>
                         </div>
 
@@ -155,4 +155,32 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection
+
+@push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.2/classic/ckeditor.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const textareaIds = ['description', 'requirements', 'includes'];
+        
+        textareaIds.forEach(id => {
+            ClassicEditor
+                .create(document.querySelector(`#${id}`), {
+                    toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'imageUpload', 'blockQuote', 'insertTable', '|', 'undo', 'redo'],
+                    heading: {
+                        options: [
+                            { model: 'paragraph', title: 'Đoạn văn', class: 'ck-heading_paragraph' },
+                            { model: 'heading1', view: 'h1', title: 'Tiêu đề 1', class: 'ck-heading_heading1' },
+                            { model: 'heading2', view: 'h2', title: 'Tiêu đề 2', class: 'ck-heading_heading2' },
+                            { model: 'heading3', view: 'h3', title: 'Tiêu đề 3', class: 'ck-heading_heading3' }
+                        ]
+                    },
+                    language: 'vi'
+                })
+                .catch(error => {
+                    console.error(`Lỗi khi khởi tạo CKEditor cho ${id}:`, error);
+                });
+        });
+    });
+</script>
+@endpush 

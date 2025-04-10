@@ -2,6 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tailwind Typography cho nội dung HTML từ CKEditor */
+@layer components {
+    .prose h1 {
+        @apply text-2xl font-bold mb-4 text-gray-800;
+    }
+    
+    .prose h2 {
+        @apply text-xl font-bold mb-3 text-gray-800;
+    }
+    
+    .prose h3 {
+        @apply text-lg font-bold mb-3 text-gray-800;
+    }
+    
+    .prose p {
+        @apply mb-4 text-gray-700;
+    }
+    
+    .prose ul {
+        @apply list-disc pl-5 mb-4 text-gray-700;
+    }
+    
+    .prose ol {
+        @apply list-decimal pl-5 mb-4 text-gray-700;
+    }
+    
+    .prose li {
+        @apply mb-2;
+    }
+    
+    .prose a {
+        @apply text-blue-600 hover:underline;
+    }
+    
+    .prose blockquote {
+        @apply pl-4 border-l-4 border-gray-300 italic my-4 text-gray-700;
+    }
+    
+    .prose table {
+        @apply w-full border-collapse mb-4;
+    }
+    
+    .prose table th {
+        @apply border border-gray-300 px-4 py-2 bg-gray-100 text-left;
+    }
+    
+    .prose table td {
+        @apply border border-gray-300 px-4 py-2;
+    }
+}
+
 @layer components {
   .btn-primary {
     @apply py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75;

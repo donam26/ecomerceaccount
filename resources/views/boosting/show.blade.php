@@ -75,7 +75,7 @@
                         Mô tả dịch vụ
                     </h2>
                     <div class="prose max-w-none text-gray-700 leading-relaxed">
-                        <p>{{ $service->description }}</p>
+                        {!! $service->description !!}
                     </div>
                 </div>
 
@@ -89,7 +89,7 @@
                         Yêu cầu
                     </h2>
                     <div class="prose max-w-none text-gray-700 leading-relaxed">
-                        <p>{{ $service->requirements }}</p>
+                        {!! $service->requirements !!}
                     </div>
                 </div>
                 @endif
@@ -104,7 +104,7 @@
                         Dịch vụ bao gồm
                     </h2>
                     <div class="prose max-w-none text-gray-700 leading-relaxed">
-                        <p>{{ $service->includes }}</p>
+                        {!! $service->includes !!}
                     </div>
                 </div>
                 @endif
@@ -282,7 +282,7 @@
                                 {{ $relatedService->name }}
                             </a>
                         </h3>
-                        <p class="text-gray-600 text-sm mb-4 flex-grow">{{ Str::limit($relatedService->description, 120) }}</p>
+                        <p class="text-gray-600 text-sm mb-4 flex-grow">{{ Str::limit(strip_tags($relatedService->description), 120) }}</p>
                         <div class="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
                             @if($relatedService->hasDiscount())
                             <div class="flex flex-col">

@@ -246,13 +246,23 @@
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h2 class="text-lg font-medium text-gray-900">Ghi chú nội bộ</h2>
                 </div>
+                
+                <!-- Hiển thị ghi chú nếu có -->
+                @if($order->admin_notes)
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="prose max-w-none">
+                        {!! $order->admin_notes !!}
+                    </div>
+                </div>
+                @endif
+                
                 <div class="px-6 py-4">
                     <form action="{{ route('admin.boosting_orders.notes', $order->id) }}" method="POST">
                         @csrf
                         <div class="mb-4">
-                            <label for="admin_notes" class="block text-sm font-medium text-gray-700">Ghi chú</label>
+                            <label for="admin_notes" class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
                             <textarea id="admin_notes" name="admin_notes" rows="3"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                class="ckeditor mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 placeholder="Nhập ghi chú nội bộ cho đơn hàng này">{{ $order->admin_notes }}</textarea>
                             <p class="mt-1 text-xs text-gray-500">Ghi chú này chỉ hiển thị cho quản trị viên và nhân viên.</p>
                         </div>
@@ -332,4 +342,20 @@
         @endif
     </div>
 </div>
-@endsection 
+@endsection
+
+@push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.2/classic/ckeditor.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        ClassicEditor
+            .create(document.querySelector('#admin_notes'), {
+                toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'undo', 'redo'],
+                language: 'vi'
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    });
+</script>
+@endpush 
