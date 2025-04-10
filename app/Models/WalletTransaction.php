@@ -95,9 +95,25 @@ class WalletTransaction extends Model
             return null;
         }
 
-        $model = 'App\\Models\\' . $this->reference_type;
+        // Kiểm tra xem reference_type có chứa tên đầy đủ của model không
+        if (strpos($this->reference_type, '\\') === false) {
+            // Nếu reference_type không chứa namespace đầy đủ, thêm namespace App\Models
+            $model = 'App\\Models\\' . $this->reference_type;
+        } else {
+            // Nếu đã có namespace đầy đủ, sử dụng trực tiếp
+            $model = $this->reference_type;
+        }
+
         if (class_exists($model)) {
             return $model::find($this->reference_id);
+        }
+
+        // Xử lý các trường hợp đặc biệt cho tương thích ngược
+        // Hỗ trợ các giá trị cũ như 'order', 'boosting_order'
+        if ($this->reference_type === 'order') {
+            return \App\Models\Order::find($this->reference_id);
+        } elseif ($this->reference_type === 'boosting_order') {
+            return \App\Models\BoostingOrder::find($this->reference_id);
         }
 
         return null;

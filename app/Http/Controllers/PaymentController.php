@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
@@ -141,32 +142,17 @@ class PaymentController extends Controller
             if ($boostingOrder->status === 'pending') {
                 $boostingOrder->status = 'paid';
                 $boostingOrder->save();
-                
-                // Log cập nhật trạng thái
-                Log::info('PaymentController: Đã cập nhật đơn hàng cày thuê thành paid', [
-                    'order_number' => $boostingOrder->order_number
-                ]);
+             
             }
                 
-            // Nếu là đơn hàng cày thuê đã thanh toán và chưa cung cấp thông tin tài khoản,
-            // chuyển hướng đến trang nhập thông tin tài khoản
+         
             if ($boostingOrder->isPaid() && !$boostingOrder->hasAccountInfo()) {
-                Log::info('PaymentController: Chuyển hướng đến trang nhập thông tin tài khoản', [
-                    'order_number' => $boostingOrder->order_number,
-                    'route' => 'boosting.account_info'
-                ]);
-                
+            
                 return redirect()->route('boosting.account_info', $orderNumber)
                     ->with('success', 'Thanh toán thành công! Vui lòng cung cấp thông tin tài khoản game để chúng tôi thực hiện dịch vụ.');
             }
             
-            // Hiển thị trang thanh toán thành công cho dịch vụ cày thuê
-            Log::info('PaymentController: Hiển thị trang thanh toán thành công', [
-                'order_number' => $boostingOrder->order_number,
-                'status' => $boostingOrder->status,
-                'has_account_info' => $boostingOrder->hasAccountInfo()
-            ]);
-            
+         
             return view('payment.success', [
                 'order' => $boostingOrder, 
                 'isBoostingOrder' => true
@@ -234,14 +220,7 @@ class PaymentController extends Controller
             }
             
             $paymentContent = $pattern . ' ' . $orderType . $cleanedOrderNumber;
-            
-            // Log nội dung chuyển khoản để debug
-            Log::info('SePay QR: Tạo nội dung chuyển khoản', [
-                'orderNumber' => $orderNumber,
-                'cleanedOrderNumber' => $cleanedOrderNumber,
-                'orderType' => $orderType,
-                'paymentContent' => $paymentContent
-            ]);
+       
         }
         
         // Mã hóa nội dung chuyển khoản để sử dụng trong URL
@@ -253,13 +232,7 @@ class PaymentController extends Controller
         // Tạo URL trực tiếp đến QR code của SePay
         $qrUrl = "https://qr.sepay.vn/img?acc=103870429701&bank=VietinBank&amount={$amount}&des={$encodedContent}&template=compact";
         
-        // Log URL để debug
-        Log::debug('SePay QR URL', [
-            'url' => $qrUrl,
-            'content' => $paymentContent,
-            'order_number' => $order->order_number
-        ]);
-        
+     
         return [
             'qr_url' => $qrUrl,
             'payment_content' => $paymentContent,
@@ -300,12 +273,26 @@ class PaymentController extends Controller
             $isBoostingOrder = true;
         }
         
+        // Kiểm tra xem đơn hàng có thuộc về người dùng hiện tại không
+        if ($order->user_id !== $user->id) {
+            Log::warning('Người dùng cố gắng thanh toán đơn hàng không thuộc về họ', [
+                'user_id' => $user->id,
+                'order_number' => $orderNumber,
+                'order_user_id' => $order->user_id
+            ]);
+            return redirect()->route('home')->with('error', 'Bạn không có quyền thanh toán đơn hàng này');
+        }
+        
         // Kiểm tra trạng thái đơn hàng
-        if ($order->status == 'paid' || $order->status == 'completed') {
-            if ($isBoostingOrder) {
-                return redirect()->route('boosting.account_info', $order->order_number)->with('success', 'Đơn hàng này đã được thanh toán');
-            } else {
-                return redirect()->route('payment.success', $order->order_number)->with('success', 'Đơn hàng này đã được thanh toán');
+        if ($isBoostingOrder) {
+            if ($order->status == 'paid' || $order->status == 'completed') {
+                return redirect()->route('boosting.account_info', $order->order_number)
+                    ->with('success', 'Đơn hàng này đã được thanh toán');
+            }
+        } else {
+            if ($order->status == 'completed') {
+                return redirect()->route('payment.success', $order->order_number)
+                    ->with('success', 'Đơn hàng này đã được thanh toán');
             }
         }
         
@@ -315,37 +302,75 @@ class PaymentController extends Controller
         }
         
         try {
-            // Tạo giao dịch thanh toán
-            $transaction = new WalletTransaction();
-            $transaction->wallet_id = $wallet->id;
-            $transaction->amount = -$order->amount; // Số tiền âm vì là thanh toán
-            $transaction->balance_before = $wallet->balance;
-            $transaction->balance_after = $wallet->balance - $order->amount;
-            $transaction->type = WalletTransaction::TYPE_PAYMENT;
-            $transaction->description = 'Thanh toán đơn hàng #' . $order->order_number;
-            $transaction->reference_id = $order->id;
-            $transaction->reference_type = $isBoostingOrder ? 'boosting_order' : 'order';
-            $transaction->save();
+            // Bắt đầu transaction để đảm bảo tính toàn vẹn dữ liệu
+            DB::beginTransaction();
             
-            // Cập nhật số dư ví
-            $wallet->balance = $transaction->balance_after;
-            $wallet->save();
+            // Tạo mô tả thanh toán
+            $description = 'Thanh toán ' . ($isBoostingOrder ? 'dịch vụ cày thuê' : 'mua tài khoản') . ' #' . $order->order_number;
+            
+            // Trừ tiền từ ví và tạo giao dịch
+            $transaction = $wallet->withdraw(
+                $order->amount,
+                WalletTransaction::TYPE_PAYMENT,
+                $description,
+                $order->id,
+                $isBoostingOrder ? 'BoostingOrder' : 'Order'
+            );
+            
+            // Nếu không trừ được tiền do lỗi nào đó
+            if (!$transaction) {
+                DB::rollBack();
+                return redirect()->route('wallet.deposit')->with('error', 'Không thể thanh toán, vui lòng kiểm tra số dư ví của bạn.');
+            }
             
             // Cập nhật trạng thái đơn hàng
-            $order->status = 'paid';
+            if ($isBoostingOrder) {
+                // Đối với đơn hàng boosting, sử dụng trạng thái 'paid'
+                $order->status = 'paid';
+            } else {
+                // Đối với đơn hàng mua tài khoản thông thường, sử dụng trạng thái 'completed'
+                $order->status = 'completed';
+                // Cập nhật thời gian hoàn thành
+                $order->completed_at = now();
+            }
+            
             $order->payment_method = 'wallet';
             $order->paid_at = now();
             $order->save();
             
+            // Commit transaction
+            DB::commit();
+            
+            // Log giao dịch thành công
+            Log::info('Thanh toán qua ví thành công', [
+                'user_id' => $user->id,
+                'order_number' => $order->order_number,
+                'amount' => $order->amount,
+                'is_boosting_order' => $isBoostingOrder,
+                'wallet_balance_after' => $wallet->balance
+            ]);
+            
             // Chuyển hướng tùy theo loại đơn hàng
             if ($isBoostingOrder) {
-                return redirect()->route('boosting.account_info', $order->order_number)->with('success', 'Thanh toán thành công. Vui lòng nhập thông tin tài khoản.');
+                return redirect()->route('boosting.account_info', $order->order_number)
+                    ->with('success', 'Thanh toán thành công. Vui lòng nhập thông tin tài khoản để bắt đầu dịch vụ.');
             } else {
-                return redirect()->route('payment.success', $order->order_number)->with('success', 'Thanh toán thành công. Cảm ơn bạn đã mua hàng!');
+                return redirect()->route('payment.success', $order->order_number)
+                    ->with('success', 'Thanh toán thành công. Cảm ơn bạn đã mua hàng!');
             }
         } catch (\Exception $e) {
-            Log::error('Lỗi thanh toán qua ví: ' . $e->getMessage());
-            return back()->with('error', 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại sau.');
+            // Rollback transaction nếu có lỗi
+            DB::rollBack();
+            
+            // Log lỗi để debug
+            Log::error('Lỗi thanh toán qua ví: ' . $e->getMessage(), [
+                'user_id' => $user->id, 
+                'order_number' => $orderNumber,
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->with('error', 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.');
         }
     }
 

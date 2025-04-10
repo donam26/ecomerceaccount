@@ -94,34 +94,79 @@
                                 <div class="px-6 py-5 space-y-6">
                                     @if(isset($wallet) && $wallet && $wallet->balance >= $order->amount)
                                     <!-- Thanh toán qua ví -->
-                                    <div class="relative p-4 mt-4 border border-gray-200 rounded-lg">
-                                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                                            <div class="w-full border-t border-gray-200"></div>
-                                        </div>
-                                        <div class="relative flex items-center justify-between">
-                                            <span class="pr-2 text-sm text-gray-500 bg-white">Ví điện tử</span>
-                                            <form action="{{ route('payment.wallet', $order->order_number) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                    <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <div class="relative p-4 mt-4 border border-gray-200 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-all duration-300 shadow-sm">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex-1">
+                                                <h3 class="font-medium text-gray-900 flex items-center">
+                                                    <svg class="mr-2 h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                                     </svg>
-                                                    Thanh toán qua ví ({{ number_format($wallet->balance, 0, ',', '.') }}đ)
-                                                </button>
-                                            </form>
+                                                    Thanh toán bằng số dư ví
+                                                </h3>
+                                                <div class="mt-2">
+                                                    <p class="text-sm text-gray-600">Số dư hiện tại: <span class="font-semibold text-green-600">{{ number_format($wallet->balance, 0, ',', '.') }}đ</span></p>
+                                                    <p class="text-sm text-gray-600">Số tiền thanh toán: <span class="font-semibold text-gray-900">{{ number_format($order->amount, 0, ',', '.') }}đ</span></p>
+                                                    <p class="text-sm text-gray-600 mt-1">Số dư còn lại sau thanh toán: <span class="font-semibold text-blue-600">{{ number_format($wallet->balance - $order->amount, 0, ',', '.') }}đ</span></p>
+                                                    <p class="mt-2 text-xs text-gray-500">Thanh toán nhanh chóng và an toàn từ số dư ví của bạn.</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="ml-4">
+                                                <form action="{{ route('payment.wallet', $order->order_number) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                                                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                        </svg>
+                                                        Xác nhận thanh toán
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
-                                        <p class="mt-2 text-sm text-gray-500">Thanh toán nhanh chóng từ số dư ví của bạn.</p>
                                     </div>
                                     @elseif(isset($wallet) && $wallet && $wallet->balance < $order->amount)
                                     <!-- Số dư ví không đủ -->
-                                    <div class="relative p-4 mt-4 border border-gray-200 rounded-lg bg-gray-50">
+                                    <div class="relative p-4 mt-4 border border-red-200 rounded-lg bg-red-50">
                                         <div class="flex items-center justify-between">
                                             <div>
-                                                <span class="text-sm font-medium text-gray-900">Ví điện tử</span>
-                                                <p class="mt-1 text-sm text-red-600">Số dư không đủ: {{ number_format($wallet->balance, 0, ',', '.') }}đ / {{ number_format($order->amount, 0, ',', '.') }}đ</p>
+                                                <h3 class="font-medium text-gray-900 flex items-center">
+                                                    <svg class="mr-2 h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    Thanh toán bằng số dư ví
+                                                </h3>
+                                                <div class="mt-2">
+                                                    <p class="text-sm text-gray-600">Số dư hiện tại: <span class="font-semibold text-red-600">{{ number_format($wallet->balance, 0, ',', '.') }}đ</span></p>
+                                                    <p class="text-sm text-gray-600">Số tiền thanh toán: <span class="font-semibold text-gray-900">{{ number_format($order->amount, 0, ',', '.') }}đ</span></p>
+                                                    <p class="mt-1 text-sm text-red-600 font-medium">Số dư không đủ để thanh toán (còn thiếu {{ number_format($order->amount - $wallet->balance, 0, ',', '.') }}đ)</p>
+                                                </div>
                                             </div>
-                                            <a href="{{ route('wallet.deposit') }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                Nạp tiền
+                                            <a href="{{ route('wallet.deposit') }}" class="ml-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                </svg>
+                                                Nạp tiền ngay
+                                            </a>
+                                        </div>
+                                    </div>
+                                    @elseif(Auth::check() && !isset($wallet))
+                                    <!-- Chưa có ví -->
+                                    <div class="relative p-4 mt-4 border border-yellow-200 rounded-lg bg-yellow-50">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h3 class="font-medium text-gray-900 flex items-center">
+                                                    <svg class="mr-2 h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    Thanh toán bằng số dư ví
+                                                </h3>
+                                                <p class="mt-2 text-sm text-gray-600">Bạn chưa có ví điện tử. Tạo ví điện tử để thanh toán nhanh chóng cho các đơn hàng sau này.</p>
+                                            </div>
+                                            <a href="{{ route('wallet.deposit') }}" class="ml-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                </svg>
+                                                Tạo ví điện tử
                                             </a>
                                         </div>
                                     </div>

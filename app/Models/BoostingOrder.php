@@ -91,7 +91,7 @@ class BoostingOrder extends Model
     }
 
     /**
-     * Kiểm tra xem thông tin tài khoản đã được nhập chưa
+     * Kiểm tra xem đơn hàng đã có thông tin tài khoản chưa
      */
     public function hasAccountInfo()
     {

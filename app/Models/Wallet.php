@@ -69,15 +69,16 @@ class Wallet extends Model
      * Trừ tiền từ ví
      *
      * @param int $amount Số tiền cần trừ
-     * @param string $type Loại giao dịch (withdraw, payment)
+     * @param string $type Loại giao dịch (payment, withdraw)
      * @param string|null $description Mô tả giao dịch
      * @param string|null $referenceId ID tham chiếu
      * @param string|null $referenceType Loại tham chiếu
      * @param array|null $metadata Metadata
-     * @return WalletTransaction|false
+     * @return WalletTransaction|bool False nếu không đủ tiền
      */
     public function withdraw($amount, $type = 'payment', $description = null, $referenceId = null, $referenceType = null, $metadata = null)
     {
+        // Kiểm tra số dư
         if ($this->balance < $amount) {
             return false;
         }
@@ -88,7 +89,7 @@ class Wallet extends Model
 
         return $this->createTransaction(
             $type, 
-            -$amount, 
+            -$amount, // Số tiền âm cho giao dịch trừ tiền
             $balanceBefore, 
             $this->balance, 
             $description, 
@@ -99,11 +100,12 @@ class Wallet extends Model
     }
 
     /**
-     * Tạo giao dịch mới
+     * Tạo giao dịch trong ví
      */
     private function createTransaction($type, $amount, $balanceBefore, $balanceAfter, $description = null, $referenceId = null, $referenceType = null, $metadata = null)
     {
-        return $this->transactions()->create([
+        return WalletTransaction::create([
+            'wallet_id' => $this->id,
             'user_id' => $this->user_id,
             'type' => $type,
             'amount' => $amount,
@@ -112,7 +114,7 @@ class Wallet extends Model
             'description' => $description,
             'reference_id' => $referenceId,
             'reference_type' => $referenceType,
-            'metadata' => $metadata ? json_encode($metadata) : null,
+            'metadata' => $metadata,
         ]);
     }
 }
