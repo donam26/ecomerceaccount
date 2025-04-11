@@ -95,28 +95,7 @@
                     
                     <div class="mb-6">
                         <h3 class="font-semibold text-gray-800 mb-2">Thông tin tài khoản:</h3>
-                        @if($account->attributes)
-                            <div class="mt-4">
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Đặc điểm tài khoản:</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    @php
-                                        $attributes = [];
-                                        if (is_string($account->attributes)) {
-                                            $attributes = json_decode($account->attributes, true) ?? [];
-                                        } else if (is_array($account->attributes)) {
-                                            $attributes = $account->attributes;
-                                        }
-                                    @endphp
-                                    
-                                    @foreach($attributes as $key => $value)
-                                        <span class="bg-gray-100 text-gray-800 text-sm px-3 py-1 rounded-full">
-                                            {{ is_array($key) ? json_encode($key) : $key }}: {{ is_array($value) ? json_encode($value) : $value }}
-                                        </span>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-                        
+                     
                         <div class="text-gray-700 mb-6">
                             {{ $account->description }}
                         </div>

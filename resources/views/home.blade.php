@@ -162,7 +162,7 @@
     <div class="bg-gray-50 py-12">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-10 text-center">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">Tài khoản mới nhất</h2>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">SPAM KHẮP ĐẢO KAIA</h2>
                 <p class="text-gray-600">Cập nhật liên tục các tài khoản mới nhất với nhiều ưu đãi</p>
             </div>
             
