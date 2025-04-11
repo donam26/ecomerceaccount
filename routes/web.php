@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\BoostingOrderController as AdminBoostingOrderCont
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\Admin\WalletController as AdminWalletController;
 use App\Http\Controllers\TopUpServiceController;
+use App\Http\Controllers\GameServiceController;
+use App\Http\Controllers\Admin\GameServiceController as AdminGameServiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +46,9 @@ Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.ind
 Route::get('/accounts/search', [AccountController::class, 'search'])->name('accounts.search');
 Route::get('/accounts/{id}', [AccountController::class, 'show'])->name('accounts.show');
 
+    // Dịch vụ game
+    Route::get('/services', [GameServiceController::class, 'index'])->name('services.index');
+    Route::get('/services/{slug}', [GameServiceController::class, 'show'])->name('services.show');
 // Yêu cầu đăng nhập
 Route::middleware(['auth'])->group(function () {
     // Profile routes
@@ -109,6 +114,12 @@ Route::middleware(['auth'])->group(function () {
     
     // Chi tiết đơn hàng
     Route::get('/topup-orders/{orderNumber}', [TopUpServiceController::class, 'showOrder'])->name('topup.orders.show');
+
+
+    Route::post('/services/{slug}/order', [GameServiceController::class, 'order'])->name('services.order');
+    Route::post('/services/{slug}/package/{package}', [GameServiceController::class, 'orderPackage'])->name('services.order_package');
+    Route::get('/my-service-orders', [GameServiceController::class, 'myOrders'])->name('services.my_orders');
+    Route::get('/my-service-orders/{id}', [GameServiceController::class, 'viewOrder'])->name('services.view_order');
 });
 
 // Admin routes
@@ -166,6 +177,22 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::post('topup-orders/{id}/assign', [\App\Http\Controllers\Admin\TopUpOrderController::class, 'assign'])->name('topup_orders.assign');
     Route::post('topup-orders/{id}/status', [\App\Http\Controllers\Admin\TopUpOrderController::class, 'updateStatus'])->name('topup_orders.status');
     Route::post('topup-orders/{id}/notes', [\App\Http\Controllers\Admin\TopUpOrderController::class, 'updateNotes'])->name('topup_orders.notes');
+
+    // Game Services
+    Route::resource('services', AdminGameServiceController::class);
+    
+    // Service Packages
+    Route::get('services/{service}/packages', [AdminGameServiceController::class, 'packages'])->name('services.packages');
+    Route::get('services/{service}/packages/create', [AdminGameServiceController::class, 'createPackage'])->name('services.packages.create');
+    Route::post('services/{service}/packages', [AdminGameServiceController::class, 'storePackage'])->name('services.packages.store');
+    Route::get('services/{service}/packages/{package}/edit', [AdminGameServiceController::class, 'editPackage'])->name('services.packages.edit');
+    Route::put('services/{service}/packages/{package}', [AdminGameServiceController::class, 'updatePackage'])->name('services.packages.update');
+    Route::delete('services/{service}/packages/{package}', [AdminGameServiceController::class, 'destroyPackage'])->name('services.packages.destroy');
+    
+    // Service Orders
+    Route::get('service-orders', [AdminGameServiceController::class, 'orders'])->name('services.orders.index');
+    Route::get('service-orders/{order}', [AdminGameServiceController::class, 'showOrder'])->name('services.orders.show');
+    Route::put('service-orders/{order}/status', [AdminGameServiceController::class, 'updateOrderStatus'])->name('services.orders.update-status');
 });
 
 require __DIR__.'/auth.php';

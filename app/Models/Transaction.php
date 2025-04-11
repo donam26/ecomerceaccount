@@ -13,6 +13,7 @@ class Transaction extends Model
         'order_id',
         'boosting_order_id',
         'top_up_order_id',
+        'game_service_order_id',
         'transaction_id',
         'payment_method',
         'amount',
@@ -54,6 +55,14 @@ class Transaction extends Model
     }
     
     /**
+     * Đơn hàng dịch vụ liên quan đến giao dịch
+     */
+    public function serviceOrder()
+    {
+        return $this->belongsTo(ServiceOrder::class, 'game_service_order_id');
+    }
+    
+    /**
      * Kiểm tra xem giao dịch có phải cho đơn hàng cày thuê không
      */
     public function isBoostingTransaction()
@@ -67,6 +76,14 @@ class Transaction extends Model
     public function isTopUpTransaction()
     {
         return !empty($this->top_up_order_id);
+    }
+    
+    /**
+     * Kiểm tra xem giao dịch có phải cho đơn hàng dịch vụ không
+     */
+    public function isServiceTransaction()
+    {
+        return !empty($this->game_service_order_id);
     }
     
     /**
@@ -91,6 +108,12 @@ class Transaction extends Model
             if ($this->topUpOrder) {
                 $this->topUpOrder->status = 'paid';
                 $this->topUpOrder->save();
+            }
+        } elseif ($this->isServiceTransaction()) {
+            // Đơn hàng dịch vụ
+            if ($this->serviceOrder) {
+                $this->serviceOrder->status = 'paid';
+                $this->serviceOrder->save();
             }
         } else {
             // Đơn hàng thường

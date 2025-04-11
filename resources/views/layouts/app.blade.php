@@ -48,7 +48,10 @@
                                 Tài khoản
                             </a>
                             <a href="{{ route('boosting.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('boosting.*') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
-                                Dịch vụ
+                                Dịch vụ cày thuê
+                            </a>
+                            <a href="{{ route('services.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('services.*') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
+                                Câu cá bóng 5 6
                             </a>
                             <a href="{{ route('topup.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('topup.*') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
                                 Nạp thuê
@@ -155,7 +158,10 @@
                         Tài khoản
                     </a>
                     <a href="{{ route('boosting.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('boosting.*') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
-                        Dịch vụ
+                        Dịch vụ cày thuê
+                    </a>
+                    <a href="{{ route('services.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('services.*') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
+                        Câu cá bóng 5 6
                     </a>
                     <a href="{{ route('about') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('about') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
                         Về chúng tôi
