@@ -278,12 +278,42 @@
                                 <span class="text-red-600">{{ number_format($order->amount, 0, ',', '.') }}đ</span>
                             </div>
                         </div>
+                        @elseif(isset($isTopUpOrder) && $isTopUpOrder)
+                        <!-- Hiển thị thông tin đơn hàng nạp thuê -->
+                        <div class="mb-4">
+                            <h3 class="font-medium text-gray-900">{{ $order->service->name }}</h3>
+                            <p class="text-sm text-gray-500">{{ $order->service->game->name }}</p>
+                            <p class="text-sm text-gray-500 mt-2">Game ID: {{ $order->game_id }}</p>
+                            @if($order->server_id)
+                            <p class="text-sm text-gray-500">Server: {{ $order->server_id }}</p>
+                            @endif
+                            <p class="text-sm text-gray-500 mt-2">Thời gian ước tính: {{ $order->service->estimated_days ?? 'N/A' }} ngày</p>
+                        </div>
+                        
+                        <div class="border-t border-gray-200 pt-4 mt-4">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-600">Giá dịch vụ</span>
+                                <span class="font-medium text-gray-900">{{ number_format($order->original_amount, 0, ',', '.') }}đ</span>
+                            </div>
+                            
+                            @if($order->discount > 0)
+                                <div class="flex justify-between mb-2 text-green-600">
+                                    <span>Giảm giá</span>
+                                    <span>-{{ number_format($order->discount, 0, ',', '.') }}đ</span>
+                                </div>
+                            @endif
+                            
+                            <div class="flex justify-between font-bold text-lg pt-4 border-t border-gray-200 mt-4">
+                                <span>Tổng cộng</span>
+                                <span class="text-red-600">{{ number_format($order->amount, 0, ',', '.') }}đ</span>
+                            </div>
+                        </div>
                         @else
                         <!-- Hiển thị thông tin đơn hàng tài khoản thường -->
                         <div class="flex items-center mb-4">
                             @php
                                 $accountImage = 'https://via.placeholder.com/300x200';
-                                if ($order->account->images) {
+                                if ($order->account && $order->account->images) {
                                     if (is_string($order->account->images)) {
                                         $images = json_decode($order->account->images, true);
                                         if (is_array($images) && !empty($images)) {
@@ -294,10 +324,10 @@
                                     }
                                 }
                             @endphp
-                            <img src="{{ $accountImage }}" alt="{{ $order->account->title }}" class="w-16 h-16 object-cover rounded-md">
+                            <img src="{{ $accountImage }}" alt="{{ $order->account->title ?? 'Tài khoản' }}" class="w-16 h-16 object-cover rounded-md">
                             <div class="ml-4">
-                                <h3 class="font-medium text-gray-900">{{ $order->account->title }}</h3>
-                                <p class="text-sm text-gray-500">{{ $order->account->game->name }}</p>
+                                <h3 class="font-medium text-gray-900">{{ $order->account->title ?? 'Tài khoản game' }}</h3>
+                                <p class="text-sm text-gray-500">{{ $order->account->game->name ?? '' }}</p>
                             </div>
                         </div>
                         

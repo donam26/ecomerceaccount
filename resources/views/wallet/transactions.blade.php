@@ -91,7 +91,7 @@
                                     </a>
                                     @elseif($transaction->reference_type == 'BoostingOrder')
                                     <a href="{{ route('boosting.orders.show', $transaction->reference_id) }}" class="text-blue-600 hover:text-blue-800">
-                                        Xem đơn hàng cày thuê
+                                        Xem đơn hàng dịch vụ
                                     </a>
                                     @endif
                                 </span>

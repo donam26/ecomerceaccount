@@ -134,7 +134,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-medium">Đơn hàng cày thuê</h3>
+                                <h3 class="font-medium">Đơn hàng dịch vụ</h3>
                                 <p class="text-sm text-gray-600">Xem lịch sử dịch vụ cày thuê</p>
                             </div>
                         </div>

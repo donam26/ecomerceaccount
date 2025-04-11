@@ -41,4 +41,12 @@ class Game extends Model
     {
         return $this->hasMany(BoostingService::class);
     }
+
+    /**
+     * Lấy các dịch vụ nạp thuê thuộc về game này
+     */
+    public function topUpServices()
+    {
+        return $this->hasMany(TopUpService::class);
+    }
 }

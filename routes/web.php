@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\BoostingServiceController as AdminBoostingService
 use App\Http\Controllers\Admin\BoostingOrderController as AdminBoostingOrderController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\Admin\WalletController as AdminWalletController;
+use App\Http\Controllers\TopUpServiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,7 +74,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/boosting/{slug}', [BoostingServiceController::class, 'show'])->name('boosting.show');
     
     // Sửa URL để tránh xung đột với route của đơn hàng thường, mẫu /orders/... 
-    Route::get('/boosting-orders/{orderNumber}', [BoostingServiceController::class, 'show'])->name('boosting.orders.show');
+    Route::get('/boosting-orders/{orderNumber}', [BoostingServiceController::class, 'showOrder'])->name('boosting.orders.show');
     
     // Nhập thông tin tài khoản sau khi thanh toán - cập nhật đường dẫn thành /boosting-account-info thay vì /boosting/orders/...
     Route::get('/boosting-account-info/{orderNumber}', [BoostingServiceController::class, 'accountInfo'])
@@ -95,6 +96,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/wallet/card/history', [WalletController::class, 'cardDepositHistory'])->name('wallet.card.history');
     Route::get('/wallet/card/{requestId}', [WalletController::class, 'showCardPending'])->name('wallet.card.pending');
     Route::get('/wallet/card/{requestId}/check', [WalletController::class, 'checkCardStatus'])->name('wallet.card.check');
+
+    // Dịch vụ nạp thuê
+    Route::get('/topup', [TopUpServiceController::class, 'index'])->name('topup.index');
+    
+    // Thêm route để hiển thị danh sách đơn hàng nạp thuê của người dùng
+    Route::get('/topup/my-orders', [TopUpServiceController::class, 'myOrders'])->name('topup.my_orders');
+    
+    // Route đặt hàng phải đứng trước route show để được ưu tiên
+    Route::post('/topup/{slug}/order', [TopUpServiceController::class, 'order'])->name('topup.order');
+    Route::get('/topup/{slug}', [TopUpServiceController::class, 'show'])->name('topup.show');
+    
+    // Chi tiết đơn hàng
+    Route::get('/topup-orders/{orderNumber}', [TopUpServiceController::class, 'showOrder'])->name('topup.orders.show');
 });
 
 // Admin routes
@@ -142,6 +156,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::post('wallets/{id}/adjust', [AdminWalletController::class, 'adjustBalance'])->name('wallets.adjust.submit');
     Route::get('transactions', [AdminWalletController::class, 'allTransactions'])->name('transactions.index');
     Route::delete('transactions/{id}', [AdminWalletController::class, 'deleteTransaction'])->name('transactions.delete');
+    
+    // Quản lý dịch vụ nạp thuê
+    Route::resource('topup', \App\Http\Controllers\Admin\TopUpServiceController::class);
+    
+    // Quản lý đơn hàng nạp thuê
+    Route::get('topup-orders', [\App\Http\Controllers\Admin\TopUpOrderController::class, 'index'])->name('topup_orders.index');
+    Route::get('topup-orders/{id}', [\App\Http\Controllers\Admin\TopUpOrderController::class, 'show'])->name('topup_orders.show');
+    Route::post('topup-orders/{id}/assign', [\App\Http\Controllers\Admin\TopUpOrderController::class, 'assign'])->name('topup_orders.assign');
+    Route::post('topup-orders/{id}/status', [\App\Http\Controllers\Admin\TopUpOrderController::class, 'updateStatus'])->name('topup_orders.status');
+    Route::post('topup-orders/{id}/notes', [\App\Http\Controllers\Admin\TopUpOrderController::class, 'updateNotes'])->name('topup_orders.notes');
 });
 
 require __DIR__.'/auth.php';

@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\BoostingOrder;
+use App\Models\TopUpOrder;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
-class BoostingOrderController extends Controller
+class TopUpOrderController extends Controller
 {
     /**
-     * Hiển thị danh sách đơn hàng cày thuê
+     * Hiển thị danh sách đơn hàng nạp thuê
      */
     public function index(Request $request)
     {
-        $query = BoostingOrder::with(['user', 'service', 'assignedTo']);
+        $query = TopUpOrder::with(['user', 'service', 'assignedTo']);
 
         // Lọc theo trạng thái nếu có
         if ($request->has('status') && $request->status !== 'all') {
@@ -39,14 +39,14 @@ class BoostingOrderController extends Controller
         $orders = $query->paginate(15);
 
         // Thống kê đơn hàng theo trạng thái
-        $stats = DB::table('boosting_orders')
+        $stats = DB::table('top_up_orders')
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->get()
             ->pluck('total', 'status')
             ->toArray();
 
-        return view('admin.boosting_orders.index', compact('orders', 'stats'));
+        return view('admin.topup_orders.index', compact('orders', 'stats'));
     }
 
     /**
@@ -54,7 +54,7 @@ class BoostingOrderController extends Controller
      */
     public function show($id)
     {
-        $order = BoostingOrder::with(['user', 'service', 'assignedTo'])
+        $order = TopUpOrder::with(['user', 'service', 'assignedTo'])
             ->findOrFail($id);
 
         // Lấy danh sách nhân viên có thể giao việc
@@ -67,7 +67,7 @@ class BoostingOrderController extends Controller
         // Lấy các giao dịch liên quan đến đơn hàng
         $transactions = $order->transactions()->with('user')->get();
 
-        return view('admin.boosting_orders.show', compact('order', 'staffs', 'transactions'));
+        return view('admin.topup_orders.show', compact('order', 'staffs', 'transactions'));
     }
 
     /**
@@ -79,11 +79,11 @@ class BoostingOrderController extends Controller
             'assigned_to' => 'required|exists:users,id'
         ]);
 
-        $order = BoostingOrder::findOrFail($id);
+        $order = TopUpOrder::findOrFail($id);
         $order->assigned_to = $request->assigned_to;
         $order->save();
 
-        return redirect()->route('admin.boosting_orders.show', $id)
+        return redirect()->route('admin.topup_orders.show', $id)
             ->with('success', 'Đơn hàng đã được gán cho nhân viên thành công.');
     }
 
@@ -97,7 +97,7 @@ class BoostingOrderController extends Controller
             'admin_notes' => 'nullable|string'
         ]);
 
-        $order = BoostingOrder::findOrFail($id);
+        $order = TopUpOrder::findOrFail($id);
         $oldStatus = $order->status;
         
         // Cập nhật trạng thái
@@ -115,34 +115,8 @@ class BoostingOrderController extends Controller
         
         $order->save();
 
-        return redirect()->route('admin.boosting_orders.show', $id)
+        return redirect()->route('admin.topup_orders.show', $id)
             ->with('success', 'Trạng thái đơn hàng đã được cập nhật thành công.');
-    }
-
-    /**
-     * Xem thông tin tài khoản game
-     */
-    public function viewGameAccount($id)
-    {
-        $order = BoostingOrder::with(['user', 'service'])
-            ->findOrFail($id);
-        
-        // Kiểm tra nếu không có thông tin tài khoản
-        if (!$order->hasAccountInfo()) {
-            return redirect()->route('admin.boosting_orders.show', $id)
-                ->with('error', 'Đơn hàng này chưa có thông tin tài khoản game.');
-        }
-        
-        // Ghi log ai đã xem thông tin này
-        \Illuminate\Support\Facades\Log::info('Admin viewed game account info', [
-            'admin_id' => Auth::id(),
-            'admin_name' => Auth::user()->name,
-            'order_id' => $order->id,
-            'order_number' => $order->order_number,
-            'timestamp' => now()
-        ]);
-        
-        return view('admin.boosting_orders.view_account', compact('order'));
     }
     
     /**
@@ -154,11 +128,11 @@ class BoostingOrderController extends Controller
             'admin_notes' => 'nullable|string'
         ]);
 
-        $order = BoostingOrder::findOrFail($id);
+        $order = TopUpOrder::findOrFail($id);
         $order->admin_notes = $request->admin_notes;
         $order->save();
 
-        return redirect()->route('admin.boosting_orders.show', $id)
+        return redirect()->route('admin.topup_orders.show', $id)
             ->with('success', 'Ghi chú đơn hàng đã được cập nhật thành công.');
     }
 }

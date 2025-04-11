@@ -189,4 +189,31 @@ class BoostingServiceController extends Controller
             
         return view('boosting.my_orders', compact('orders'));
     }
+
+    /**
+     * Hiển thị chi tiết đơn hàng cày thuê
+     */
+    public function showOrder($orderNumber)
+    {
+        // Lấy thông tin đơn hàng từ cơ sở dữ liệu
+        $order = BoostingOrder::where('order_number', $orderNumber)
+            ->where('user_id', auth()->id())
+            ->with(['service.game'])
+            ->firstOrFail();
+            
+        return view('boosting.order_detail', compact('order'));
+    }
+
+    /**
+     * Hiển thị trang thành công sau khi gửi thông tin tài khoản
+     */
+    public function accountInfoSuccess(Request $request, $orderNumber)
+    {
+        // Lấy thông tin đơn hàng từ cơ sở dữ liệu
+        $order = BoostingOrder::where('order_number', $orderNumber)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+            
+        return view('boosting.account_info_success', compact('order'));
+    }
 }

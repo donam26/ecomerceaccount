@@ -12,6 +12,7 @@ class Transaction extends Model
     protected $fillable = [
         'order_id',
         'boosting_order_id',
+        'top_up_order_id',
         'transaction_id',
         'payment_method',
         'amount',
@@ -45,11 +46,27 @@ class Transaction extends Model
     }
     
     /**
+     * Đơn hàng nạp thuê liên quan đến giao dịch
+     */
+    public function topUpOrder()
+    {
+        return $this->belongsTo(TopUpOrder::class);
+    }
+    
+    /**
      * Kiểm tra xem giao dịch có phải cho đơn hàng cày thuê không
      */
     public function isBoostingTransaction()
     {
         return !empty($this->boosting_order_id);
+    }
+    
+    /**
+     * Kiểm tra xem giao dịch có phải cho đơn hàng nạp thuê không
+     */
+    public function isTopUpTransaction()
+    {
+        return !empty($this->top_up_order_id);
     }
     
     /**
@@ -68,6 +85,12 @@ class Transaction extends Model
             if ($this->boostingOrder) {
                 $this->boostingOrder->status = 'paid';
                 $this->boostingOrder->save();
+            }
+        } elseif ($this->isTopUpTransaction()) {
+            // Đơn hàng nạp thuê
+            if ($this->topUpOrder) {
+                $this->topUpOrder->status = 'paid';
+                $this->topUpOrder->save();
             }
         } else {
             // Đơn hàng thường

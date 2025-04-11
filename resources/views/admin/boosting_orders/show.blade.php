@@ -210,39 +210,7 @@
                 </div>
             </div>
         </div>
-        
-        <div class="grid gap-6 mb-8 md:grid-cols-2">
-            <!-- Giao đơn hàng cho nhân viên -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-medium text-gray-900">Giao đơn hàng</h2>
-                </div>
-                <div class="px-6 py-4">
-                    <form action="{{ route('admin.boosting_orders.assign', $order->id) }}" method="POST">
-                        @csrf
-                        <div class="mb-4">
-                            <label for="assigned_to" class="block text-sm font-medium text-gray-700">Giao cho nhân viên</label>
-                            <select id="assigned_to" name="assigned_to" required
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                <option value="">-- Chọn nhân viên --</option>
-                                @foreach($staffs as $staff)
-                                <option value="{{ $staff->id }}" {{ $order->assigned_to == $staff->id ? 'selected' : '' }}>
-                                    {{ $staff->name }}
-                                </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        
-                        <button type="submit"
-                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Giao đơn hàng
-                        </button>
-                    </form>
-                </div>
-            </div>
-            
-           
-        </div>
+     
         
         <!-- Thông tin thanh toán -->
         @if($transactions->count() > 0)
