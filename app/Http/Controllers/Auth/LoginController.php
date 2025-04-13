@@ -35,6 +35,12 @@ class LoginController extends Controller
         if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
             $request->session()->regenerate();
 
+            // Nếu người dùng là admin, chuyển hướng đến trang admin
+            if (Auth::user()->isAdmin()) {
+                return redirect()->route('admin.dashboard');
+            }
+
+            // Ngược lại, chuyển hướng đến trang chủ
             return redirect()->intended(route('home'));
         }
 
