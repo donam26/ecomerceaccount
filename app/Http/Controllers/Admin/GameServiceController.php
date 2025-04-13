@@ -227,11 +227,17 @@ class GameServiceController extends Controller
         // Đảm bảo giá tiền là số nguyên
         $validated['price'] = (int)$validated['price'];
         
-        // Chỉ lưu sale_price khi nó được gửi đến và có giá trị
-        if (!empty($validated['sale_price'])) {
+        // Xử lý sale_price đúng cách
+        if (isset($validated['sale_price']) && $validated['sale_price'] != '') {
             $validated['sale_price'] = (int)$validated['sale_price'];
         } else {
+            // Nếu không có giá trị hoặc rỗng, đặt là null
             $validated['sale_price'] = null;
+        }
+        
+        // Xử lý display_order nếu không có
+        if (!isset($validated['display_order']) || $validated['display_order'] === '') {
+            $validated['display_order'] = 0; // Giá trị mặc định
         }
         
         // Xử lý xóa ảnh hiện tại
