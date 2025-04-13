@@ -285,7 +285,7 @@
                                 <span>Thời gian ước tính: {{ $relatedService->estimated_minutes }} phút</span>
                             </div>
                             
-                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ Str::limit(strip_tags($relatedService->description), 100) }}</p>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">{!! Str::limit(strip_tags($relatedService->description), 100) !!}</p>
                             
                             <div class="flex justify-between items-center">
                                 <div>

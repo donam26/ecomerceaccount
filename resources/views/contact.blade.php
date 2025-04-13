@@ -44,7 +44,7 @@
                                     </div>
                                     <div class="ml-3">
                                         <p class="text-gray-900 font-medium">Điện thoại</p>
-                                        <p class="text-gray-600">0123 456 789</p>
+                                        <p class="text-gray-600">0876085633</p>
                                     </div>
                                 </div>
                                 

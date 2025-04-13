@@ -186,7 +186,7 @@
                             
                             <div class="mb-4">
                                 <label for="admin_note" class="block text-sm font-medium text-gray-700 mb-1">Ghi chú nội bộ</label>
-                                <textarea id="admin_note" name="admin_note" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $order->admin_note }}</textarea>
+                                <textarea id="admin_note" name="admin_note" rows="4" class="ckeditor mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $order->admin_note }}</textarea>
                             </div>
                             
                             <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -217,7 +217,7 @@
                             @if($order->admin_note)
                             <div class="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
                                 <dt class="text-sm font-medium text-gray-500">Ghi chú</dt>
-                                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{{ $order->admin_note }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{!! $order->admin_note !!}</dd>
                             </div>
                             @endif
                         </dl>
@@ -227,4 +227,28 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection
+
+@push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.2/classic/ckeditor.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        ClassicEditor
+            .create(document.querySelector('#admin_note'), {
+                toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'blockQuote', 'insertTable', '|', 'undo', 'redo'],
+                heading: {
+                    options: [
+                        { model: 'paragraph', title: 'Đoạn văn', class: 'ck-heading_paragraph' },
+                        { model: 'heading1', view: 'h1', title: 'Tiêu đề 1', class: 'ck-heading_heading1' },
+                        { model: 'heading2', view: 'h2', title: 'Tiêu đề 2', class: 'ck-heading_heading2' },
+                        { model: 'heading3', view: 'h3', title: 'Tiêu đề 3', class: 'ck-heading_heading3' }
+                    ]
+                },
+                language: 'vi'
+            })
+            .catch(error => {
+                console.error('Lỗi khi khởi tạo CKEditor:', error);
+            });
+    });
+</script>
+@endpush 

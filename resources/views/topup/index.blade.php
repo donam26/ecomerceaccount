@@ -70,7 +70,7 @@
                         <span>Thời gian ước tính: {{ $service->estimated_minutes }} phút</span>
                     </div>
                     
-                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ $service->description }}</p>
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">{!! $service->description !!}</p>
                     
                     <div class="flex justify-between items-center">
                         <div>
