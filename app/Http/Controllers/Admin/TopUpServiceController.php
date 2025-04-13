@@ -63,6 +63,7 @@ class TopUpServiceController extends Controller
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',
+            'login_type' => 'required|in:username_password,game_id,both',
         ]);
         
         // Tạo slug
@@ -118,6 +119,7 @@ class TopUpServiceController extends Controller
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',
+            'login_type' => 'required|in:username_password,game_id,both',
         ]);
         
         // Upload hình ảnh thumbnail mới nếu có

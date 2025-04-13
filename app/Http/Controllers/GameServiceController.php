@@ -107,13 +107,24 @@ class GameServiceController extends Controller
             
             $service = $query->firstOrFail();
             
+            // Xác định quy tắc xác thực dựa trên login_type
             $validationRules = [
-                'game_username' => 'required|string|max:100',
-                'game_password' => 'required|string|max:100',
-                'game_server' => 'required|string|max:50',
-                'notes' => 'nullable|string|max:500',
                 'package_id' => 'required|exists:game_service_packages,id',
+                'notes' => 'nullable|string|max:500',
             ];
+            
+            // Thêm quy tắc xác thực dựa trên login_type của dịch vụ
+            if ($service->login_type === 'username_password' || $service->login_type === 'both') {
+                $validationRules['game_username'] = 'required|string|max:100';
+                $validationRules['game_password'] = 'required|string|max:100';
+            }
+            
+            if ($service->login_type === 'game_id' || $service->login_type === 'both') {
+                $validationRules['game_id'] = 'required|string|max:100';
+            }
+            
+            // Thêm trường game_server
+            $validationRules['game_server'] = 'required|string|max:50';
             
             $validated = $request->validate($validationRules);
             
@@ -125,19 +136,29 @@ class GameServiceController extends Controller
                 return back()->withErrors(['package_id' => 'Gói dịch vụ không hợp lệ']);
             }
             
-            // Tạo đơn hàng
+            // Chuẩn bị dữ liệu đơn hàng
             $orderData = [
                 'user_id' => Auth::id(),
                 'game_service_id' => $service->id,
                 'game_service_package_id' => $package->id,
                 'order_number' => ServiceOrder::generateOrderNumber(),
-                'game_username' => $validated['game_username'],
-                'game_password' => $validated['game_password'],
                 'game_server' => $validated['game_server'],
                 'notes' => $validated['notes'] ?? null,
                 'amount' => $package->getDisplayPriceAttribute(),
             ];
             
+            // Thêm thông tin đăng nhập dựa trên login_type
+            if ($service->login_type === 'username_password' || $service->login_type === 'both') {
+                $orderData['game_username'] = $validated['game_username'];
+                $orderData['game_password'] = $validated['game_password'];
+            }
+            
+            // Thêm game_id nếu được yêu cầu
+            if ($service->login_type === 'game_id' || $service->login_type === 'both') {
+                $orderData['game_id'] = $validated['game_id'];
+            }
+            
+            // Tạo đơn hàng
             $order = ServiceOrder::create($orderData);
             
             // Chuyển hướng đến trang thanh toán

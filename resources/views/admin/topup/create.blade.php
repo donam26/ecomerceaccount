@@ -142,6 +142,19 @@
                                 <span class="ml-2 text-sm text-gray-700">Kích hoạt dịch vụ</span>
                             </label>
                         </div>
+                        
+                        <div class="mb-4">
+                            <label for="login_type" class="block text-sm font-medium text-gray-700 mb-1">
+                                Loại thông tin đăng nhập <span class="text-red-600">*</span>
+                            </label>
+                            <select id="login_type" name="login_type" required
+                                class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <option value="game_id" {{ old('login_type', 'game_id') == 'game_id' ? 'selected' : '' }}>Chỉ ID Game</option>
+                                <option value="username_password" {{ old('login_type') == 'username_password' ? 'selected' : '' }}>Tài khoản và mật khẩu</option>
+                                <option value="both" {{ old('login_type') == 'both' ? 'selected' : '' }}>Cả hai (ID và tài khoản)</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Loại thông tin đăng nhập mà người dùng cần cung cấp khi đặt dịch vụ này</p>
+                        </div>
                     </div>
                 </div>
 

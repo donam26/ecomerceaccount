@@ -177,39 +177,55 @@
                     </div>
                     
                     @auth
-                    <form action="{{ route('topup.order', $service->slug) }}" method="POST">
+                    <form action="{{ route('topup.order', $service->slug) }}" method="POST" class="mt-6">
                         @csrf
-                        <div class="mb-4">
-                            <label for="game_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                ID trong game <span class="text-red-600">*</span>
-                            </label>
-                            <input type="text" id="game_id" name="game_id" required
-                                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Nhập ID/tài khoản trong game của bạn">
+                        <div class="space-y-4">
+                            @if($service->login_type === 'game_id' || $service->login_type === 'both')
+                            <div>
+                                <label for="game_id" class="block text-sm font-medium text-gray-700">ID Game <span class="text-red-600">*</span></label>
+                                <input type="text" name="game_id" id="game_id" value="{{ old('game_id') }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                @error('game_id')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            @endif
+                            
+                            @if($service->login_type === 'username_password' || $service->login_type === 'both')
+                            <div>
+                                <label for="game_username" class="block text-sm font-medium text-gray-700">Tên đăng nhập Game <span class="text-red-600">*</span></label>
+                                <input type="text" name="game_username" id="game_username" value="{{ old('game_username') }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                @error('game_username')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            
+                            <div>
+                                <label for="game_password" class="block text-sm font-medium text-gray-700">Mật khẩu Game <span class="text-red-600">*</span></label>
+                                <input type="password" name="game_password" id="game_password" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                @error('game_password')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            @endif
+                            
+                            <div>
+                                <label for="server_id" class="block text-sm font-medium text-gray-700">Server Game</label>
+                                <input type="text" name="server_id" id="server_id" value="{{ old('server_id') }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <p class="mt-1 text-xs text-gray-500">Nhập server game nếu có</p>
+                            </div>
+                            
+                            <div>
+                                <label for="additional_info" class="block text-sm font-medium text-gray-700">Thông tin bổ sung</label>
+                                <textarea name="additional_info" id="additional_info" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">{{ old('additional_info') }}</textarea>
+                                <p class="mt-1 text-xs text-gray-500">Thông tin thêm mà bạn muốn cung cấp</p>
+                            </div>
+                            
+                            <div class="pt-4">
+                                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Đặt ngay
+                                </button>
+                            </div>
                         </div>
-
-                        <div class="mb-4">
-                            <label for="server_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                Server (nếu có)
-                            </label>
-                            <input type="text" id="server_id" name="server_id"
-                                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Nhập server/máy chủ nếu có">
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label for="additional_info" class="block text-sm font-medium text-gray-700 mb-2">
-                                Thông tin bổ sung (tùy chọn)
-                            </label>
-                            <textarea id="additional_info" name="additional_info" rows="3" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 resize-none" placeholder="Nhập ghi chú hoặc yêu cầu đặc biệt của bạn..."></textarea>
-                        </div>
-                        
-                        <button type="submit" class="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition duration-300 font-bold text-lg flex items-center justify-center shadow-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Đặt dịch vụ ngay
-                        </button>
                     </form>
                     @else
                     <div class="text-center bg-blue-50 p-6 rounded-lg mb-6">

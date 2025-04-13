@@ -131,13 +131,26 @@
                         </div>
 
                         <div class="sm:col-span-6">
-                            <div class="flex items-start">
-                                <div class="flex items-center h-5">
-                                    <input id="is_featured" name="is_featured" type="checkbox" value="1" {{ old('is_featured', $service->is_featured) ? 'checked' : '' }} class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
-                                </div>
-                                <div class="ml-3 text-sm">
-                                    <label for="is_featured" class="font-medium text-gray-700">Hiển thị nổi bật</label>
-                                </div>
+                            <div class="mb-4">
+                                <label for="is_featured" class="inline-flex items-center">
+                                    <input type="checkbox" id="is_featured" name="is_featured" value="1" 
+                                        {{ old('is_featured', $service->is_featured) ? 'checked' : '' }}
+                                        class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                                    <span class="ml-2 text-sm text-gray-700">Dịch vụ nổi bật</span>
+                                </label>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="login_type" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Loại thông tin đăng nhập <span class="text-red-600">*</span>
+                                </label>
+                                <select id="login_type" name="login_type" required
+                                    class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="username_password" {{ old('login_type', $service->login_type) == 'username_password' ? 'selected' : '' }}>Tài khoản và mật khẩu</option>
+                                    <option value="game_id" {{ old('login_type', $service->login_type) == 'game_id' ? 'selected' : '' }}>Chỉ ID Game</option>
+                                    <option value="both" {{ old('login_type', $service->login_type) == 'both' ? 'selected' : '' }}>Cả hai (ID và tài khoản)</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Loại thông tin đăng nhập mà người dùng cần cung cấp khi đặt dịch vụ này</p>
                             </div>
                         </div>
                     </div>

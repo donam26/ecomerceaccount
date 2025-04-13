@@ -48,17 +48,18 @@
                         <div class="sm:col-span-3">
                             <label for="price" class="block text-sm font-medium text-gray-700">Giá gói (VNĐ) <span class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <input type="number" name="price" id="price" min="0" value="{{ old('price', $package->price) }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                                <input type="number" name="price" id="price" min="0" value="{{ old('price', (int)$package->price) }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
                             </div>
+                            <p class="mt-1 text-xs text-gray-500">Nhập số tiền nguyên (không dấu phẩy hay dấu chấm), ví dụ: 100000</p>
                         </div>
 
                         <!-- Giá khuyến mãi -->
                         <div class="sm:col-span-3">
                             <label for="sale_price" class="block text-sm font-medium text-gray-700">Giá khuyến mãi (VNĐ)</label>
                             <div class="mt-1">
-                                <input type="number" name="sale_price" id="sale_price" min="0" value="{{ old('sale_price', $package->sale_price) }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                <input type="number" name="sale_price" id="sale_price" min="0" value="{{ old('sale_price', (int)$package->sale_price) }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
                             </div>
-                            <p class="mt-1 text-xs text-gray-500">Để trống nếu không có khuyến mãi</p>
+                            <p class="mt-1 text-xs text-gray-500">Để trống nếu không có khuyến mãi. Nhập số tiền nguyên, ví dụ: 80000</p>
                         </div>
 
                         <!-- Thứ tự hiển thị -->

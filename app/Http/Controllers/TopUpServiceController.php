@@ -61,25 +61,40 @@ class TopUpServiceController extends Controller
      */
     public function order(Request $request, $slug)
     {
-        // Validate thông tin
-        $request->validate([
-            'game_id' => 'required|string|max:255',
-            'server_id' => 'nullable|string|max:255',
-            'additional_info' => 'nullable|string|max:1000',
-        ], [
-            'game_id.required' => 'Vui lòng nhập ID trong game của bạn',
-        ]);
-
         $service = TopUpService::where('slug', $slug)
             ->where('is_active', true)
             ->firstOrFail();
-            
+        
         // Kiểm tra đăng nhập
         if (!Auth::check()) {
             return redirect()->route('login')
                 ->with('info', 'Vui lòng đăng nhập để đặt dịch vụ nạp thuê.');
         }
         
+        // Xác định quy tắc xác thực dựa trên login_type
+        $rules = [];
+        $messages = [];
+        
+        // Kiểm tra login_type và thêm quy tắc xác thực phù hợp
+        if ($service->login_type === 'game_id' || $service->login_type === 'both') {
+            $rules['game_id'] = 'required|string|max:255';
+            $messages['game_id.required'] = 'Vui lòng nhập ID trong game của bạn';
+        }
+        
+        if ($service->login_type === 'username_password' || $service->login_type === 'both') {
+            $rules['game_username'] = 'required|string|max:255';
+            $rules['game_password'] = 'required|string|max:255';
+            $messages['game_username.required'] = 'Vui lòng nhập tên đăng nhập game của bạn';
+            $messages['game_password.required'] = 'Vui lòng nhập mật khẩu game của bạn';
+        }
+        
+        // Thêm các trường khác
+        $rules['server_id'] = 'nullable|string|max:255';
+        $rules['additional_info'] = 'nullable|string|max:1000';
+        
+        // Validate thông tin
+        $request->validate($rules, $messages);
+
         // Tạo số đơn hàng
         $orderNumber = 'TOPUP' . time() . rand(100, 999);
         
@@ -88,8 +103,8 @@ class TopUpServiceController extends Controller
         $originalAmount = $service->price;
         $discount = $service->hasDiscount() ? ($service->price - $service->sale_price) : 0;
         
-        // Tạo đơn hàng
-        $order = TopUpOrder::create([
+        // Chuẩn bị dữ liệu đơn hàng
+        $orderData = [
             'order_number' => $orderNumber,
             'user_id' => Auth::id(),
             'service_id' => $service->id,
@@ -97,10 +112,23 @@ class TopUpServiceController extends Controller
             'original_amount' => $originalAmount,
             'discount' => $discount,
             'status' => 'pending',
-            'game_id' => $request->game_id,
             'server_id' => $request->server_id,
             'additional_info' => $request->additional_info,
-        ]);
+        ];
+        
+        // Thêm thông tin đăng nhập dựa trên login_type
+        if ($service->login_type === 'game_id' || $service->login_type === 'both') {
+            $orderData['game_id'] = $request->game_id;
+        }
+        
+        // Cập nhật TopUpOrder model để có thêm các trường game_username và game_password
+        if ($service->login_type === 'username_password' || $service->login_type === 'both') {
+            $orderData['game_username'] = $request->game_username;
+            $orderData['game_password'] = $request->game_password;
+        }
+        
+        // Tạo đơn hàng
+        $order = TopUpOrder::create($orderData);
         
         // Chuyển hướng đến trang thanh toán
         return redirect()->route('payment.checkout', $order->order_number);

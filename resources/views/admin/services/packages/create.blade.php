@@ -49,6 +49,7 @@
                             <div class="mt-1">
                                 <input type="number" name="price" id="price" min="0" value="{{ old('price') }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
                             </div>
+                            <p class="mt-1 text-xs text-gray-500">Nhập số tiền nguyên (không dấu phẩy hay dấu chấm), ví dụ: 100000</p>
                         </div>
 
                         <!-- Giá khuyến mãi -->
@@ -57,7 +58,7 @@
                             <div class="mt-1">
                                 <input type="number" name="sale_price" id="sale_price" min="0" value="{{ old('sale_price', '') }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
                             </div>
-                            <p class="mt-1 text-xs text-gray-500">Để trống nếu không có khuyến mãi</p>
+                            <p class="mt-1 text-xs text-gray-500">Để trống nếu không có khuyến mãi. Nhập số tiền nguyên, ví dụ: 80000</p>
                         </div>
 
                         <!-- Thứ tự hiển thị -->

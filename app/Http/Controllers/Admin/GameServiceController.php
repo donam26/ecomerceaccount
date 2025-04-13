@@ -9,6 +9,7 @@ use App\Models\ServicePackage;
 use App\Models\ServiceOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class GameServiceController extends Controller
 {
@@ -44,6 +45,7 @@ class GameServiceController extends Controller
             'status' => 'required|in:active,inactive',
             'image' => 'nullable|image|max:2048',
             'is_featured' => 'boolean',
+            'login_type' => 'required|in:username_password,game_id,both',
         ]);
         
         // Xử lý upload hình ảnh
@@ -56,7 +58,7 @@ class GameServiceController extends Controller
         $validated['slug'] = Str::slug($validated['name']);
         
         // Debug: log dữ liệu trước khi tạo
-        \Log::info('Creating new GameService with data: ', $validated);
+        Log::info('Creating new GameService with data: ', $validated);
         
         // Tạo dịch vụ
         GameService::create($validated);
@@ -90,6 +92,7 @@ class GameServiceController extends Controller
             'status' => 'required|in:active,inactive',
             'image' => 'nullable|image|max:2048',
             'is_featured' => 'boolean',
+            'login_type' => 'required|in:username_password,game_id,both',
         ]);
         
         // Xử lý upload hình ảnh
@@ -159,9 +162,20 @@ class GameServiceController extends Controller
             'image' => 'nullable|image|max:2048',
         ]);
         
-        // Chỉ lưu sale_price khi nó được gửi đến và có giá trị
-        if (empty($validated['sale_price'])) {
+        // Đảm bảo giá tiền là số nguyên
+        $validated['price'] = (int)$validated['price'];
+        
+        // Xử lý sale_price đúng cách
+        if (isset($validated['sale_price']) && $validated['sale_price'] != '') {
+            $validated['sale_price'] = (int)$validated['sale_price'];
+        } else {
+            // Nếu không có giá trị hoặc rỗng, đặt là null
             $validated['sale_price'] = null;
+        }
+        
+        // Xử lý display_order nếu không có
+        if (!isset($validated['display_order']) || $validated['display_order'] === '') {
+            $validated['display_order'] = 0; // Giá trị mặc định
         }
         
         // Xử lý upload hình ảnh
@@ -169,6 +183,9 @@ class GameServiceController extends Controller
             $imagePath = $request->file('image')->store('service_packages', 'public');
             $validated['image'] = '/storage/' . $imagePath;
         }
+        
+        // Debug: log dữ liệu trước khi tạo
+        Log::info('Tạo gói dịch vụ mới với dữ liệu: ', $validated);
         
         // Tạo gói dịch vụ
         $service->packages()->create($validated);
@@ -207,8 +224,13 @@ class GameServiceController extends Controller
             'remove_image' => 'nullable|boolean',
         ]);
         
+        // Đảm bảo giá tiền là số nguyên
+        $validated['price'] = (int)$validated['price'];
+        
         // Chỉ lưu sale_price khi nó được gửi đến và có giá trị
-        if (empty($validated['sale_price'])) {
+        if (!empty($validated['sale_price'])) {
+            $validated['sale_price'] = (int)$validated['sale_price'];
+        } else {
             $validated['sale_price'] = null;
         }
         

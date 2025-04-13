@@ -28,6 +28,7 @@ class ServiceOrder extends Model
         'payment_status',
         'game_username',
         'game_password',
+        'game_id',
         'game_server',
         'notes',
         'account_details',

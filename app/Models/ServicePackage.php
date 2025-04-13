@@ -29,8 +29,8 @@ class ServicePackage extends Model
     ];
 
     protected $casts = [
-        'price' => 'decimal:0',
-        'sale_price' => 'decimal:0',
+        'price' => 'integer',
+        'sale_price' => 'integer',
         'display_order' => 'integer',
         'metadata' => 'json',
     ];

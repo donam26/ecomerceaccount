@@ -21,7 +21,8 @@ class GameService extends Model
         'metadata',
         'completed_count',
         'game_id',
-        'type'
+        'type',
+        'login_type'
     ];
 
     protected $casts = [

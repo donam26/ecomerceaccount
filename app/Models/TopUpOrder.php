@@ -19,6 +19,8 @@ class TopUpOrder extends Model
         'status',
         'game_id',
         'server_id',
+        'game_username',
+        'game_password',
         'additional_info',
         'admin_notes',
         'assigned_to',

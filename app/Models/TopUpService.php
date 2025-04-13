@@ -19,7 +19,8 @@ class TopUpService extends Model
         'thumbnail',
         'banner',
         'slug',
-        'is_active'
+        'is_active',
+        'login_type'
     ];
 
     /**
