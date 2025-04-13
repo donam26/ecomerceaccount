@@ -12,6 +12,7 @@ class Account extends Model
 
     protected $fillable = [
         'game_id',
+        'account_category_id',
         'title',
         'description',
         'price',
@@ -44,6 +45,14 @@ class Account extends Model
     public function game()
     {
         return $this->belongsTo(Game::class);
+    }
+
+    /**
+     * Danh mục mà tài khoản này thuộc về
+     */
+    public function category()
+    {
+        return $this->belongsTo(AccountCategory::class, 'account_category_id');
     }
 
     /**

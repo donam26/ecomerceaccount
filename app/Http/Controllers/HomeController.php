@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Game;
 use App\Models\Account;
+use App\Models\AccountCategory;
 
 class HomeController extends Controller
 {
@@ -19,11 +20,17 @@ class HomeController extends Controller
             $query->where('status', 'available');
         }])->take(6)->get();
         
-      
         $recentAccounts = Account::where('status', 'available')
                           ->latest()
                           ->take(8)
                           ->get();
+        
+        // Lấy các danh mục tài khoản nổi bật
+        $accountCategories = AccountCategory::where('is_active', true)
+            ->orderBy('is_featured', 'desc')
+            ->orderBy('display_order')
+            ->take(4)
+            ->get();
         
         // Lấy các dịch vụ nổi bật hoặc mới nhất
         $services = \App\Models\GameService::with(['game', 'packages' => function($query) {
@@ -38,7 +45,7 @@ class HomeController extends Controller
         ->take(4)
         ->get();
         
-        return view('home', compact('games', 'recentAccounts', 'services'));
+        return view('home', compact('games', 'recentAccounts', 'services', 'accountCategories'));
     }
     
     /**

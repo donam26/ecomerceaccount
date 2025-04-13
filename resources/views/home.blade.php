@@ -34,71 +34,39 @@
             </div>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                @foreach($recentAccounts as $account)
-                    <div class="card overflow-hidden">
-                        <div class="relative">
-                            @if($account->original_price && $account->original_price > $account->price)
-                                <div class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-                                    -{{ $account->getDiscountPercentageAttribute() }}%
-                                </div>
-                            @endif
-                            
-                            <!-- Ảnh tài khoản -->
-                            <div class="h-40 overflow-hidden">
-                                @php
-                                    $accountImage = 'https://via.placeholder.com/300x200';
-                                    if ($account->images) {
-                                        if (is_string($account->images)) {
-                                            $images = json_decode($account->images, true);
-                                            if (is_array($images) && !empty($images)) {
-                                                $accountImage = asset('storage/' . $images[0]);
-                                            }
-                                        } elseif (is_array($account->images) && !empty($account->images)) {
-                                            $accountImage = asset('storage/' . $account->images[0]);
-                                        }
-                                    }
-                                @endphp
-                                <img src="{{ $accountImage }}" alt="{{ $account->title }}" class="w-full h-40 object-cover">
-                            </div>
-                        </div>
-                        
-                        <div class="p-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">{{ $account->game->name }}</span>
-                                @if($account->is_verified)
-                                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                        </svg>
-                                        Đã xác thực
-                                    </span>
-                                @endif
-                            </div>
-                            
-                            <h3 class="font-bold text-gray-800">{{ $account->title }}</h3>
-                            <p class="text-gray-600 text-sm mt-1">{{ Str::limit($account->description, 50) }}</p>
-                            
-                            <div class="mt-3 flex items-center justify-between">
-                                <div>
-                                    <span class="text-xl font-bold text-blue-600">{{ number_format($account->price, 0, ',', '.') }}đ</span>
-                                    @if($account->original_price && $account->original_price > $account->price)
-                                        <span class="text-sm text-gray-500 line-through ml-1">{{ number_format($account->original_price, 0, ',', '.') }}đ</span>
-                                    @endif
-                                </div>
-                                <a href="{{ route('accounts.show', $account->id) }}" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Chi tiết</a>
-                            </div>
+            @foreach($accountCategories as $category)
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <a href="{{ route('account.category', $category->slug) }}">
+                    @if($category->image)
+                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="w-full h-48 object-cover">
+                    @else
+                    <div class="w-full h-48 bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
+                        <span class="text-white text-2xl font-bold">{{ $category->name }}</span>
+                    </div>
+                    @endif
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-2">{{ $category->name }}</h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ $category->description }}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-blue-600 font-medium">Xem tài khoản</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
+                                {{ $category->accounts()->where('status', 'available')->count() }} tài khoản
+                            </span>
                         </div>
                     </div>
-                @endforeach
+                </a>
+            </div>
+            @endforeach
             </div>
             
             <div class="mt-8 text-center">
-                <a href="{{ route('accounts.index') }}" class="btn-primary">Xem tất cả tài khoản</a>
+                <a href="{{ route('account.categories') }}" class="btn-primary">Xem tất cả danh mục</a>
             </div>
         </div>
     </div>
-      <!-- Dịch vụ nổi bật -->
-      @if(isset($services) && $services->count() > 0)
+
+    <!-- Dịch vụ nổi bật -->
+    @if(isset($services) && $services->count() > 0)
     <div class="bg-white py-12">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-10 text-center">

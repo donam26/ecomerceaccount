@@ -35,6 +35,24 @@
                             @enderror
                         </div>
 
+                        <!-- Danh mục tài khoản -->
+                        <div>
+                            <label for="account_category_id" class="block text-sm font-medium text-gray-700">Danh mục tài khoản</label>
+                            <select id="account_category_id" name="account_category_id"
+                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="">Chọn danh mục</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ (old('account_category_id') ?? $account->account_category_id) == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">Có thể để trống</p>
+                            @error('account_category_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         <!-- Tiêu đề -->
                         <div>
                             <label for="title" class="block text-sm font-medium text-gray-700">Tiêu đề</label>

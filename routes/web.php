@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\WalletController as AdminWalletController;
 use App\Http\Controllers\TopUpServiceController;
 use App\Http\Controllers\GameServiceController;
 use App\Http\Controllers\Admin\GameServiceController as AdminGameServiceController;
+use App\Http\Controllers\AccountCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,11 @@ Route::get('/games/{id}', [GameController::class, 'show'])->name('games.show');
 Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
 Route::get('/accounts/search', [AccountController::class, 'search'])->name('accounts.search');
 Route::get('/accounts/{id}', [AccountController::class, 'show'])->name('accounts.show');
+
+// Danh mục tài khoản
+Route::get('/account-categories', [AccountCategoryController::class, 'index'])->name('account.categories');
+Route::get('/account-categories/{slug}', [AccountCategoryController::class, 'show'])->name('account.category');
+Route::get('/account-categories/{slug}/filter', [AccountCategoryController::class, 'filter'])->name('account.category.filter');
 
     // Dịch vụ game
     Route::get('/services', [GameServiceController::class, 'index'])->name('services.index');
@@ -132,6 +138,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     
     // Quản lý tài khoản game
     Route::resource('accounts', AdminAccountController::class);
+    Route::get('accounts/category/{categoryId}', [AdminAccountController::class, 'getCategoryAccounts'])->name('accounts.category');
+    
+    // Quản lý danh mục tài khoản
+    Route::resource('account_categories', \App\Http\Controllers\Admin\AccountCategoryController::class);
     
     // Quản lý đơn hàng
     Route::resource('orders', AdminOrderController::class);

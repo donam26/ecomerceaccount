@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Game;
+use App\Models\AccountCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -15,9 +16,57 @@ class AccountController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Account::with('game');
+        $query = Account::with(['game', 'category']);
         
-        // Lọc theo game
+        // Lọc theo trò chơi
+        if ($request->has('game_id') && $request->game_id) {
+            $query->where('game_id', $request->game_id);
+        }
+        
+        // Lọc theo danh mục
+        if ($request->has('category_id') && $request->category_id) {
+            $query->where('account_category_id', $request->category_id);
+        }
+        
+        // Lọc theo trạng thái
+        if ($request->has('status') && $request->status) {
+            $query->where('status', $request->status);
+        }
+        
+        // Tìm kiếm theo tiêu đề hoặc mô tả
+        if ($request->has('search') && $request->search) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('username', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        // Sắp xếp
+        $sortField = $request->input('sort', 'created_at');
+        $direction = $request->input('direction', 'desc');
+        
+        $query->orderBy($sortField, $direction);
+        
+        $accounts = $query->paginate(15);
+        $games = Game::orderBy('name')->get();
+        $categories = AccountCategory::where('is_active', true)->orderBy('name')->get();
+        
+        return view('admin.accounts.index', compact('accounts', 'games', 'categories'));
+    }
+    
+    /**
+     * Hiển thị danh sách tài khoản trong một danh mục
+     */
+    public function getCategoryAccounts(Request $request, $categoryId)
+    {
+        $category = AccountCategory::findOrFail($categoryId);
+        
+        $query = Account::where('account_category_id', $categoryId)
+                        ->with(['game']);
+        
+        // Lọc theo trò chơi
         if ($request->has('game_id') && $request->game_id) {
             $query->where('game_id', $request->game_id);
         }
@@ -27,15 +76,26 @@ class AccountController extends Controller
             $query->where('status', $request->status);
         }
         
+        // Tìm kiếm theo tiêu đề hoặc mô tả
+        if ($request->has('search') && $request->search) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('username', 'like', "%{$searchTerm}%");
+            });
+        }
+        
         // Sắp xếp
-        $sort = $request->get('sort', 'created_at');
-        $direction = $request->get('direction', 'desc');
-        $query->orderBy($sort, $direction);
+        $sortField = $request->input('sort', 'created_at');
+        $direction = $request->input('direction', 'desc');
+        
+        $query->orderBy($sortField, $direction);
         
         $accounts = $query->paginate(15);
         $games = Game::orderBy('name')->get();
         
-        return view('admin.accounts.index', compact('accounts', 'games'));
+        return view('admin.accounts.category_accounts', compact('category', 'accounts', 'games'));
     }
     
     /**
@@ -44,7 +104,8 @@ class AccountController extends Controller
     public function create()
     {
         $games = Game::orderBy('name')->get();
-        return view('admin.accounts.create', compact('games'));
+        $categories = AccountCategory::where('is_active', true)->orderBy('name')->get();
+        return view('admin.accounts.create', compact('games', 'categories'));
     }
     
     /**
@@ -54,6 +115,7 @@ class AccountController extends Controller
     {
         $validated = $request->validate([
             'game_id' => 'required|exists:games,id',
+            'account_category_id' => 'nullable|exists:account_categories,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'attributes' => 'nullable|array',
@@ -67,6 +129,7 @@ class AccountController extends Controller
         
         $account = new Account();
         $account->game_id = $validated['game_id'];
+        $account->account_category_id = $validated['account_category_id'] ?? null;
         $account->title = $validated['title'];
         $account->description = $validated['description'] ?? null;
         $account->attributes = $validated['attributes'] ?? [];
@@ -102,7 +165,7 @@ class AccountController extends Controller
      */
     public function show($id)
     {
-        $account = Account::with('game')->findOrFail($id);
+        $account = Account::with(['game', 'category'])->findOrFail($id);
         return view('admin.accounts.show', compact('account'));
     }
     
@@ -113,7 +176,8 @@ class AccountController extends Controller
     {
         $account = Account::findOrFail($id);
         $games = Game::orderBy('name')->get();
-        return view('admin.accounts.edit', compact('account', 'games'));
+        $categories = \App\Models\AccountCategory::where('is_active', true)->orderBy('name')->get();
+        return view('admin.accounts.edit', compact('account', 'games', 'categories'));
     }
     
     /**
@@ -125,6 +189,7 @@ class AccountController extends Controller
         
         $validated = $request->validate([
             'game_id' => 'required|exists:games,id',
+            'account_category_id' => 'nullable|exists:account_categories,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'attributes' => 'nullable|array',
@@ -138,6 +203,7 @@ class AccountController extends Controller
         ]);
         
         $account->game_id = $validated['game_id'];
+        $account->account_category_id = $validated['account_category_id'] ?? null;
         $account->title = $validated['title'];
         $account->description = $validated['description'] ?? null;
         $account->attributes = $validated['attributes'] ?? [];

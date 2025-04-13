@@ -1,75 +1,88 @@
 @extends('layouts.admin')
 
-@section('title', 'Quản lý tài khoản game')
+@section('title', 'Tài khoản trong danh mục ' . $category->name)
 
 @section('content')
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center">
-            <h1 class="text-2xl font-semibold text-gray-900">Quản lý tài khoản game</h1>
-            <a href="{{ route('admin.accounts.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                Thêm tài khoản mới
-            </a>
+            <h1 class="text-2xl font-semibold text-gray-900">
+                Tài khoản trong danh mục: <span class="text-blue-600">{{ $category->name }}</span>
+            </h1>
+            <div class="flex space-x-2">
+                <a href="{{ route('admin.accounts.index') }}" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
+                    <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                </a>
+                <a href="{{ route('admin.accounts.create') }}?category_id={{ $category->id }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                    Thêm tài khoản mới
+                </a>
+            </div>
         </div>
-        
-        <!-- Bộ lọc -->
-        <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
-            <form action="{{ route('admin.accounts.index') }}" method="GET" class="p-4">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label for="game_id" class="block text-sm font-medium text-gray-700">Trò chơi</label>
-                        <select id="game_id" name="game_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                            <option value="">Tất cả trò chơi</option>
-                            @foreach($games as $game)
-                                <option value="{{ $game->id }}" {{ request('game_id') == $game->id ? 'selected' : '' }}>{{ $game->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="category_id" class="block text-sm font-medium text-gray-700">Danh mục</label>
-                        <select id="category_id" name="category_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                            <option value="">Tất cả danh mục</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700">Trạng thái</label>
-                        <select id="status" name="status" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                            <option value="">Tất cả trạng thái</option>
-                            <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Có sẵn</option>
-                            <option value="sold" {{ request('status') == 'sold' ? 'selected' : '' }}>Đã bán</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Đang xử lý</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="search" class="block text-sm font-medium text-gray-700">Tìm kiếm</label>
-                        <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Tiêu đề, mô tả, username..." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                    </div>
-                </div>
-                <div class="mt-4 flex justify-between">
-                    <div>
-                        <label for="sort" class="block text-sm font-medium text-gray-700">Sắp xếp theo</label>
-                        <div class="flex gap-2">
-                            <select id="sort" name="sort" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                <option value="created_at" {{ request('sort') == 'created_at' ? 'selected' : '' }}>Ngày tạo</option>
-                                <option value="price" {{ request('sort') == 'price' ? 'selected' : '' }}>Giá</option>
-                                <option value="title" {{ request('sort') == 'title' ? 'selected' : '' }}>Tiêu đề</option>
-                            </select>
-                            <select id="direction" name="direction" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                <option value="desc" {{ request('direction') == 'desc' ? 'selected' : '' }}>Giảm dần</option>
-                                <option value="asc" {{ request('direction') == 'asc' ? 'selected' : '' }}>Tăng dần</option>
-                            </select>
+
+        <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Thông tin danh mục</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            @if($category->image)
+                                <img src="{{ Storage::url($category->image) }}" alt="{{ $category->name }}" class="w-full h-32 object-cover rounded-md">
+                            @else
+                                <div class="w-full h-32 bg-gray-200 flex items-center justify-center rounded-md">
+                                    <span class="text-gray-500 text-xs">Không có ảnh</span>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="col-span-2">
+                            <p><span class="font-medium">ID:</span> {{ $category->id }}</p>
+                            <p><span class="font-medium">Tên:</span> {{ $category->name }}</p>
+                            <p><span class="font-medium">Slug:</span> {{ $category->slug }}</p>
+                            <p><span class="font-medium">Trạng thái:</span> 
+                                @if($category->is_active)
+                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Hoạt động</span>
+                                @else
+                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Không hoạt động</span>
+                                @endif
+                            </p>
                         </div>
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                            Lọc kết quả
-                        </button>
+                    <div class="mt-2">
+                        <p class="font-medium">Mô tả:</p>
+                        <p class="text-gray-600">{{ $category->description ?? 'Không có mô tả' }}</p>
                     </div>
                 </div>
-            </form>
+                <div>
+                    <!-- Bộ lọc -->
+                    <form action="{{ route('admin.accounts.category', $category->id) }}" method="GET" class="p-4 bg-gray-50 rounded-md">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Lọc tài khoản</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="game_id" class="block text-sm font-medium text-gray-700">Trò chơi</label>
+                                <select id="game_id" name="game_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <option value="">Tất cả trò chơi</option>
+                                    @foreach($games as $game)
+                                        <option value="{{ $game->id }}" {{ request('game_id') == $game->id ? 'selected' : '' }}>{{ $game->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label for="status" class="block text-sm font-medium text-gray-700">Trạng thái</label>
+                                <select id="status" name="status" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Có sẵn</option>
+                                    <option value="sold" {{ request('status') == 'sold' ? 'selected' : '' }}>Đã bán</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Đang xử lý</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                Lọc
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
         
         <!-- Danh sách tài khoản -->
@@ -101,7 +114,7 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach($accounts as $account)
+                    @forelse($accounts as $account)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $account->id }}
@@ -162,7 +175,13 @@
                                 </form>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                Không có tài khoản nào trong danh mục này
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
             

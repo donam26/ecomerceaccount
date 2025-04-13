@@ -19,6 +19,11 @@ class AccountController extends Controller
             $query->where('game_id', $request->game_id);
         }
         
+        // Lọc theo danh mục
+        if ($request->has('category_id') && $request->category_id) {
+            $query->where('account_category_id', $request->category_id);
+        }
+        
         // Sắp xếp
         $sortBy = $request->input('sort_by', 'latest');
         switch ($sortBy) {
@@ -39,7 +44,13 @@ class AccountController extends Controller
         
         $accounts = $query->paginate(12);
         
-        return view('accounts.index', compact('accounts'));
+        // Lấy danh sách các danh mục tài khoản
+        $categories = \App\Models\AccountCategory::where('is_active', true)
+            ->orderBy('display_order')
+            ->orderBy('name')
+            ->get();
+        
+        return view('accounts.index', compact('accounts', 'categories'));
     }
     
     /**
