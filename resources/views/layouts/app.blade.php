@@ -160,6 +160,9 @@
                     <a href="{{ route('services.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('services.*') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
                         Dịch vụ
                     </a>
+                    <a href="{{ route('topup.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('topup.*') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
+                        Nạp thuê
+                    </a>
                     <a href="{{ route('about') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('about') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
                         Về chúng tôi
                     </a>
@@ -175,6 +178,24 @@
                             Đăng ký
                         </a>
                     @else
+                        <!-- Hiển thị số dư ví trên mobile -->
+                        <a href="{{ route('wallet.index') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm11 1H6v8h8V6z" clip-rule="evenodd" />
+                                    <path d="M14 8a1 1 0 100-2h-4a1 1 0 100 2h4z" />
+                                </svg>
+                                <span>Ví: {{ Auth::user()->wallet ? number_format(Auth::user()->wallet->balance, 0, ',', '.') : 0 }}đ</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('wallet.deposit') }}" class="block px-3 py-2 rounded-md text-white bg-green-600 font-medium hover:bg-green-700">
+                            <div class="flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                                </svg>
+                                Nạp tiền
+                            </div>
+                        </a>
                         <a href="{{ route('profile.index') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
                             Thông tin tài khoản
                         </a>
