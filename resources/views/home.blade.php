@@ -2,128 +2,173 @@
 
 @section('title', 'Trang chủ')
 
+@section('breadcrumbs')
+<div class="flex items-center text-sm">
+    <a href="{{ route('home') }}" class="text-indigo-600 font-medium">Trang chủ</a>
+</div>
+@endsection
+
 @section('content')
     <!-- Hero Banner -->
     <div class="relative">
-        <div class="bg-gradient-to-r from-blue-700 to-blue-500 text-white">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                    <div>
-                        <h1 class="text-4xl md:text-5xl font-bold mb-4">Tài khoản Playtogerther chất lượng cao</h1>
-                        <p class="text-xl mb-8">Chúng tôi cung cấp các tài khoản game Playtogerther uy tín, giá tốt nhất thị trường, giao dịch an toàn, bảo mật.</p>
-                        <div class="flex space-x-4">
-                            <a href="{{ route('accounts.index') }}" class="btn-primary px-6 py-3 text-lg">Xem tài khoản</a>
-                            <a href="{{ route('about') }}" class="border-2 border-white text-white px-6 py-3 rounded-lg hover:bg-white hover:text-blue-600 transition duration-300 text-lg">Tìm hiểu thêm</a>
+        <div class="bg-gradient-to-r from-indigo-700 to-blue-500 text-white relative overflow-hidden">
+            <!-- Background pattern -->
+            <div class="absolute inset-0 opacity-10">
+                <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                        <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5"/>
+                    </pattern>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                </svg>
+            </div>
+            
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div data-aos="fade-right">
+                        <h1 class="text-4xl md:text-5xl font-extrabold mb-6 animate-fade-in-up leading-tight">
+                            Tài khoản Playtogerther <span class="text-yellow-300">chất lượng cao</span>
+                        </h1>
+                        <p class="text-xl mb-8 text-gray-200 leading-relaxed animate-fade-in-up animate-delay-100">
+                            Chúng tôi cung cấp các tài khoản game uy tín, giá tốt nhất thị trường, giao dịch an toàn, bảo mật.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 animate-fade-in-up animate-delay-200">
+                            <a href="{{ route('accounts.index') }}" class="btn-primary px-6 py-3 text-lg inline-flex items-center justify-center">
+                                <i class="bi bi-controller mr-2"></i>Xem tài khoản
+                            </a>
+                            <a href="{{ route('about') }}" class="border-2 border-white text-white px-6 py-3 rounded-lg hover:bg-white hover:text-indigo-600 transition duration-300 text-lg flex items-center justify-center">
+                                <i class="bi bi-info-circle mr-2"></i>Tìm hiểu thêm
+                            </a>
                         </div>
                     </div>
-                    <div class="hidden md:block">
-                        <img src="{{ asset('images/banner.jpeg') }}" alt="Playtogerther Mobile" class="w-full h-auto rounded-lg shadow-lg">
+                    <div class="hidden md:block" data-aos="fade-left">
+                        <div class="relative">
+                            <div class="absolute -inset-4 bg-white/10 rounded-2xl blur-xl"></div>
+                            <img src="{{ asset('images/banner.jpeg') }}" alt="Playtogerther Mobile" class="w-full h-auto rounded-xl shadow-2xl relative transform hover:scale-105 transition duration-700">
+                        </div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Wave effect -->
+            <div class="absolute bottom-0 left-0 right-0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" class="w-full">
+                    <path fill="#f9fafb" fill-opacity="1" d="M0,32L80,42.7C160,53,320,75,480,74.7C640,75,800,53,960,37.3C1120,21,1280,11,1360,5.3L1440,0L1440,100L1360,100C1280,100,1120,100,960,100C800,100,640,100,480,100C320,100,160,100,80,100L0,100Z"></path>
+                </svg>
             </div>
         </div>
     </div>
 
-  
-    <!-- Tài khoản mới nhất -->
-    <div class="bg-gray-50 py-12">
+    <!-- Danh mục tài khoản -->
+    <div class="bg-gray-50 py-16">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-10 text-center">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">SPAM KHẮP ĐẢO KAIA</h2>
-                <p class="text-gray-600">Cập nhật liên tục các tài khoản mới nhất với nhiều ưu đãi</p>
+            <div class="mb-10 text-center" data-aos="fade-up">
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-medium inline-block px-2.5 py-1 rounded-full">DANH MỤC TÀI KHOẢN</span>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2 mt-2">SPAM KHẮP ĐẢO KAIA</h2>
+                <div class="divider"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto">Cập nhật liên tục các tài khoản mới nhất với nhiều ưu đãi hấp dẫn</p>
             </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             @foreach($accountCategories as $category)
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <a href="{{ route('account.category', $category->slug) }}">
-                    @if($category->image)
-                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="w-full h-48 object-cover">
-                    @else
-                    <div class="w-full h-48 bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
-                        <span class="text-white text-2xl font-bold">{{ $category->name }}</span>
-                    </div>
-                    @endif
-                    <div class="p-4">
-                        <h3 class="text-lg font-semibold mb-2">{{ $category->name }}</h3>
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ $category->description }}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-blue-600 font-medium">Xem tài khoản</span>
-                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
-                                {{ $category->accounts()->where('status', 'available')->count() }} tài khoản
-                            </span>
+                <div class="card hover-shadow" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                    <a href="{{ route('account.category', $category->slug) }}">
+                        @if($category->image)
+                            <div class="overflow-hidden rounded-t-xl">
+                                <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" 
+                                    class="w-full h-52 object-cover transition-transform duration-500 hover:scale-110">
+                            </div>
+                        @else
+                            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 h-52 flex items-center justify-center rounded-t-xl">
+                                <span class="text-white text-2xl font-bold px-4 text-center">{{ $category->name }}</span>
+                            </div>
+                        @endif
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold mb-2 text-gray-800 group-hover:text-indigo-600 transition-colors">{{ $category->name }}</h3>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2 h-10">{{ $category->description }}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-indigo-600 font-medium flex items-center">
+                                    Xem tài khoản
+                                    <i class="bi bi-arrow-right ml-1"></i>
+                                </span>
+                                <span class="badge badge-blue">
+                                    {{ $category->accounts()->where('status', 'available')->count() }} tài khoản
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                </a>
-            </div>
+                    </a>
+                </div>
             @endforeach
             </div>
             
-            <div class="mt-8 text-center">
-                <a href="{{ route('account.categories') }}" class="btn-primary">Xem tất cả danh mục</a>
+            <div class="mt-12 text-center" data-aos="fade-up">
+                <a href="{{ route('account.categories') }}" class="btn-primary px-8 py-3 flex items-center justify-center mx-auto w-auto max-w-xs">
+                    <i class="bi bi-grid-3x3-gap mr-2"></i>
+                    Xem tất cả danh mục
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Dịch vụ nổi bật -->
     @if(isset($services) && $services->count() > 0)
-    <div class="bg-white py-12">
+    <div class="bg-white py-16">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-10 text-center">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">Khu vực dịch vụ</h2>
-                <p class="text-gray-600">Dịch vụ uy tín từ các ShopBuffsao</p>
+            <div class="mb-10 text-center" data-aos="fade-up">
+                <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-block px-2.5 py-1 rounded-full">DỊCH VỤ HÀNG ĐẦU</span>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2 mt-2">Khu vực dịch vụ</h2>
+                <div class="divider"></div>
+                <p class="text-gray-600 max-w-2xl mx-auto">Dịch vụ uy tín từ các ShopBuffsao</p>
             </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 @foreach($services as $service)
-                <div class="group bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition duration-300">
+                <div class="group card card-hover-effect" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                     <a href="{{ route('services.show', $service->slug) }}" class="block">
-                        <div class="relative h-48 overflow-hidden">
+                        <div class="relative h-48 overflow-hidden rounded-t-xl">
                             @if($service->image)
-                            <img src="{{ asset($service->image) }}" alt="{{ $service->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                <img src="{{ asset($service->image) }}" alt="{{ $service->name }}" 
+                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                             @else
-                            <div class="w-full h-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <div class="w-full h-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center">
+                                    <i class="bi bi-play-circle text-white text-6xl"></i>
+                                </div>
+                            @endif
+                            <!-- Game tag and featured badge -->
+                            <div class="absolute top-2 left-2">
+                                <span class="bg-indigo-600/80 text-white text-xs font-medium px-2.5 py-1 rounded backdrop-blur-sm">
+                                    {{ $service->game->name }}
+                                </span>
                             </div>
+                            @if($service->is_featured)
+                                <div class="absolute top-2 right-2">
+                                    <span class="bg-yellow-500/80 text-white text-xs font-medium px-2.5 py-1 rounded flex items-center backdrop-blur-sm">
+                                        <i class="bi bi-star-fill mr-1"></i>
+                                        Nổi bật
+                                    </span>
+                                </div>
                             @endif
                         </div>
                     </a>
                     
                     <div class="p-5">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">{{ $service->game->name }}</span>
-                            @if($service->is_featured)
-                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                Nổi bật
-                            </span>
-                            @endif
-                        </div>
-                        
                         <a href="{{ route('services.show', $service->slug) }}" class="block">
-                            <h3 class="font-bold text-gray-800 text-xl mb-2 hover:text-blue-600 transition">{{ $service->name }}</h3>
+                            <h3 class="font-bold text-gray-800 text-xl mb-2 hover:text-indigo-600 transition">{{ $service->name }}</h3>
                         </a>
                         
-                        <p class="text-gray-600 text-sm mb-4">{{ Str::limit($service->description, 100) }}</p>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2 h-10">{{ Str::limit($service->description, 100) }}</p>
                         
                         <div class="flex items-center justify-between">
-                            <div class="text-blue-600 font-semibold">
+                            <div class="text-indigo-600 font-semibold">
                                 @if($service->packages->count() > 0)
-                                Từ {{ number_format($service->packages->min('price'), 0, ',', '.') }}đ
+                                    Từ {{ number_format($service->packages->min('price'), 0, ',', '.') }}đ
                                 @else
-                                Liên hệ báo giá
+                                    Liên hệ báo giá
                                 @endif
                             </div>
-                            <a href="{{ route('services.show', $service->slug) }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
-                                Xem chi tiết
-                                <svg class="w-3.5 h-3.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                                </svg>
+                            <a href="{{ route('services.show', $service->slug) }}" 
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 transition">
+                                <span>Chi tiết</span>
+                                <i class="bi bi-chevron-right ml-1"></i>
                             </a>
                         </div>
                     </div>
@@ -131,51 +176,58 @@
                 @endforeach
             </div>
             
-            <div class="mt-8 text-center">
-                <a href="{{ route('services.index') }}" class="btn-primary">Xem tất cả dịch vụ</a>
+            <div class="mt-12 text-center" data-aos="fade-up">
+                <a href="{{ route('services.index') }}" class="btn-primary px-8 py-3 flex items-center justify-center mx-auto w-auto max-w-xs">
+                    <i class="bi bi-grid-3x3-gap mr-2"></i>
+                    Xem tất cả dịch vụ
+                </a>
             </div>
         </div>
     </div>
     @endif
 
      <!-- Lý do chọn chúng tôi -->
-     <div class="bg-white py-12">
+     <div class="bg-gradient-to-r from-indigo-700 to-blue-700 text-white py-16">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-10 text-center">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">Tại sao chọn chúng tôi?</h2>
-                <p class="text-gray-600">Chúng tôi cam kết mang đến cho bạn trải nghiệm mua tài khoản game tốt nhất</p>
+            <div class="mb-10 text-center" data-aos="fade-up">
+                <span class="bg-white/20 text-white text-xs font-medium inline-block px-2.5 py-1 rounded-full backdrop-blur-sm">VÌ SAO CHỌN CHÚNG TÔI</span>
+                <h2 class="text-3xl font-bold mb-2 mt-2">Tại sao chọn chúng tôi?</h2>
+                <div class="w-16 sm:w-24 h-1 bg-white/20 rounded-full mx-auto my-4"></div>
+                <p class="text-gray-200 max-w-2xl mx-auto">Chúng tôi cam kết mang đến cho bạn trải nghiệm mua tài khoản game tốt nhất</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="bg-blue-100 rounded-full p-4 mx-auto w-16 h-16 flex items-center justify-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                        </svg>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="text-center flex flex-col items-center" data-aos="fade-up" data-aos-delay="100">
+                    <div class="bg-white/10 rounded-xl p-6 mb-6 w-20 h-20 flex items-center justify-center backdrop-blur-sm">
+                        <i class="bi bi-patch-check text-4xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Uy tín hàng đầu</h3>
-                    <p class="text-gray-600">Chúng tôi cam kết cung cấp tài khoản chất lượng, đúng như mô tả, mang đến sự hài lòng cho khách hàng.</p>
+                    <h3 class="text-xl font-bold mb-4">Uy tín hàng đầu</h3>
+                    <p class="text-gray-200">Chúng tôi cam kết cung cấp tài khoản chất lượng, đúng như mô tả, mang đến sự hài lòng cho khách hàng.</p>
                 </div>
                 
-                <div class="text-center">
-                    <div class="bg-blue-100 rounded-full p-4 mx-auto w-16 h-16 flex items-center justify-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                        </svg>
+                <div class="text-center flex flex-col items-center" data-aos="fade-up" data-aos-delay="200">
+                    <div class="bg-white/10 rounded-xl p-6 mb-6 w-20 h-20 flex items-center justify-center backdrop-blur-sm">
+                        <i class="bi bi-shield-check text-4xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">An toàn & Bảo mật</h3>
-                    <p class="text-gray-600">Giao dịch an toàn, bảo mật thông tin khách hàng tuyệt đối, thanh toán đa dạng qua nhiều hình thức.</p>
+                    <h3 class="text-xl font-bold mb-4">An toàn & Bảo mật</h3>
+                    <p class="text-gray-200">Giao dịch an toàn, bảo mật thông tin khách hàng tuyệt đối, thanh toán đa dạng qua nhiều hình thức.</p>
                 </div>
                 
-                <div class="text-center">
-                    <div class="bg-blue-100 rounded-full p-4 mx-auto w-16 h-16 flex items-center justify-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                        </svg>
+                <div class="text-center flex flex-col items-center" data-aos="fade-up" data-aos-delay="300">
+                    <div class="bg-white/10 rounded-xl p-6 mb-6 w-20 h-20 flex items-center justify-center backdrop-blur-sm">
+                        <i class="bi bi-headset text-4xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Hỗ trợ 24/7</h3>
-                    <p class="text-gray-600">Đội ngũ hỗ trợ chuyên nghiệp, luôn sẵn sàng giải đáp mọi thắc mắc và hỗ trợ bạn khi cần.</p>
+                    <h3 class="text-xl font-bold mb-4">Hỗ trợ 24/7</h3>
+                    <p class="text-gray-200">Đội ngũ hỗ trợ chuyên nghiệp, luôn sẵn sàng giải đáp mọi thắc mắc và hỗ trợ bạn khi cần.</p>
                 </div>
+            </div>
+            
+            <!-- CTA Button -->
+            <div class="mt-12 text-center" data-aos="fade-up">
+                <a href="{{ route('contact') }}" class="bg-white text-indigo-700 px-8 py-3 rounded-lg font-medium inline-flex items-center hover:bg-gray-100 transition-all transform hover:-translate-y-1 hover:shadow-xl">
+                    <i class="bi bi-chat-dots mr-2"></i>
+                    Liên hệ với chúng tôi
+                </a>
             </div>
         </div>
     </div>

@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
-@section('title', 'Quản lý dịch vụ nạp thuê')
+@section('title', 'Quản lý dịch vụ nạp hộ')
 
 @section('content')
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center">
-            <h1 class="text-2xl font-semibold text-gray-900">Quản lý dịch vụ nạp thuê</h1>
+            <h1 class="text-2xl font-semibold text-gray-900">Quản lý dịch vụ nạp hộ</h1>
             <a href="{{ route('admin.topup.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
                 Thêm dịch vụ mới
             </a>
@@ -129,7 +129,7 @@
                         @empty
                         <tr>
                             <td colspan="9" class="px-6 py-4 text-sm text-center text-gray-500">
-                                Không có dữ liệu dịch vụ nạp thuê.
+                                Không có dữ liệu dịch vụ nạp hộ.
                             </td>
                         </tr>
                         @endforelse

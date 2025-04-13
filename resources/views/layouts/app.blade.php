@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="ShopBuffsao - Web mua bán tài khoản game uy tín, chất lượng cao">
+    <meta name="keywords" content="mua tài khoản game, bán tài khoản, game online, nạp game, dịch vụ game">
 
     <title>{{ config('app.name', 'ShopBuffsao') }} - @yield('title', 'Trang chủ')</title>
 
@@ -22,328 +24,495 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <!-- Heroicons -->
-    <script src="https://unpkg.com/heroicons@1.0.6/dist/solid.js"></script>
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <style>
+        /* Custom styles */
+        .gradient-bg {
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+        }
+        .floating-social {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .floating-social a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        .floating-social a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0,0,0,0.2);
+        }
+        .facebook-btn {
+            background: #1877F2;
+        }
+        .zalo-btn {
+            background: #0068ff;
+        }
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: white;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+        .dropdown-menu {
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            transform-origin: top;
+            transform: scale(0.95);
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.2s ease, opacity 0.2s ease, visibility 0.2s ease;
+        }
+        .dropdown-menu.show {
+            transform: scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+        }
+        .mobile-menu {
+            transform: translateY(-10px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .mobile-menu.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .nav-item {
+            position: relative;
+        }
+        .badge-notification {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 9999px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body class="font-sans antialiased bg-gray-50 text-gray-800">
     <div class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="bg-blue-600 text-white shadow">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex">
+        <!-- Header/Navbar -->
+        <header class="sticky top-0 z-50">
+            <nav class="gradient-bg text-white shadow-md">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center h-16">
                         <!-- Logo -->
-                        <div class="flex-shrink-0 flex items-center">
-                            <a href="{{ route('home') }}" class="logo-text">
-                                ShopBuffsao
+                        <div class="flex items-center">
+                            <a href="{{ route('home') }}" class="flex items-center space-x-2">
+                                <!-- Logo tùy chỉnh nếu có -->
+                                <span class="text-xl font-bold tracking-tight">ShopBuffsao</span>
                             </a>
                         </div>
                         
-                        <!-- Navigation Links -->
-                        <div class="hidden sm:ml-6 sm:flex space-x-4">
-                            <a href="{{ route('home') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('home') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
-                                Trang chủ
-                            </a>
-                            <a href="{{ route('accounts.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('accounts.*') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
-                                Tài khoản
-                            </a>
-                           
-                            <a href="{{ route('services.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('services.*') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
-                                Dịch vụ
-                            </a>
-                            <a href="{{ route('topup.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('topup.*') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
-                                Nạp thuê
-                            </a>
-                            <a href="{{ route('contact') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('contact') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
-                                Liên hệ
-                            </a>
+                        <!-- Desktop Navigation -->
+                        <div class="hidden md:flex md:items-center md:space-x-6">
+                            <a href="{{ route('home') }}" class="nav-link px-2 py-2 text-white hover:text-gray-100 font-medium {{ request()->routeIs('home') ? 'active' : '' }}">Trang chủ</a>
+                            <a href="{{ route('accounts.index') }}" class="nav-link px-2 py-2 text-white hover:text-gray-100 font-medium {{ request()->routeIs('accounts.*') ? 'active' : '' }}">Tài khoản</a>
+                            <a href="{{ route('services.index') }}" class="nav-link px-2 py-2 text-white hover:text-gray-100 font-medium {{ request()->routeIs('services.*') ? 'active' : '' }}">Dịch vụ</a>
+                            <a href="{{ route('topup.index') }}" class="nav-link px-2 py-2 text-white hover:text-gray-100 font-medium {{ request()->routeIs('topup.*') ? 'active' : '' }}">Nạp hộ</a>
+                            <a href="{{ route('contact') }}" class="nav-link px-2 py-2 text-white hover:text-gray-100 font-medium {{ request()->routeIs('contact') ? 'active' : '' }}">Liên hệ</a>
                         </div>
-                    </div>
-                    
-                    <!-- Search -->
-                    <div class="flex items-center">
-                        <form action="{{ route('accounts.search') }}" method="GET" class="hidden md:block">
-                            <div class="relative">
-                                <input type="text" name="keyword" placeholder="Tìm kiếm tài khoản..." class="w-64 rounded-full py-1 px-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        
+                        <!-- Search -->
+                        <div class="hidden md:flex items-center">
+                            <form action="{{ route('accounts.search') }}" method="GET" class="relative">
+                                <input type="text" name="keyword" placeholder="Tìm kiếm tài khoản..." 
+                                    class="w-64 rounded-full py-2 px-4 pr-10 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 border-0">
                                 <button type="submit" class="absolute right-0 top-0 h-full px-3 text-gray-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                                    </svg>
+                                    <i class="bi bi-search"></i>
                                 </button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <!-- Authentication -->
-                    <div class="hidden sm:flex sm:items-center sm:ml-6">
-                        @guest
-                            <a href="{{ route('login') }}" class="text-sm text-white hover:text-gray-200 mr-4">Đăng nhập</a>
-                            <a href="{{ route('register') }}" class="text-sm bg-white text-blue-600 hover:bg-gray-100 px-4 py-2 rounded-md font-semibold">Đăng ký</a>
-                        @else
-                            <!-- Hiển thị số dư ví -->
-                            <div class="flex items-center border-r border-blue-400 pr-3 mr-3">
-                                <a href="{{ route('wallet.index') }}" class="flex items-center hover:text-gray-200">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm11 1H6v8h8V6z" clip-rule="evenodd" />
-                                        <path d="M14 8a1 1 0 100-2h-4a1 1 0 100 2h4z" />
-                                    </svg>
-                                    <span>Ví: {{ Auth::user()->wallet ? number_format(Auth::user()->wallet->balance, 0, ',', '.') : 0 }}đ</span>
-                                </a>
-                            </div>
+                            </form>
+                        </div>
                         
-                            <div class="ml-3 relative cursor-pointer
-">
-                                <div class="flex items-center">
-                                    <span class="mr-2">{{ Auth::user()->name }}</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                
-                                <!-- Dropdown menu -->
-                                <div class="hidden absolute right-0 mt-2 w-48 py-2 bg-white rounded-md shadow-lg z-10 ">
-                                    @if(Auth::user()->isAdmin())
-                                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Quản trị viên
+                        <!-- User Menu (Desktop) -->
+                        <div class="hidden md:flex items-center space-x-4">
+                            @guest
+                                <a href="{{ route('login') }}" class="text-white hover:text-gray-200 font-medium">Đăng nhập</a>
+                                <a href="{{ route('register') }}" class="bg-white text-indigo-600 hover:bg-gray-100 px-4 py-2 rounded-lg font-medium transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-md">Đăng ký</a>
+                            @else
+                                <div class="relative" id="userDropdown">
+                                    <div class="flex items-center space-x-3 cursor-pointer">
+                                        <!-- Wallet balance -->
+                                        <a href="{{ route('wallet.index') }}" class="flex items-center px-3 py-1.5 bg-indigo-700 rounded-lg hover:bg-indigo-800 transition">
+                                            <i class="bi bi-wallet2 mr-2"></i>
+                                            <span>{{ Auth::user()->wallet ? number_format(Auth::user()->wallet->balance, 0, ',', '.') : 0 }}đ</span>
                                         </a>
-                                    @endif
+                                        
+                                        <div class="flex items-center space-x-1">
+                                            <span class="text-sm">{{ Auth::user()->name }}</span>
+                                            <i class="bi bi-chevron-down text-xs"></i>
+                                        </div>
+                                    </div>
                                     
-                                    <a href="{{ route('profile.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        Thông tin tài khoản
-                                    </a>
-
-                                    <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        Đơn hàng tài khoản
-                                    </a>
-                                    
-                                    
-                                    <a href="{{ route('services.my_orders') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        Lịch sử dịch vụ
-                                    </a>
-                                    
-                                    <!-- Authentication -->
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Đăng xuất
-                                        </button>
-                                    </form>
+                                    <!-- User Dropdown Menu -->
+                                    <div class="dropdown-menu absolute right-0 mt-2 w-48 py-2 bg-white rounded-lg shadow-lg text-gray-700 z-10">
+                                        @if(Auth::user()->isAdmin())
+                                            <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-sm hover:bg-gray-100 hover:text-indigo-600 transition">
+                                                <i class="bi bi-speedometer2 mr-2"></i>Quản trị viên
+                                            </a>
+                                            <hr class="my-1 border-gray-200">
+                                        @endif
+                                        
+                                        <a href="{{ route('profile.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-100 hover:text-indigo-600 transition">
+                                            <i class="bi bi-person mr-2"></i>Thông tin tài khoản
+                                        </a>
+                                        <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-100 hover:text-indigo-600 transition">
+                                            <i class="bi bi-bag mr-2"></i>Đơn hàng tài khoản
+                                        </a>
+                                        <a href="{{ route('services.my_orders') }}" class="block px-4 py-2 text-sm hover:bg-gray-100 hover:text-indigo-600 transition">
+                                            <i class="bi bi-clock-history mr-2"></i>Lịch sử dịch vụ
+                                        </a>
+                                        <hr class="my-1 border-gray-200">
+                                        <form method="POST" action="{{ route('logout') }}">
+                                            @csrf
+                                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 hover:text-red-600 transition">
+                                                <i class="bi bi-box-arrow-right mr-2"></i>Đăng xuất
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
-                            </div>
-                        @endguest
+                            @endguest
+                        </div>
+                        
+                        <!-- Mobile Menu Button -->
+                        <div class="flex md:hidden">
+                            <button type="button" id="mobileMenuButton" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-200 hover:bg-indigo-700 transition">
+                                <i class="bi bi-list text-2xl"></i>
+                            </button>
+                        </div>
                     </div>
-                    
-                    <!-- Mobile menu button -->
-                    <div class="flex items-center sm:hidden">
-                        <button type="button" class="mobile-menu-button inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
+                </div>
+                
+                <!-- Mobile Menu -->
+                <div id="mobileMenu" class="mobile-menu hidden md:hidden">
+                    <div class="px-4 py-2 space-y-1 border-t border-indigo-700">
+                        <!-- Mobile Search -->
+                        <div class="pb-2">
+                            <form action="{{ route('accounts.search') }}" method="GET" class="relative">
+                                <input type="text" name="keyword" placeholder="Tìm kiếm tài khoản..." 
+                                    class="w-full rounded-full py-2 px-4 pr-10 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 border-0">
+                                <button type="submit" class="absolute right-0 top-0 h-full px-3 text-gray-600">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Mobile Navigation Links -->
+                        <a href="{{ route('home') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('home') ? 'bg-indigo-700 font-medium' : 'hover:bg-indigo-700' }} transition">
+                            <i class="bi bi-house mr-2"></i>Trang chủ
+                        </a>
+                        <a href="{{ route('accounts.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('accounts.*') ? 'bg-indigo-700 font-medium' : 'hover:bg-indigo-700' }} transition">
+                            <i class="bi bi-person-circle mr-2"></i>Tài khoản
+                        </a>
+                        <a href="{{ route('services.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('services.*') ? 'bg-indigo-700 font-medium' : 'hover:bg-indigo-700' }} transition">
+                            <i class="bi bi-gear mr-2"></i>Dịch vụ
+                        </a>
+                        <a href="{{ route('topup.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('topup.*') ? 'bg-indigo-700 font-medium' : 'hover:bg-indigo-700' }} transition">
+                            <i class="bi bi-currency-dollar mr-2"></i>Nạp hộ
+                        </a>
+                        <a href="{{ route('contact') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('contact') ? 'bg-indigo-700 font-medium' : 'hover:bg-indigo-700' }} transition">
+                            <i class="bi bi-envelope mr-2"></i>Liên hệ
+                        </a>
+                        
+                        <div class="pt-2 border-t border-indigo-700 mt-2">
+                            @guest
+                                <a href="{{ route('login') }}" class="block px-3 py-2 rounded-md text-white hover:bg-indigo-700 transition">
+                                    <i class="bi bi-box-arrow-in-right mr-2"></i>Đăng nhập
+                                </a>
+                                <a href="{{ route('register') }}" class="block mt-2 px-3 py-2 rounded-md bg-white text-indigo-600 hover:bg-gray-100 font-medium text-center transition">
+                                    Đăng ký
+                                </a>
+                            @else
+                                <!-- Mobile Wallet -->
+                                <a href="{{ route('wallet.index') }}" class="flex items-center justify-between px-3 py-2 rounded-md bg-indigo-700 text-white mb-2">
+                                    <div class="flex items-center">
+                                        <i class="bi bi-wallet2 mr-2"></i>
+                                        <span>Số dư</span>
+                                    </div>
+                                    <span class="font-semibold">{{ Auth::user()->wallet ? number_format(Auth::user()->wallet->balance, 0, ',', '.') : 0 }}đ</span>
+                                </a>
+                                
+                                <!-- Mobile User Menu -->
+                                <a href="{{ route('profile.index') }}" class="block px-3 py-2 rounded-md text-white hover:bg-indigo-700 transition">
+                                    <i class="bi bi-person mr-2"></i>Thông tin tài khoản
+                                </a>
+                                <a href="{{ route('orders.index') }}" class="block px-3 py-2 rounded-md text-white hover:bg-indigo-700 transition">
+                                    <i class="bi bi-bag mr-2"></i>Đơn hàng tài khoản
+                                </a>
+                                <a href="{{ route('services.my_orders') }}" class="block px-3 py-2 rounded-md text-white hover:bg-indigo-700 transition">
+                                    <i class="bi bi-clock-history mr-2"></i>Lịch sử dịch vụ
+                                </a>
+                                <a href="{{ route('wallet.deposit') }}" class="block px-3 py-2 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 mt-2 transition text-center">
+                                    <i class="bi bi-plus-circle mr-2"></i>Nạp tiền
+                                </a>
+                                
+                                @if(Auth::user()->isAdmin())
+                                    <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 rounded-md text-white hover:bg-indigo-700 mt-2 transition">
+                                        <i class="bi bi-speedometer2 mr-2"></i>Quản trị viên
+                                    </a>
+                                @endif
+                                
+                                <form method="POST" action="{{ route('logout') }}" class="mt-2">
+                                    @csrf
+                                    <button type="submit" class="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-red-600 transition">
+                                        <i class="bi bi-box-arrow-right mr-2"></i>Đăng xuất
+                                    </button>
+                                </form>
+                            @endguest
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        
+        <!-- Breadcrumbs -->
+        @hasSection('breadcrumbs')
+            <div class="bg-white shadow-sm border-b">
+                <div class="container mx-auto px-4 py-2 text-sm">
+                    @yield('breadcrumbs')
+                </div>
+            </div>
+        @endif
+        
+        <!-- Flash Messages -->
+        <div class="toast-container" id="toastContainer">
+            @if (session('success'))
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow-md" role="alert">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-check-circle text-green-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p>{{ session('success') }}</p>
+                        </div>
+                        <button class="ml-auto text-green-500 hover:text-green-700" onclick="this.parentElement.parentElement.remove()">
+                            <i class="bi bi-x"></i>
                         </button>
                     </div>
                 </div>
-            </div>
+            @endif
             
-            <!-- Mobile menu -->
-            <div class="hidden mobile-menu sm:hidden">
-                <div class="px-2 pt-2 pb-3 space-y-1">
-                    <a href="{{ route('home') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('home') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
-                        Trang chủ
-                    </a>
-                    <a href="{{ route('games.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('games.*') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
-                        Trò chơi
-                    </a>
-                    <a href="{{ route('accounts.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('accounts.*') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
-                        Tài khoản
-                    </a>
-                   
-                    <a href="{{ route('services.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('services.*') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
-                        Dịch vụ
-                    </a>
-                    <a href="{{ route('topup.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('topup.*') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
-                        Nạp thuê
-                    </a>
-                    <a href="{{ route('about') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('about') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
-                        Về chúng tôi
-                    </a>
-                    <a href="{{ route('contact') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('contact') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
-                        Liên hệ
-                    </a>
-                    
-                    @guest
-                        <a href="{{ route('login') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
-                            Đăng nhập
-                        </a>
-                        <a href="{{ route('register') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
-                            Đăng ký
-                        </a>
-                    @else
-                        <!-- Hiển thị số dư ví trên mobile -->
-                        <a href="{{ route('wallet.index') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm11 1H6v8h8V6z" clip-rule="evenodd" />
-                                    <path d="M14 8a1 1 0 100-2h-4a1 1 0 100 2h4z" />
-                                </svg>
-                                <span>Ví: {{ Auth::user()->wallet ? number_format(Auth::user()->wallet->balance, 0, ',', '.') : 0 }}đ</span>
-                            </div>
-                        </a>
-                        <a href="{{ route('wallet.deposit') }}" class="block px-3 py-2 rounded-md text-white bg-green-600 font-medium hover:bg-green-700">
-                            <div class="flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
-                                </svg>
-                                Nạp tiền
-                            </div>
-                        </a>
-                        <a href="{{ route('profile.index') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
-                            Thông tin tài khoản
-                        </a>
-                        <a href="{{ route('orders.index') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
-                            Đơn hàng tài khoản
-                        </a>
-                        <a href="{{ route('boosting.my_orders') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
-                            Đơn hàng cày thuê
-                        </a>
-                        <a href="{{ route('services.my_orders') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
-                            Lịch sử dịch vụ
-                        </a>
-                        @if(Auth::user()->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
-                                Quản trị viên
-                            </a>
-                        @endif
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="block w-full text-left px-3 py-2 rounded-md text-white hover:bg-blue-700">
-                                Đăng xuất
-                            </button>
-                        </form>
-                    @endguest
+            @if (session('error'))
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-md" role="alert">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-exclamation-circle text-red-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p>{{ session('error') }}</p>
+                        </div>
+                        <button class="ml-auto text-red-500 hover:text-red-700" onclick="this.parentElement.parentElement.remove()">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </header>
-        
-        <!-- Flash Messages -->
-        @if (session('success'))
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-                <p>{{ session('success') }}</p>
-            </div>
-        @endif
-        
-        @if (session('error'))
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-                <p>{{ session('error') }}</p>
-            </div>
-        @endif
-        
-        @if (session('warning'))
-            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
-                <p>{{ session('warning') }}</p>
-            </div>
-        @endif
+            @endif
+            
+            @if (session('warning'))
+                <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded shadow-md" role="alert">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-exclamation-triangle text-yellow-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p>{{ session('warning') }}</p>
+                        </div>
+                        <button class="ml-auto text-yellow-500 hover:text-yellow-700" onclick="this.parentElement.parentElement.remove()">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+            @endif
+        </div>
         
         <!-- Page Content -->
         <main class="flex-grow">
-            @yield('content')
+            <div class="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+                @yield('content')
+            </div>
         </main>
         
         <!-- Footer -->
-        <footer class="bg-gray-800 text-white py-8">
+        <footer class="bg-gray-900 text-white pt-12 pb-6">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div>
-                        <h4 class="text-lg font-semibold mb-4">Về chúng tôi</h4>
-                        <p class="text-gray-300">
-                            Playtogerther Shop là nơi cung cấp tài khoản game Playtogerther chất lượng, uy tín, với nhiều ưu đãi hấp dẫn.
+                    <div data-aos="fade-up" data-aos-delay="100">
+                        <h4 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="bi bi-info-circle mr-2"></i>Về chúng tôi
+                        </h4>
+                        <p class="text-gray-400 mb-4">
+                            ShopBuffsao là nơi cung cấp tài khoản game chất lượng, uy tín, với nhiều ưu đãi hấp dẫn.
                         </p>
+                        <div class="flex space-x-4">
+                            <a href="https://www.facebook.com/people/Shopbuffsao/61574594802771/" target="_blank" class="text-gray-400 hover:text-white transition">
+                                <i class="bi bi-facebook text-xl"></i>
+                            </a>
+                            <a href="https://zalo.me/0876085633" target="_blank" class="text-gray-400 hover:text-white transition">
+                                <span class="font-bold">Zalo</span>
+                            </a>
+                        </div>
                     </div>
                     
-                    <div>
-                        <h4 class="text-lg font-semibold mb-4">Liên kết nhanh</h4>
-                        <ul class="space-y-2">
-                            <li><a href="{{ route('home') }}" class="text-gray-300 hover:text-white">Trang chủ</a></li>
-                            <li><a href="{{ route('games.index') }}" class="text-gray-300 hover:text-white">Trò chơi</a></li>
-                            <li><a href="{{ route('accounts.index') }}" class="text-gray-300 hover:text-white">Tài khoản</a></li>
-                            <li><a href="{{ route('boosting.index') }}" class="text-gray-300 hover:text-white">Dịch vụ</a></li>
-                            <li><a href="{{ route('about') }}" class="text-gray-300 hover:text-white">Về chúng tôi</a></li>
-                            <li><a href="{{ route('contact') }}" class="text-gray-300 hover:text-white">Liên hệ</a></li>
+                    <div data-aos="fade-up" data-aos-delay="200">
+                        <h4 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="bi bi-link-45deg mr-2"></i>Liên kết nhanh
+                        </h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="{{ route('home') }}" class="hover:text-white transition"><i class="bi bi-chevron-right mr-2 text-xs"></i>Trang chủ</a></li>
+                            <li><a href="{{ route('accounts.index') }}" class="hover:text-white transition"><i class="bi bi-chevron-right mr-2 text-xs"></i>Tài khoản</a></li>
+                            <li><a href="{{ route('services.index') }}" class="hover:text-white transition"><i class="bi bi-chevron-right mr-2 text-xs"></i>Dịch vụ</a></li>
+                            <li><a href="{{ route('topup.index') }}" class="hover:text-white transition"><i class="bi bi-chevron-right mr-2 text-xs"></i>Nạp hộ</a></li>
+                            <li><a href="{{ route('contact') }}" class="hover:text-white transition"><i class="bi bi-chevron-right mr-2 text-xs"></i>Liên hệ</a></li>
                         </ul>
                     </div>
                     
-                    <div>
-                        <h4 class="text-lg font-semibold mb-4">Liên hệ</h4>
-                        <ul class="space-y-2 text-gray-300">
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                </svg>
-                                123 Đường ABC, Quận XYZ, TP.HCM
+                    <div data-aos="fade-up" data-aos-delay="300">
+                        <h4 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="bi bi-telephone mr-2"></i>Liên hệ
+                        </h4>
+                        <ul class="space-y-3 text-gray-400">
+                            <li class="flex items-start">
+                                <i class="bi bi-geo-alt mt-1 mr-3 text-indigo-400"></i>
+                                <span>123 Đường ABC, Quận XYZ, TP.HCM</span>
                             </li>
                             <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                                </svg>
-                                0876085633
+                                <i class="bi bi-telephone mr-3 text-indigo-400"></i>
+                                <a href="tel:0876085633" class="hover:text-white transition">0876085633</a>
                             </li>
                             <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                                </svg>
-                                shopbuffsao@gmail.com
+                                <i class="bi bi-envelope mr-3 text-indigo-400"></i>
+                                <a href="mailto:shopbuffsao@gmail.com" class="hover:text-white transition">shopbuffsao@gmail.com</a>
                             </li>
                         </ul>
                     </div>
                 </div>
                 
-                <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
-                    <p>&copy; {{ date('Y') }} Playtogerther Shop. Tất cả quyền được bảo lưu.</p>
+                <div class="border-t border-gray-800 mt-10 pt-6 text-center text-gray-500 text-sm">
+                    <p>&copy; {{ date('Y') }} ShopBuffsao. Tất cả quyền được bảo lưu.</p>
                 </div>
             </div>
         </footer>
     </div>
     
+    <!-- Floating Social Buttons -->
+    <div class="floating-social">
+        <a href="https://www.facebook.com/people/Shopbuffsao/61574594802771/" target="_blank" class="facebook-btn" data-aos="fade-left" data-aos-delay="100">
+            <i class="bi bi-facebook text-xl"></i>
+        </a>
+        <a href="https://zalo.me/0876085633" target="_blank" class="zalo-btn" data-aos="fade-left" data-aos-delay="200">
+            <span class="font-bold text-sm">Zalo</span>
+        </a>
+        <button id="scrollToTop" class="bg-gray-800 text-white hover:bg-gray-700 transition" data-aos="fade-left" data-aos-delay="300">
+            <i class="bi bi-arrow-up"></i>
+        </button>
+    </div>
+    
     <script>
-        // Mobile menu toggle
+        // Initialize AOS
         document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuButton = document.querySelector('.mobile-menu-button');
-            const mobileMenu = document.querySelector('.mobile-menu');
+            AOS.init({
+                duration: 800,
+                easing: 'ease-in-out',
+                once: true
+            });
+            
+            // Mobile menu
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
             
             if (mobileMenuButton && mobileMenu) {
                 mobileMenuButton.addEventListener('click', function() {
                     mobileMenu.classList.toggle('hidden');
+                    mobileMenu.classList.toggle('show');
                 });
             }
             
-            // User dropdown toggle
-            const userDropdownButton = document.querySelector('.ml-3.relative');
-            const userDropdownMenu = document.querySelector('.ml-3.relative .hidden');
-            
-            if (userDropdownButton && userDropdownMenu) {
-                userDropdownButton.addEventListener('click', function() {
-                    userDropdownMenu.classList.toggle('hidden');
+            // User dropdown
+            const userDropdown = document.getElementById('userDropdown');
+            if (userDropdown) {
+                const dropdownMenu = userDropdown.querySelector('.dropdown-menu');
+                
+                userDropdown.addEventListener('click', function(e) {
+                    dropdownMenu.classList.toggle('show');
                 });
                 
                 // Close dropdown when clicking outside
-                document.addEventListener('click', function(event) {
-                    if (!userDropdownButton.contains(event.target)) {
-                        userDropdownMenu.classList.add('hidden');
+                document.addEventListener('click', function(e) {
+                    if (userDropdown && !userDropdown.contains(e.target)) {
+                        dropdownMenu.classList.remove('show');
+                    }
+                });
+            }
+            
+            // Auto-hide flash messages
+            setTimeout(function() {
+                const toasts = document.querySelectorAll('.toast-container > div');
+                toasts.forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 500);
+                });
+            }, 5000);
+            
+            // Scroll to top
+            const scrollToTopButton = document.getElementById('scrollToTop');
+            if (scrollToTopButton) {
+                scrollToTopButton.addEventListener('click', function() {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+                
+                // Show/hide scroll to top button
+                window.addEventListener('scroll', function() {
+                    if (window.pageYOffset > 300) {
+                        scrollToTopButton.style.opacity = '1';
+                    } else {
+                        scrollToTopButton.style.opacity = '0';
                     }
                 });
             }
         });
     </script>
-    
-    <!-- Biểu tượng mạng xã hội nổi -->
-    <div class="social-float-buttons">
-        <a href="https://www.facebook.com/people/Shopbuffsao/61574594802771/" target="_blank" class="social-float-button facebook text-white">
-            <i class="bi bi-facebook text-2xl"></i>
-        </a>
-        <a href="https://zalo.me/0876085633" target="_blank" class="social-float-button zalo text-white">
-            <span class="font-bold text-lg">Zalo</span>
-        </a>
-    </div>
     
     @stack('scripts')
 </body>

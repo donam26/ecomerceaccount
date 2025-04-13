@@ -22,7 +22,7 @@
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                         </svg>
                         @if(isset($isBoostingOrder) && $isBoostingOrder)
-                        <a href="{{ route('boosting.index') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Dịch vụ cày thuê</a>
+                        <a href="{{ route('boosting.index') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Dịch vụ cày hộ</a>
                         @else
                         <a href="{{ route('orders.index') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng của tôi</a>
                         @endif
@@ -34,7 +34,7 @@
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                         </svg>
                         @if(isset($isBoostingOrder) && $isBoostingOrder)
-                        <a href="{{ route('boosting.my_orders') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng cày thuê</a>
+                        <a href="{{ route('boosting.my_orders') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng cày hộ</a>
                         @elseif(isset($order) && strpos($order->order_number, 'SRV-') === 0)
                         <a href="{{ route('services.my_orders') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng dịch vụ</a>
                         @else

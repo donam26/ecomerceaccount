@@ -2,192 +2,276 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tailwind Typography cho nội dung HTML từ CKEditor */
-@layer components {
-    .prose h1 {
-        @apply text-2xl font-bold mb-4 text-gray-800;
+/* Import Google Fonts - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@layer base {
+    body {
+        font-family: 'Poppins', sans-serif;
     }
     
-    .prose h2 {
-        @apply text-xl font-bold mb-3 text-gray-800;
-    }
-    
-    .prose h3 {
-        @apply text-lg font-bold mb-3 text-gray-800;
-    }
-    
-    .prose p {
-        @apply mb-4 text-gray-700;
-    }
-    
-    .prose ul {
-        @apply list-disc pl-5 mb-4 text-gray-700;
-    }
-    
-    .prose ol {
-        @apply list-decimal pl-5 mb-4 text-gray-700;
-    }
-    
-    .prose li {
-        @apply mb-2;
-    }
-    
-    .prose a {
-        @apply text-blue-600 hover:underline;
-    }
-    
-    .prose blockquote {
-        @apply pl-4 border-l-4 border-gray-300 italic my-4 text-gray-700;
-    }
-    
-    .prose table {
-        @apply w-full border-collapse mb-4;
-    }
-    
-    .prose table th {
-        @apply border border-gray-300 px-4 py-2 bg-gray-100 text-left;
-    }
-    
-    .prose table td {
-        @apply border border-gray-300 px-4 py-2;
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Poppins', sans-serif;
     }
 }
 
 @layer components {
-  .btn-primary {
-    @apply py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75;
-  }
-  .card {
-    @apply bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300;
-  }
-  .input-field {
-    @apply w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400;
-  }
+    .btn-primary {
+        @apply bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-5 py-2.5 transition-all duration-300 shadow-md hover:shadow-lg inline-block;
+    }
+    
+    .btn-outline {
+        @apply border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-medium rounded-lg px-5 py-2.5 transition-all duration-300 inline-block;
+    }
+    
+    .card {
+        @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden;
+    }
+    
+    .input-field {
+        @apply rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm w-full;
+    }
+    
+    .section-title {
+        @apply text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4 sm:mb-6;
+    }
+    
+    .section-subtitle {
+        @apply text-gray-600 text-sm sm:text-base mb-8 sm:mb-12 max-w-xl mx-auto text-center;
+    }
+
+    .badge {
+        @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+    }
+    
+    .badge-blue {
+        @apply bg-blue-100 text-blue-800;
+    }
+    
+    .badge-green {
+        @apply bg-green-100 text-green-800;
+    }
+    
+    .badge-yellow {
+        @apply bg-yellow-100 text-yellow-800;
+    }
+    
+    .badge-red {
+        @apply bg-red-100 text-red-800;
+    }
+    
+    .divider {
+        @apply w-16 sm:w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full mx-auto my-4;
+    }
+    
+    .container-custom {
+        @apply px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl;
+    }
 }
 
-/* CSS tùy chỉnh cho biểu tượng mạng xã hội */
-.social-float-buttons {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 999;
+/* Responsive images */
+.img-responsive {
+    @apply w-full h-auto object-cover;
 }
 
-.social-float-button {
-    width: 56px !important;
-    height: 56px !important;
-    border-radius: 50% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin-top: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    transition: all 0.3s ease !important;
+/* Logo Animation */
+.logo-animation {
+    animation: pulse 2s infinite;
 }
 
-.social-float-button:hover {
-    transform: scale(1.1) !important;
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
 }
 
-.social-float-button.facebook {
-    background-color: #1877f2 !important;
-}
-
-.social-float-button.facebook:hover {
-    background-color: #0d6ae4 !important;
-}
-
-.social-float-button.zalo {
-    background-color: #0068ff !important;
-}
-
-.social-float-button.zalo:hover {
-    background-color: #0057d5 !important;
-}
-
-/* Hiệu ứng logo ShopBuffsao */
-.logo-text {
-    font-size: 2rem;
-    font-weight: 800;
-    background: linear-gradient(90deg, #ffffff, #c3e0ff, #ffcc00, #ffffff);
-    background-size: 300% 100%;
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    letter-spacing: 0.5px;
-    position: relative;
+/* Hover Effects */
+.hover-shadow {
     transition: all 0.3s ease;
-    padding: 5px 0;
-    animation: shimmer 6s infinite;
-    display: inline-block;
 }
 
-.logo-text:hover {
-    transform: scale(1.05);
-    background: linear-gradient(90deg, #ffffff, #ffcc00, #ffaa00, #ffffff);
-    background-size: 300% 100%;
-    -webkit-background-clip: text;
-    text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
-    animation: shine 1.5s ease-in-out infinite;
+.hover-shadow:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateY(-5px);
 }
 
-.logo-text::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    z-index: -1;
-    background: linear-gradient(90deg, transparent, rgba(255, 204, 0, 0.2), transparent);
-    background-size: 300% 100%;
-    animation: shimmer 3s infinite;
-    border-radius: 4px;
+/* Page transitions */
+.page-enter-active,
+.page-leave-active {
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.page-enter-from,
+.page-leave-to {
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transform: translateY(10px);
 }
 
-.logo-text:hover::before {
-    opacity: 1;
+/* Social media icons */
+.social-icon {
+    @apply w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300;
 }
 
-.logo-text::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #ffcc00, transparent);
-    transition: width 0.4s ease;
+.social-icon-facebook {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
 }
 
-.logo-text:hover::after {
-    width: 100%;
+.social-icon-twitter {
+    @apply bg-blue-400 text-white hover:bg-blue-500;
 }
 
-/* Hiệu ứng animation cho logo */
-@keyframes shimmer {
-    0% {
-        background-position: 0% 50%;
+.social-icon-instagram {
+    @apply bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-500 text-white;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-primary {
+    @apply bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700;
+}
+
+.bg-gradient-secondary {
+    @apply bg-gradient-to-r from-gray-50 to-gray-100;
+}
+
+/* Hover animation for cards */
+.card-hover-effect {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover-effect:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom animation for hero elements */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-@keyframes shine {
-    0% {
-        background-position: 0% 50%;
+.animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-delay-100 {
+    animation-delay: 0.1s;
+}
+
+.animate-delay-200 {
+    animation-delay: 0.2s;
+}
+
+.animate-delay-300 {
+    animation-delay: 0.3s;
+}
+
+/* Custom responsive padding and margin helpers */
+.py-responsive {
+    @apply py-8 sm:py-12 md:py-16 lg:py-20;
+}
+
+.my-responsive {
+    @apply my-8 sm:my-12 md:my-16 lg:my-20;
+}
+
+.px-responsive {
+    @apply px-4 sm:px-6 md:px-8 lg:px-10;
+}
+
+.mx-responsive {
+    @apply mx-4 sm:mx-6 md:mx-8 lg:mx-10;
+}
+
+/* Responsive font sizes */
+.text-responsive-title {
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl;
+}
+
+.text-responsive-subtitle {
+    @apply text-lg sm:text-xl md:text-2xl;
+}
+
+.text-responsive {
+    @apply text-sm sm:text-base md:text-lg;
+}
+
+/* Custom breakpoint indicator - useful for debugging responsive issues */
+.breakpoint-indicator {
+    @apply fixed bottom-0 right-0 z-50 p-2 font-bold text-white bg-black;
+}
+
+.breakpoint-indicator::after {
+    content: "sm";
+    @apply sm:content-["sm"] md:content-["md"] lg:content-["lg"] xl:content-["xl"] 2xl:content-["2xl"];
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #bbd0e2;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3182ce;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+    .hide-scrollbar {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
     }
-    50% {
-        background-position: 100% 50%;
+    
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
     }
-    100% {
-        background-position: 0% 50%;
+    
+    .touch-scroll {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Grid optimizations for mobile */
+.grid-responsive-1-2-3-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8;
+}
+
+.grid-responsive-1-2-3 {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8;
+}
+
+.grid-responsive-1-2 {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6;
+}
+
+/* Background pattern size adjustment for mobile */
+.bg-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+@media (max-width: 640px) {
+    .bg-pattern {
+        background-size: 40px 40px;
     }
 }

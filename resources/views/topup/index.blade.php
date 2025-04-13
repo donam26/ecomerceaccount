@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Dịch vụ nạp thuê')
+@section('title', 'Dịch vụ nạp hộ')
 
 @section('content')
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Dịch vụ nạp thuê</h1>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Dịch vụ nạp hộ</h1>
             <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                 Dịch vụ nạp tiền, vật phẩm nhanh chóng và an toàn cho tài khoản game của bạn. Đội ngũ chuyên nghiệp sẽ hỗ trợ bạn nạp tiền, vật phẩm trong game một cách nhanh chóng và an toàn.
             </p>

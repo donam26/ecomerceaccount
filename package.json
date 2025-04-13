@@ -16,6 +16,7 @@
     "dependencies": {
         "postcss-import": "^16.1.0",
         "postcss-nesting": "^13.0.1",
+        "swiper": "^11.2.6",
         "tailwindcss": "^3.4.17"
     }
 }

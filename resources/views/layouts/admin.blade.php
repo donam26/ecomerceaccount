@@ -107,7 +107,7 @@
                                         <span class="truncate">Đơn hàng dịch vụ</span>
                                     </a>
                                     <a href="{{ route('admin.topup.index') }}" class="{{ request()->routeIs('admin.topup.*') ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
-                                        <span class="truncate">Dịch vụ nạp thuê</span>
+                                        <span class="truncate">Dịch vụ nạp hộ</span>
                                     </a>
                                 </div>
                             </div>
@@ -200,7 +200,7 @@
                     <div x-show="servicesOpen" class="pl-6">
                         <a href="{{ route('admin.services.index') }}" class="{{ request()->routeIs('admin.services.*') ? 'bg-gray-900' : '' }} block px-4 py-2 text-white rounded-md">Dịch vụ</a>
                         <a href="{{ route('admin.services.orders.index') }}" class="{{ request()->routeIs('admin.services.orders.*') ? 'bg-gray-900' : '' }} block px-4 py-2 text-white rounded-md">Đơn hàng dịch vụ</a>
-                        <a href="{{ route('admin.topup.index') }}" class="{{ request()->routeIs('admin.topup.*') ? 'bg-gray-900' : '' }} block px-4 py-2 text-white rounded-md">Dịch vụ nạp thuê</a>
+                        <a href="{{ route('admin.topup.index') }}" class="{{ request()->routeIs('admin.topup.*') ? 'bg-gray-900' : '' }} block px-4 py-2 text-white rounded-md">Dịch vụ nạp hộ</a>
                     </div>
                 </div>
                 

@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Chỉnh sửa dịch vụ nạp thuê')
+@section('title', 'Chỉnh sửa dịch vụ nạp hộ')
 
 @section('content')
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center">
             <h1 class="text-2xl font-semibold text-gray-900">
-                Chỉnh sửa dịch vụ nạp thuê: {{ $service->name }}
+                Chỉnh sửa dịch vụ nạp hộ: {{ $service->name }}
             </h1>
             <div class="flex gap-2">
                 <a href="{{ route('admin.topup.index') }}"
@@ -54,7 +54,7 @@
                             </label>
                             <input type="text" id="name" name="name" value="{{ old('name', $service->name) }}" required
                                 class="block w-full mt-1 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <p class="text-xs text-gray-500 mt-1">Tên dịch vụ nạp thuê, ví dụ: Nạp 1000 Kim Cương Free Fire</p>
+                            <p class="text-xs text-gray-500 mt-1">Tên dịch vụ nạp hộ, ví dụ: Nạp 1000 Kim Cương Free Fire</p>
                         </div>
 
                         <div class="mb-4">
