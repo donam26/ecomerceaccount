@@ -24,75 +24,90 @@ class PaymentController extends Controller
      */
     public function checkout($orderNumber)
     {
-        // Tìm đơn hàng thông thường
-        $order = Order::where('order_number', $orderNumber)->first();
-        
-        // Kiểm tra các loại đơn hàng
-        $isBoostingOrder = false;
-        $isTopUpOrder = false;
-        $isServiceOrder = false;
-        
-        if (!$order) {
-            // Kiểm tra xem có phải là đơn hàng boosting
-            $order = BoostingOrder::where('order_number', $orderNumber)->first();
+        try {
+            // Tìm đơn hàng thông thường
+            $order = Order::where('order_number', $orderNumber)->first();
+            
+            // Kiểm tra các loại đơn hàng
+            $isBoostingOrder = false;
+            $isTopUpOrder = false;
+            $isServiceOrder = false;
             
             if (!$order) {
-                // Kiểm tra xem có phải là đơn hàng nạp thuê
-                $order = \App\Models\TopUpOrder::where('order_number', $orderNumber)->first();
+                // Kiểm tra xem có phải là đơn hàng boosting
+                $order = BoostingOrder::where('order_number', $orderNumber)->first();
                 
                 if (!$order) {
-                    // Kiểm tra xem có phải là đơn hàng dịch vụ
-                    $order = \App\Models\ServiceOrder::where('order_number', $orderNumber)->first();
-                
-                if (!$order) {
-                    return redirect()->route('home')->with('error', 'Không tìm thấy đơn hàng');
-                }
-                
-                    $isServiceOrder = true;
+                    // Kiểm tra xem có phải là đơn hàng nạp thuê
+                    $order = \App\Models\TopUpOrder::where('order_number', $orderNumber)->first();
+                    
+                    if (!$order) {
+                        // Kiểm tra xem có phải là đơn hàng dịch vụ
+                        $order = \App\Models\ServiceOrder::where('order_number', $orderNumber)->first();
+                        
+                        if (!$order) {
+                            Log::error('Không tìm thấy đơn hàng với mã: ' . $orderNumber);
+                            return redirect()->route('home')->with('error', 'Không tìm thấy đơn hàng với mã: ' . $orderNumber);
+                        }
+                        
+                        $isServiceOrder = true;
+                    } else {
+                        $isTopUpOrder = true;
+                    }
                 } else {
-                $isTopUpOrder = true;
+                    $isBoostingOrder = true;
                 }
-            } else {
-                $isBoostingOrder = true;
             }
-        }
-        
-        // Kiểm tra trạng thái thanh toán
-        if ($order->status == 'paid' || $order->status == 'completed') {
-            if ($isBoostingOrder) {
-                // Nếu đơn hàng boosting đã thanh toán, chuyển đến trang nhập thông tin tài khoản
-                if (!$order->hasAccountInfo()) {
-                    return redirect()->route('boosting.account_info', $order->order_number)
-                        ->with('success', 'Đơn hàng này đã được thanh toán, vui lòng cung cấp thông tin tài khoản');
+            
+            // Kiểm tra trạng thái thanh toán
+            if ($order->status == 'paid' || $order->status == 'completed') {
+                if ($isBoostingOrder) {
+                    // Nếu đơn hàng boosting đã thanh toán, chuyển đến trang nhập thông tin tài khoản
+                    if (!$order->hasAccountInfo()) {
+                        return redirect()->route('boosting.account_info', $order->order_number)
+                            ->with('success', 'Đơn hàng này đã được thanh toán, vui lòng cung cấp thông tin tài khoản');
+                    }
+                    return redirect()->route('boosting.show', $order->service->slug)
+                        ->with('success', 'Đơn hàng này đã được thanh toán');
+                } elseif ($isTopUpOrder) {
+                    // Nếu đơn hàng nạp thuê đã thanh toán, chuyển đến trang chi tiết đơn hàng
+                    return redirect()->route('topup.show', $order->service->slug)
+                        ->with('success', 'Đơn hàng này đã được thanh toán và đang được xử lý');
+                } elseif ($isServiceOrder) {
+                    // Nếu đơn hàng dịch vụ đã thanh toán, chuyển đến trang dịch vụ
+                    return redirect()->route('services.show', $order->service->slug)
+                        ->with('success', 'Đơn hàng này đã được thanh toán và đang được xử lý');
+                } else {
+                    // Nếu đơn hàng thông thường đã thanh toán, chuyển đến trang chi tiết đơn hàng
+                    $orderNumber = $order->order_number;
+                    if (strpos($orderNumber, 'SRV-') === 0) {
+                        return redirect()->route('services.view_order', $orderNumber)
+                            ->with('success', 'Đơn hàng này đã được thanh toán');
+                    } elseif (strpos($orderNumber, 'BST-') === 0) {
+                        return redirect()->route('boosting.orders.show', $orderNumber)
+                            ->with('success', 'Đơn hàng này đã được thanh toán');
+                    } else {
+                        return redirect()->route('orders.index')
+                            ->with('success', 'Đơn hàng này đã được thanh toán');
+                    }
                 }
-                return redirect()->route('boosting.show', $order->service->slug)
-                    ->with('success', 'Đơn hàng này đã được thanh toán');
-            } elseif ($isTopUpOrder) {
-                // Nếu đơn hàng nạp thuê đã thanh toán, chuyển đến trang chi tiết đơn hàng
-                return redirect()->route('topup.show', $order->service->slug)
-                    ->with('success', 'Đơn hàng này đã được thanh toán và đang được xử lý');
-            } elseif ($isServiceOrder) {
-                // Nếu đơn hàng dịch vụ đã thanh toán, chuyển đến trang dịch vụ
-                return redirect()->route('services.show', $order->service->slug)
-                    ->with('success', 'Đơn hàng này đã được thanh toán và đang được xử lý');
-            } else {
-                // Nếu đơn hàng thông thường đã thanh toán, chuyển đến trang chi tiết đơn hàng
-                return redirect()->route('orders.show', $order->order_number)
-                    ->with('success', 'Đơn hàng này đã được thanh toán');
             }
+            
+            // Tạo thông tin thanh toán QR SePay
+            $paymentInfo = $this->generateSePayQRCode($order);
+            
+            // Nếu người dùng đã đăng nhập, lấy thông tin ví điện tử
+            $wallet = null;
+            if (auth()->check()) {
+                $wallet = auth()->user()->wallet;
+            }
+            
+            // Hiển thị trang thanh toán với thông tin đơn hàng và QR
+            return view('payment.checkout', compact('order', 'paymentInfo', 'isBoostingOrder', 'isTopUpOrder', 'isServiceOrder', 'wallet'));
+        } catch (\Exception $e) {
+            Log::error('Lỗi trong PaymentController@checkout: ' . $e->getMessage());
+            return redirect()->route('home')->with('error', 'Đã xảy ra lỗi khi xử lý thanh toán: ' . $e->getMessage());
         }
-        
-        // Tạo thông tin thanh toán QR SePay
-        $paymentInfo = $this->generateSePayQRCode($order);
-        
-        // Nếu người dùng đã đăng nhập, lấy thông tin ví điện tử
-        $wallet = null;
-        if (auth()->check()) {
-            $wallet = auth()->user()->wallet;
-        }
-        
-        // Hiển thị trang thanh toán với thông tin đơn hàng và QR
-        return view('payment.checkout', compact('order', 'paymentInfo', 'isBoostingOrder', 'isTopUpOrder', 'isServiceOrder', 'wallet'));
     }
 
     /**
@@ -169,8 +184,17 @@ class PaymentController extends Controller
             return redirect()->route('services.my_orders')
                 ->with('info', 'Đơn hàng đang được xử lý, vui lòng chờ trong giây lát.');
         } else {
-            return redirect()->route('orders.show', $orderNumber)
-                ->with('info', 'Đơn hàng đang được xử lý, vui lòng chờ trong giây lát.');
+            // Xác định route dựa trên prefix của mã đơn hàng
+            if (strpos($orderNumber, 'SRV-') === 0) {
+                return redirect()->route('services.view_order', $orderNumber)
+                    ->with('info', 'Đơn hàng đang được xử lý, vui lòng chờ trong giây lát.');
+            } elseif (strpos($orderNumber, 'BST-') === 0) {
+                return redirect()->route('boosting.orders.show', $orderNumber)
+                    ->with('info', 'Đơn hàng đang được xử lý, vui lòng chờ trong giây lát.');
+            } else {
+                return redirect()->route('orders.index')
+                    ->with('info', 'Đơn hàng đang được xử lý, vui lòng chờ trong giây lát.');
+            }
         }
     }
 
@@ -281,6 +305,16 @@ class PaymentController extends Controller
             elseif (strpos($orderNumber, 'WALLET') === 0) {
                 $orderType = "ORDWALLET";
             }
+            // Kiểm tra nếu là đơn hàng dịch vụ
+            elseif (strpos($orderNumber, 'SRV-') === 0 || $order instanceof \App\Models\ServiceOrder) {
+                $orderType = "ORDSRV";
+                
+                // Ghi log để debug
+                Log::info('Tạo nội dung thanh toán cho đơn hàng dịch vụ', [
+                    'order_number' => $orderNumber,
+                    'order_type' => $orderType
+                ]);
+            }
             
             // Tạo nội dung chuyển khoản không có dấu gạch ngang
             // Xử lý mã đơn hàng cho phù hợp với yêu cầu thanh toán
@@ -293,6 +327,16 @@ class PaymentController extends Controller
             } else if (strpos($orderNumber, 'WALLET-') === 0) {
                 // Đối với nạp ví, loại bỏ "WALLET-"
                 $cleanedOrderNumber = str_replace('WALLET-', '', $orderNumber);
+            } else if (strpos($orderNumber, 'SRV-') === 0) {
+                // Đối với đơn hàng dịch vụ, loại bỏ "SRV-"
+                $cleanedOrderNumber = str_replace('SRV-', '', $orderNumber);
+                
+                // Ghi log để debug
+                Log::info('Nội dung thanh toán đơn hàng dịch vụ đã xử lý', [
+                    'original' => $orderNumber,
+                    'cleaned' => $cleanedOrderNumber,
+                    'payment_content' => $pattern . ' ' . $orderType . $cleanedOrderNumber
+                ]);
             } else {
                 // Trường hợp khác giữ nguyên
                 $cleanedOrderNumber = $orderNumber;
@@ -341,20 +385,27 @@ class PaymentController extends Controller
         // Tìm đơn hàng cần thanh toán
         $order = Order::where('order_number', $orderNumber)->first();
         
-        // Nếu không tìm thấy đơn hàng thông thường, kiểm tra xem có phải là đơn hàng boosting
+        // Kiểm tra các loại đơn hàng
         $isBoostingOrder = false;
+        $isServiceOrder = false;
+        
         if (!$order) {
+            // Kiểm tra xem có phải là đơn hàng boosting
             $order = BoostingOrder::where('order_number', $orderNumber)->first();
             if (!$order) {
-                return redirect()->route('home')->with('error', 'Không tìm thấy đơn hàng');
+                // Kiểm tra xem có phải đơn hàng dịch vụ
+                $order = \App\Models\ServiceOrder::where('order_number', $orderNumber)->first();
+                if (!$order) {
+                    return redirect()->route('home')->with('error', 'Không tìm thấy đơn hàng');
+                }
+                $isServiceOrder = true;
+            } else {
+                $isBoostingOrder = true;
             }
-            
-            $isBoostingOrder = true;
         }
         
         // Kiểm tra xem đơn hàng có thuộc về người dùng hiện tại không
         if ($order->user_id !== $user->id) {
-
             return redirect()->route('home')->with('error', 'Bạn không có quyền thanh toán đơn hàng này');
         }
         
@@ -363,6 +414,11 @@ class PaymentController extends Controller
             if ($order->status == 'paid' || $order->status == 'completed') {
                 return redirect()->route('boosting.account_info', $order->order_number)
                     ->with('success', 'Đơn hàng này đã được thanh toán');
+            }
+        } else if ($isServiceOrder) {
+            if ($order->status == 'paid' || $order->status == 'completed' || $order->status == 'processing') {
+                return redirect()->route('services.show', $order->service->slug)
+                    ->with('success', 'Đơn hàng này đã được thanh toán và đang được xử lý');
             }
         } else {
             if ($order->status == 'completed') {
@@ -381,7 +437,16 @@ class PaymentController extends Controller
             DB::beginTransaction();
             
             // Tạo mô tả thanh toán
-            $description = 'Thanh toán ' . ($isBoostingOrder ? 'dịch vụ cày thuê' : 'mua tài khoản') . ' #' . $order->order_number;
+            if ($isBoostingOrder) {
+                $description = 'Thanh toán dịch vụ cày thuê #' . $order->order_number;
+            } else if ($isServiceOrder) {
+                $description = 'Thanh toán dịch vụ game #' . $order->order_number;
+            } else {
+                $description = 'Thanh toán mua tài khoản #' . $order->order_number;
+            }
+            
+            // Xác định loại model cho đơn hàng
+            $orderType = $isBoostingOrder ? 'BoostingOrder' : ($isServiceOrder ? 'ServiceOrder' : 'Order');
             
             // Trừ tiền từ ví và tạo giao dịch
             $transaction = $wallet->withdraw(
@@ -389,7 +454,7 @@ class PaymentController extends Controller
                 WalletTransaction::TYPE_PAYMENT,
                 $description,
                 $order->id,
-                $isBoostingOrder ? 'BoostingOrder' : 'Order'
+                $orderType
             );
             
             // Nếu không trừ được tiền do lỗi nào đó
@@ -399,8 +464,8 @@ class PaymentController extends Controller
             }
             
             // Cập nhật trạng thái đơn hàng
-            if ($isBoostingOrder) {
-                // Đối với đơn hàng boosting, sử dụng trạng thái 'paid'
+            if ($isBoostingOrder || $isServiceOrder) {
+                // Đối với đơn hàng boosting và service, sử dụng trạng thái 'paid'
                 $order->status = 'paid';
             } else {
                 // Đối với đơn hàng mua tài khoản thông thường, sử dụng trạng thái 'completed'
@@ -420,6 +485,9 @@ class PaymentController extends Controller
             if ($isBoostingOrder) {
                 return redirect()->route('boosting.account_info', $order->order_number)
                     ->with('success', 'Thanh toán thành công. Vui lòng nhập thông tin tài khoản để bắt đầu dịch vụ.');
+            } else if ($isServiceOrder) {
+                return redirect()->route('payment.success', $order->order_number)
+                    ->with('success', 'Thanh toán thành công. Dịch vụ game của bạn đang được xử lý!');
             } else {
                 return redirect()->route('payment.success', $order->order_number)
                     ->with('success', 'Thanh toán thành công. Cảm ơn bạn đã mua hàng!');
@@ -427,8 +495,9 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             // Rollback transaction nếu có lỗi
             DB::rollBack();
+            Log::error('Lỗi thanh toán qua ví: ' . $e->getMessage());
             
-            return back()->with('error', 'Đã xảy ra lỗi trong quá trình thanh toán. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.');
+            return back()->with('error', 'Đã xảy ra lỗi trong quá trình thanh toán: ' . $e->getMessage());
         }
     }
 
@@ -470,27 +539,39 @@ class PaymentController extends Controller
         // Tìm đơn hàng cần kiểm tra
         $order = Order::where('order_number', $orderNumber)->first();
         
-        // Nếu không tìm thấy đơn hàng thông thường, kiểm tra xem có phải là đơn hàng boosting
+        // Kiểm tra các loại đơn hàng
         $isBoostingOrder = false;
+        $isServiceOrder = false;
+        
         if (!$order) {
+            // Kiểm tra xem có phải là đơn hàng boosting
             $order = BoostingOrder::where('order_number', $orderNumber)->first();
             if (!$order) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không tìm thấy đơn hàng',
-                    'status' => 'not_found'
-                ]);
+                // Kiểm tra xem có phải là đơn hàng dịch vụ
+                $order = \App\Models\ServiceOrder::where('order_number', $orderNumber)->first();
+                if (!$order) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Không tìm thấy đơn hàng',
+                        'status' => 'not_found'
+                    ]);
+                }
+                $isServiceOrder = true;
+            } else {
+                $isBoostingOrder = true;
             }
-            
-            $isBoostingOrder = true;
         }
         
         // Trả về trạng thái đơn hàng
         if ($order->status == 'paid' || $order->status == 'completed') {
-            $redirectUrl = $isBoostingOrder 
-                ? route('boosting.account_info', $order->order_number)
-                : route('payment.success', $order->order_number);
-                
+            if ($isBoostingOrder) {
+                $redirectUrl = route('boosting.account_info', $order->order_number);
+            } else if ($isServiceOrder) {
+                $redirectUrl = route('payment.success', $order->order_number);
+            } else {
+                $redirectUrl = route('payment.success', $order->order_number);
+            }
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Đơn hàng đã được thanh toán thành công',

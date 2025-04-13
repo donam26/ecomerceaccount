@@ -34,9 +34,29 @@
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                         </svg>
                         @if(isset($isBoostingOrder) && $isBoostingOrder)
-                        <span class="ml-1 text-gray-700 md:ml-2">Đơn hàng #{{ $order->order_number }}</span>
+                        <a href="{{ route('boosting.my_orders') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng cày thuê</a>
+                        @elseif(isset($order) && strpos($order->order_number, 'SRV-') === 0)
+                        <a href="{{ route('services.my_orders') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng dịch vụ</a>
                         @else
-                        <a href="{{ route('orders.show', $order->order_number) }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng #{{ $order->order_number }}</a>
+                        <a href="{{ route('orders.index') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng của tôi</a>
+                        @endif
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        @if(isset($order))
+                            @if(strpos($order->order_number, 'SRV-') === 0)
+                                <a href="{{ route('services.view_order', $order->order_number) }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng #{{ $order->order_number }}</a>
+                            @elseif(strpos($order->order_number, 'BST-') === 0)
+                                <a href="{{ route('boosting.orders.show', $order->order_number) }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng #{{ $order->order_number }}</a>
+                            @else
+                                <a href="{{ route('orders.index') }}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">Đơn hàng #{{ $order->order_number }}</a>
+                            @endif
+                        @else
+                            <span class="ml-1 text-gray-700 md:ml-2">Đơn hàng</span>
                         @endif
                     </div>
                 </li>
@@ -395,6 +415,8 @@
                                     window.location.href = data.redirect_url;
                                 } else if ('{{ isset($isBoostingOrder) && $isBoostingOrder }}' === '1') {
                                     window.location.href = '{{ route('boosting.account_info', $order->order_number) }}';
+                                } else if ('{{ isset($order) && strpos($order->order_number, 'SRV-') === 0 }}' === '1') {
+                                    window.location.href = '{{ route('services.view_order', $order->order_number) }}';
                                 } else {
                                     window.location.href = '{{ route('payment.success', $order->order_number) }}';
                                 }
@@ -435,6 +457,8 @@
                                     window.location.href = data.redirect_url;
                                 } else if ('{{ isset($isBoostingOrder) && $isBoostingOrder }}' === '1') {
                                     window.location.href = '{{ route('boosting.account_info', $order->order_number) }}';
+                                } else if ('{{ isset($order) && strpos($order->order_number, 'SRV-') === 0 }}' === '1') {
+                                    window.location.href = '{{ route('services.view_order', $order->order_number) }}';
                                 } else {
                                     window.location.href = '{{ route('payment.success', $order->order_number) }}';
                                 }

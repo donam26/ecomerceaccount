@@ -86,9 +86,19 @@
                                 <br>
                                 <span class="text-xs text-gray-500">
                                     @if($transaction->reference_type == 'Order')
-                                    <a href="{{ route('orders.show', $transaction->reference_id) }}" class="text-blue-600 hover:text-blue-800">
-                                        Xem đơn hàng
-                                    </a>
+                                        @if(strpos($transaction->reference_id, 'SRV-') === 0)
+                                            <a href="{{ route('services.view_order', $transaction->reference_id) }}" class="text-blue-600 hover:text-blue-800">
+                                                Xem đơn hàng
+                                            </a>
+                                        @elseif(strpos($transaction->reference_id, 'BST-') === 0) 
+                                            <a href="{{ route('boosting.orders.show', $transaction->reference_id) }}" class="text-blue-600 hover:text-blue-800">
+                                                Xem đơn hàng
+                                            </a>
+                                        @else
+                                            <a href="{{ route('orders.index') }}" class="text-blue-600 hover:text-blue-800">
+                                                Xem đơn hàng
+                                            </a>
+                                        @endif
                                     @elseif($transaction->reference_type == 'BoostingOrder')
                                     <a href="{{ route('boosting.orders.show', $transaction->reference_id) }}" class="text-blue-600 hover:text-blue-800">
                                         Xem đơn hàng dịch vụ

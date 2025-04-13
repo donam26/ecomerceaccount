@@ -10,45 +10,18 @@ class GameService extends Model
     use HasFactory;
 
     protected $fillable = [
-        'game_id',
         'name',
         'slug',
         'description',
+        'price',
+        'sale_price',
         'image',
-        'type',
-        'completed_count',
-        'is_featured',
         'status',
+        'is_featured',
         'metadata',
-    ];
-
-    protected $casts = [
-        'is_featured' => 'boolean',
-        'metadata' => 'json',
-    ];
-
-    public function game()
-    {
-        return $this->belongsTo(Game::class);
-    }
-
-    public function packages()
-    {
-        return $this->hasMany(ServicePackage::class);
-    }
-
-    public function orders()
-    {
-        return $this->hasMany(ServiceOrder::class);
-    }
-    
-    // Tăng số lượng hoàn thành
-    public function incrementCompletedCount()
-    {
-        $this->increment('completed_count');
-    }
-}
-
+        'completed_count',
+        'game_id',
+        'type'
     ];
 
     protected $casts = [

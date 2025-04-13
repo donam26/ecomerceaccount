@@ -19,17 +19,26 @@ class HomeController extends Controller
             $query->where('status', 'available');
         }])->take(6)->get();
         
-        $featuredAccounts = Account::where('is_featured', true)
-                            ->where('status', 'available')
-                            ->take(8)
-                            ->get();
-                            
+      
         $recentAccounts = Account::where('status', 'available')
                           ->latest()
                           ->take(8)
                           ->get();
         
-        return view('home', compact('games', 'featuredAccounts', 'recentAccounts'));
+        // Lấy các dịch vụ nổi bật hoặc mới nhất
+        $services = \App\Models\GameService::with(['game', 'packages' => function($query) {
+            $query->where('status', 'active')->orderBy('display_order');
+        }])
+        ->where('status', 'active')
+        ->when(true, function($query) {
+            // Ưu tiên dịch vụ có đánh dấu là nổi bật
+            return $query->orderBy('is_featured', 'desc');
+        })
+        ->latest()
+        ->take(4)
+        ->get();
+        
+        return view('home', compact('games', 'recentAccounts', 'services'));
     }
     
     /**

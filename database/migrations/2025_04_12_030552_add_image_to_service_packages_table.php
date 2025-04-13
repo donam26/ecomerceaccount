@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('service_orders', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('game_service_packages', function (Blueprint $table) {
+            $table->string('image')->nullable()->after('name');
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('service_orders');
+        Schema::table('game_service_packages', function (Blueprint $table) {
+            $table->dropColumn('image');
+        });
     }
 };

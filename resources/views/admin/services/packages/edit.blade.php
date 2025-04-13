@@ -31,7 +31,7 @@
 
         <!-- Form chỉnh sửa gói dịch vụ -->
         <div class="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
-            <form action="{{ route('admin.services.packages.update', ['service' => $service->id, 'package' => $package->id]) }}" method="POST">
+            <form action="{{ route('admin.services.packages.update', ['service' => $service->id, 'package' => $package->id]) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="px-4 py-5 sm:p-6">
@@ -68,6 +68,48 @@
                                 <input type="number" name="display_order" id="display_order" min="0" value="{{ old('display_order', $package->display_order) }}" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
                             </div>
                             <p class="mt-1 text-xs text-gray-500">Số nhỏ hơn sẽ hiển thị trước</p>
+                        </div>
+
+                        <!-- Ảnh gói dịch vụ -->
+                        <div class="sm:col-span-6">
+                            <label for="image" class="block text-sm font-medium text-gray-700">Ảnh gói dịch vụ</label>
+                            
+                            @if($package->image)
+                            <div class="mt-2 mb-3">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-40 w-40 overflow-hidden rounded-md border border-gray-200">
+                                        <img src="{{ asset($package->image) }}" alt="{{ $package->name }}" class="h-full w-full object-cover object-center">
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm text-gray-500">Ảnh hiện tại</p>
+                                        <div class="mt-1 flex items-center">
+                                            <input type="checkbox" name="remove_image" id="remove_image" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                            <label for="remove_image" class="ml-2 block text-sm text-gray-700">Xóa ảnh hiện tại</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+                            
+                            <div class="mt-1 flex items-center">
+                                <div class="w-full">
+                                    <label class="block">
+                                        <span class="sr-only">Chọn ảnh gói dịch vụ</span>
+                                        <input type="file" name="image" id="image" accept="image/*" class="block w-full text-sm text-gray-500
+                                            file:mr-4 file:py-2 file:px-4
+                                            file:rounded-md file:border-0
+                                            file:text-sm file:font-semibold
+                                            file:bg-blue-50 file:text-blue-700
+                                            hover:file:bg-blue-100
+                                        "/>
+                                    </label>
+                                </div>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Tải lên ảnh mới để thay thế ảnh hiện tại (JPG, PNG). Kích thước tối đa 2MB.</p>
+                            <div id="image-preview" class="mt-2 hidden">
+                                <p class="text-sm text-gray-500 mb-1">Ảnh mới (xem trước):</p>
+                                <img src="#" alt="Xem trước ảnh" class="h-40 w-auto object-contain border rounded-md">
+                            </div>
                         </div>
 
                         <!-- Trạng thái -->
@@ -131,4 +173,46 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('image');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = imagePreview.querySelector('img');
+        const removeCheckbox = document.getElementById('remove_image');
+        
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                    
+                    // Nếu người dùng chọn ảnh mới, bỏ đánh dấu xóa ảnh cũ
+                    if (removeCheckbox) {
+                        removeCheckbox.checked = false;
+                    }
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                previewImg.src = '#';
+                imagePreview.classList.add('hidden');
+            }
+        });
+        
+        // Nếu người dùng chọn xóa ảnh, ẩn input file
+        if (removeCheckbox) {
+            removeCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // Reset file input
+                    imageInput.value = '';
+                    previewImg.src = '#';
+                    imagePreview.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
 @endsection 

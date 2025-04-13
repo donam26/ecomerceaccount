@@ -84,38 +84,7 @@
                             @endif
                         </dd>
                     </div>
-                    
-                    <!-- Thuộc tính -->
-                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                        <dt class="text-sm font-medium text-gray-500">Thuộc tính</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            @php
-                                $attributes = [];
-                                if ($account->attributes) {
-                                    if (is_string($account->attributes)) {
-                                        $attributes = json_decode($account->attributes, true) ?? [];
-                                    } else if (is_array($account->attributes)) {
-                                        $attributes = $account->attributes;
-                                    }
-                                }
-                            @endphp
-                            
-                            @if(count($attributes) > 0)
-                                <div class="space-y-2">
-                                    @foreach($attributes as $key => $value)
-                                        @if($key && $value)
-                                            <div class="bg-gray-100 px-3 py-2 rounded-md">
-                                                <span class="font-medium">{{ $key }}:</span> {{ $value }}
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            @else
-                                <p>Không có thuộc tính</p>
-                            @endif
-                        </dd>
-                    </div>
-                    
+                 
                     <!-- Hình ảnh -->
                     <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Hình ảnh</dt>

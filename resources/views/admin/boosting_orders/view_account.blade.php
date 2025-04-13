@@ -133,14 +133,7 @@
                 </div>
             </div>
             
-            @if($order->additional_info)
-            <div class="mb-4">
-                <p class="text-sm text-gray-600 mb-1">Thông tin bổ sung:</p>
-                <div class="bg-gray-100 p-3 rounded-md">
-                    <p class="text-md whitespace-pre-line">{{ $order->additional_info }}</p>
-                </div>
-            </div>
-            @endif
+            
         </div>
     </div>
 

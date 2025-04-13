@@ -71,7 +71,7 @@
             </div>
             
             <div class="flex flex-col space-y-4">
-                <a href="{{ route('orders.show', $order->order_number) }}" class="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <a href="{{ route('boosting.orders.show', $order->order_number) }}" class="inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     Xem chi tiết đơn hàng
                 </a>
                 

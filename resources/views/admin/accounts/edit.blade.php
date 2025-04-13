@@ -96,32 +96,6 @@
                             @enderror
                         </div>
 
-                        <!-- Thuộc tính -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Thuộc tính</label>
-                            <div class="mt-2 space-y-2">
-                                @php
-                                    $attributes = old('attributes') ?? $account->attributes ?? [];
-                                    if (is_string($attributes)) {
-                                        $attributes = json_decode($attributes, true) ?? [];
-                                    }
-                                @endphp
-                                
-                                @for($i = 0; $i < 4; $i++)
-                                    <div class="flex items-center space-x-2">
-                                        <input type="text" name="attributes[{{ $i }}][key]" 
-                                               placeholder="Tên thuộc tính" 
-                                               value="{{ isset($attributes[$i]) ? $attributes[$i]['key'] : '' }}"
-                                               class="block w-1/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                        <input type="text" name="attributes[{{ $i }}][value]" 
-                                               placeholder="Giá trị" 
-                                               value="{{ isset($attributes[$i]) ? $attributes[$i]['value'] : '' }}"
-                                               class="block w-2/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                    </div>
-                                @endfor
-                            </div>
-                        </div>
-
                         <!-- Hình ảnh hiện tại -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Hình ảnh hiện tại</label>

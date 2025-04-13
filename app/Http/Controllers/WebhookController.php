@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\BoostingOrder;
 use App\Models\Transaction;
 use App\Models\WalletDeposit;
+use App\Models\ServiceOrder;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -187,6 +188,37 @@ class WebhookController extends Controller
                             ]);
                         }
                         
+                        // Kiểm tra xem có phải là mã thanh toán dịch vụ (SRV-) hay không
+                        if (strpos($orderNumber, 'SRV-') === 0) {
+                            Log::info('SePay Webhook: Đơn hàng dịch vụ', ['order_number' => $orderNumber]);
+                            $serviceOrder = ServiceOrder::where('order_number', $orderNumber)->first();
+                            
+                            if ($serviceOrder) {
+                                // Cập nhật trạng thái đơn hàng thành 'paid'
+                                $serviceOrder->status = 'paid';
+                                $serviceOrder->payment_method = 'bank_transfer';
+                                $serviceOrder->save();
+                                
+                                // Lưu giao dịch
+                                Transaction::create([
+                                    'order_id' => null,
+                                    'boosting_order_id' => null,
+                                    'game_service_order_id' => $serviceOrder->id,
+                                    'amount' => $data['transferAmount'],
+                                    'payment_method' => 'bank_transfer',
+                                    'transaction_id' => $data['id'] ?? null,
+                                    'status' => 'completed',
+                                    'notes' => json_encode($data)
+                                ]);
+                                
+                                return response()->json(['success' => true]);
+                            } else {
+                                Log::warning('SePay Webhook API: Không tìm thấy đơn hàng dịch vụ', [
+                                    'order_number' => $orderNumber
+                                ]);
+                            }
+                        }
+                        
                         return response()->json(['success' => true]);
                     } else {
                         Log::warning('SePay Webhook API: Không tìm thấy đơn hàng cày thuê', [
@@ -278,6 +310,99 @@ class WebhookController extends Controller
                             'content' => $content
                         ]);
                         return response()->json(['success' => true]);
+                    }
+                } else if (strpos($content, 'ORDSRV') !== false) {
+                    // Tìm vị trí của "ORDSRV" trong chuỗi
+                    $ordSrvPos = strpos($content, 'ORDSRV');
+                    if ($ordSrvPos !== false) {
+                        // Lấy phần sau 'ORDSRV'
+                        $serviceNumberRaw = substr($content, $ordSrvPos + 6); // 6 là độ dài của 'ORDSRV'
+                        
+                        // Chỉ lấy các số đầu tiên cho đến khi gặp ký tự khác
+                        if (preg_match('/^(\d+)/', $serviceNumberRaw, $matches)) {
+                            $serviceNumber = $matches[1];
+                            
+                            // Thêm lại prefix để có mã đơn hàng đầy đủ
+                            $orderNumber = 'SRV-' . $serviceNumber;
+                            
+                            Log::info('SePay Webhook: Tìm thấy đơn hàng dịch vụ', [
+                                'order_number' => $orderNumber,
+                                'raw_content' => $content,
+                                'extracted_number' => $serviceNumber
+                            ]);
+    
+                            // Tìm đơn hàng dịch vụ
+                            $serviceOrder = ServiceOrder::where('order_number', $orderNumber)
+                                ->where('status', 'pending')
+                                ->first();
+                            
+                            if (!$serviceOrder) {
+                                // Thử tìm kiếm mở rộng
+                                $serviceOrder = ServiceOrder::where('order_number', 'like', '%' . $serviceNumber . '%')
+                                    ->where('status', 'pending')
+                                    ->first();
+                                    
+                                if (!$serviceOrder) {
+                                    Log::info('SePay Webhook: Thử tìm thêm với status khác pending', [
+                                        'order_number' => $orderNumber
+                                    ]);
+                                    
+                                    // Nếu không tìm thấy với status pending, thử tìm với bất kỳ status nào
+                                    $serviceOrder = ServiceOrder::where('order_number', $orderNumber)->first();
+                                }
+                            }
+                            
+                            if ($serviceOrder) {
+                                // Nếu đơn đã được thanh toán thì bỏ qua
+                                if ($serviceOrder->status == 'paid' || $serviceOrder->status == 'completed') {
+                                    Log::info('SePay Webhook: Đơn hàng đã được thanh toán trước đó', [
+                                        'order_id' => $serviceOrder->id,
+                                        'order_number' => $serviceOrder->order_number,
+                                        'status' => $serviceOrder->status
+                                    ]);
+                                    return response()->json(['status' => 'success', 'message' => 'Đơn hàng đã được thanh toán trước đó']);
+                                }
+                                
+                                // Cập nhật trạng thái đơn hàng thành 'paid'
+                                $serviceOrder->status = 'paid';
+                                $serviceOrder->payment_method = 'bank_transfer';
+                                $serviceOrder->paid_at = now();
+                                $serviceOrder->save();
+                                
+                                Log::info('SePay Webhook: Đã cập nhật đơn hàng dịch vụ thành paid', [
+                                    'order_id' => $serviceOrder->id,
+                                    'order_number' => $serviceOrder->order_number
+                                ]);
+                                
+                                // Lưu giao dịch
+                                Transaction::create([
+                                    'order_id' => null,
+                                    'boosting_order_id' => null,
+                                    'game_service_order_id' => $serviceOrder->id,
+                                    'amount' => $data['transferAmount'],
+                                    'payment_method' => 'bank_transfer',
+                                    'transaction_id' => $data['id'] ?? null,
+                                    'status' => 'completed',
+                                    'notes' => json_encode($data)
+                                ]);
+                                
+                                return response()->json(['status' => 'success', 'message' => 'Đã cập nhật đơn hàng dịch vụ']);
+                            } else {
+                                Log::warning('SePay Webhook: Không tìm thấy đơn hàng dịch vụ', [
+                                    'order_number' => $orderNumber,
+                                    'service_number' => $serviceNumber
+                                ]);
+                            }
+                        } else {
+                            Log::warning('SePay Webhook: Không thể trích xuất số từ mã đơn hàng dịch vụ', [
+                                'content' => $content,
+                                'service_number_raw' => $serviceNumberRaw
+                            ]);
+                        }
+                    } else {
+                        Log::warning('SePay Webhook: Không thể trích xuất mã đơn hàng dịch vụ', [
+                            'content' => $content
+                        ]);
                     }
                 } else {
                     Log::warning('SePay Webhook API: Không tìm thấy định dạng đơn hàng hợp lệ', [
@@ -550,6 +675,37 @@ class WebhookController extends Controller
                                 'transfer_content' => $content,
                                 'amount' => $data['transferAmount'] ?? 0
                             ]);
+                        }
+                        
+                        // Kiểm tra xem có phải là mã thanh toán dịch vụ (SRV-) hay không
+                        if (strpos($orderNumber, 'SRV-') === 0) {
+                            Log::info('SePay Webhook: Đơn hàng dịch vụ', ['order_number' => $orderNumber]);
+                            $serviceOrder = ServiceOrder::where('order_number', $orderNumber)->first();
+                            
+                            if ($serviceOrder) {
+                                // Cập nhật trạng thái đơn hàng thành 'paid'
+                                $serviceOrder->status = 'paid';
+                                $serviceOrder->payment_method = 'bank_transfer';
+                                $serviceOrder->save();
+                                
+                                // Lưu giao dịch
+                                Transaction::create([
+                                    'order_id' => null,
+                                    'boosting_order_id' => null,
+                                    'game_service_order_id' => $serviceOrder->id,
+                                    'amount' => $data['transferAmount'],
+                                    'payment_method' => 'bank_transfer',
+                                    'transaction_id' => $data['id'] ?? null,
+                                    'status' => 'completed',
+                                    'notes' => json_encode($data)
+                                ]);
+                                
+                                return response()->json(['success' => true]);
+                            } else {
+                                Log::warning('SePay Webhook API: Không tìm thấy đơn hàng dịch vụ', [
+                                    'order_number' => $orderNumber
+                                ]);
+                            }
                         }
                         
                         return response()->json(['success' => true]);

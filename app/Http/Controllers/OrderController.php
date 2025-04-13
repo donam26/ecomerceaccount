@@ -28,6 +28,13 @@ class OrderController extends Controller
      */
     public function show($orderNumber)
     {
+        // Kiểm tra loại đơn hàng dựa vào tiền tố
+        if (strpos($orderNumber, 'SRV-') === 0) {
+            return redirect()->route('services.view_order', $orderNumber);
+        } elseif (strpos($orderNumber, 'BST-') === 0) {
+            return redirect()->route('boosting.orders.show', $orderNumber);
+        }
+        
         $order = Order::where('order_number', $orderNumber)
             ->where('user_id', auth()->id())
             ->firstOrFail();
@@ -143,7 +150,16 @@ class OrderController extends Controller
         
         }
         
-        return redirect()->route('orders.show', $orderNumber)
-            ->with('success', 'Đơn hàng đã được hủy thành công.');
+        // Xác định route dựa trên prefix của mã đơn hàng
+        if (strpos($orderNumber, 'SRV-') === 0) {
+            return redirect()->route('services.view_order', $orderNumber)
+                ->with('success', 'Đơn hàng đã được hủy thành công.');
+        } elseif (strpos($orderNumber, 'BST-') === 0) {
+            return redirect()->route('boosting.orders.show', $orderNumber)
+                ->with('success', 'Đơn hàng đã được hủy thành công.');
+        } else {
+            return redirect()->route('orders.index')
+                ->with('success', 'Đơn hàng đã được hủy thành công.');
+        }
     }
 }

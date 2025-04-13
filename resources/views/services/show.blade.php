@@ -83,35 +83,49 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         @foreach($packages as $package)
-                        <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition duration-300 {{ $package->status === 'inactive' ? 'opacity-70' : '' }}">
-                            <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $package->name }}</h3>
-                            
-                            @if($package->description)
-                            <p class="text-gray-600 mb-4 text-sm">{{ $package->description }}</p>
+                        <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition duration-300 {{ $package->status === 'inactive' ? 'opacity-70' : '' }}">
+                            @if($package->image)
+                            <div class="w-full h-48 overflow-hidden">
+                                <img src="{{ asset($package->image) }}" alt="{{ $package->name }}" class="w-full h-full object-cover transition-transform hover:scale-105">
+                            </div>
+                            @else
+                            <div class="w-full h-48 bg-gradient-to-r from-blue-100 to-blue-200 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                </svg>
+                            </div>
                             @endif
                             
-                            <div class="flex items-center justify-between border-t border-gray-100 pt-4 mt-4">
-                                <div>
-                                    @if($package->sale_price && $package->sale_price < $package->price)
-                                    <p class="text-gray-500 line-through text-sm">{{ number_format($package->price, 0, ',', '.') }}đ</p>
-                                    <p class="text-xl font-bold text-red-600">{{ number_format($package->sale_price, 0, ',', '.') }}đ</p>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $package->name }}</h3>
+                                
+                                @if($package->description)
+                                <p class="text-gray-600 mb-4 text-sm">{{ $package->description }}</p>
+                                @endif
+                                
+                                <div class="flex items-center justify-between border-t border-gray-100 pt-4 mt-4">
+                                    <div>
+                                        @if($package->sale_price && $package->sale_price < $package->price)
+                                        <p class="text-gray-500 line-through text-sm">{{ number_format($package->price, 0, ',', '.') }}đ</p>
+                                        <p class="text-xl font-bold text-red-600">{{ number_format($package->sale_price, 0, ',', '.') }}đ</p>
+                                        @else
+                                        <p class="text-xl font-bold text-gray-800">{{ number_format($package->price, 0, ',', '.') }}đ</p>
+                                        @endif
+                                    </div>
+                                    
+                                    @if($package->status === 'active')
+                                    <form action="{{ route('services.order_package', [$service->slug, $package->id]) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm">
+                                            Chọn gói này
+                                        </button>
+                                    </form>
                                     @else
-                                    <p class="text-xl font-bold text-gray-800">{{ number_format($package->price, 0, ',', '.') }}đ</p>
+                                    <span class="bg-gray-200 text-gray-600 py-2 px-4 rounded-md text-sm">
+                                        Không khả dụng
+                                    </span>
                                     @endif
                                 </div>
-                                
-                                @if($package->status === 'active')
-                                <form action="{{ route('services.order_package', [$service->slug, $package->id]) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm">
-                                        Chọn gói này
-                                    </button>
-                                </form>
-                                @else
-                                <span class="bg-gray-200 text-gray-600 py-2 px-4 rounded-md text-sm">
-                                    Không khả dụng
-                                </span>
-                                @endif
                             </div>
                         </div>
                         @endforeach
@@ -179,15 +193,20 @@
                         <span class="text-gray-600 font-medium block mb-3">Chọn gói dịch vụ:</span>
                         <div class="space-y-3">
                             @foreach($packages as $package)
-                            <div class="border border-gray-200 rounded-lg p-3 hover:border-blue-300 transition-colors {{ $package->status === 'inactive' ? 'opacity-70' : '' }}">
-                                <div class="flex items-start justify-between">
-                                    <div>
+                            <div class="border border-gray-200 rounded-lg overflow-hidden hover:border-blue-300 transition-colors {{ $package->status === 'inactive' ? 'opacity-70' : '' }}">
+                                <div class="flex items-start p-3">
+                                    @if($package->image)
+                                    <div class="w-16 h-16 rounded overflow-hidden mr-3 flex-shrink-0">
+                                        <img src="{{ asset($package->image) }}" alt="{{ $package->name }}" class="w-full h-full object-cover">
+                                    </div>
+                                    @endif
+                                    <div class="flex-grow">
                                         <h3 class="text-gray-800 font-medium">{{ $package->name }}</h3>
                                         @if($package->description)
                                         <p class="text-gray-600 text-sm mt-1">{{ $package->description }}</p>
                                         @endif
                                     </div>
-                                    <div class="text-right">
+                                    <div class="text-right ml-3 flex-shrink-0">
                                         @if($package->sale_price && $package->sale_price < $package->price)
                                         <p class="text-gray-500 line-through text-sm">{{ number_format($package->price, 0, ',', '.') }}đ</p>
                                         <p class="font-bold text-red-600">{{ number_format($package->sale_price, 0, ',', '.') }}đ</p>
@@ -198,7 +217,7 @@
                                 </div>
                                 
                                 @if($package->status === 'active')
-                                <div class="mt-3 text-right">
+                                <div class="bg-gray-50 p-3 text-right border-t border-gray-100">
                                     <form action="{{ route('services.order_package', [$service->slug, $package->id]) }}" method="POST">
                                         @csrf
                                         <button type="submit" class="bg-blue-600 text-white py-1.5 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm">
@@ -207,7 +226,7 @@
                                     </form>
                                 </div>
                                 @else
-                                <div class="mt-3 text-right">
+                                <div class="bg-gray-50 p-3 text-right border-t border-gray-100">
                                     <span class="bg-gray-200 text-gray-600 py-1.5 px-4 rounded-md text-sm inline-block">
                                         Không khả dụng
                                     </span>

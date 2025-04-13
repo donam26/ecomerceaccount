@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Dịch vụ thuê câu cá bóng 5 6 Play Together')
+@section('title', 'Danh sách dịch vụ')
 
 @section('content')
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Dịch vụ thuê câu cá bóng 5 6 Play Together</h1>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Danh sách dịch vụ</h1>
             <p class="text-lg text-gray-600 max-w-3xl mx-auto">
                 Để lại tài khoản cho chúng tôi và thư giãn. Đội ngũ chuyên nghiệp sẽ giúp bạn đạt được mục tiêu câu được cá bóng 5, bóng 6 trong Play Together một cách nhanh chóng và an toàn.
             </p>

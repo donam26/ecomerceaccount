@@ -31,7 +31,7 @@
 
         <!-- Form tạo gói dịch vụ -->
         <div class="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
-            <form action="{{ route('admin.services.packages.store', $service->id) }}" method="POST">
+            <form action="{{ route('admin.services.packages.store', $service->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="px-4 py-5 sm:p-6">
                     <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -69,6 +69,29 @@
                             <p class="mt-1 text-xs text-gray-500">Số nhỏ hơn sẽ hiển thị trước</p>
                         </div>
 
+                        <!-- Ảnh gói dịch vụ -->
+                        <div class="sm:col-span-6">
+                            <label for="image" class="block text-sm font-medium text-gray-700">Ảnh gói dịch vụ</label>
+                            <div class="mt-1 flex items-center">
+                                <div class="w-full">
+                                    <label class="block">
+                                        <span class="sr-only">Chọn ảnh gói dịch vụ</span>
+                                        <input type="file" name="image" id="image" accept="image/*" class="block w-full text-sm text-gray-500
+                                            file:mr-4 file:py-2 file:px-4
+                                            file:rounded-md file:border-0
+                                            file:text-sm file:font-semibold
+                                            file:bg-blue-50 file:text-blue-700
+                                            hover:file:bg-blue-100
+                                        "/>
+                                    </label>
+                                </div>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Tải lên ảnh minh họa cho gói dịch vụ (JPG, PNG). Kích thước tối đa 2MB.</p>
+                            <div id="image-preview" class="mt-2 hidden">
+                                <img src="#" alt="Xem trước ảnh" class="h-40 w-auto object-contain border rounded-md">
+                            </div>
+                        </div>
+
                         <!-- Trạng thái -->
                         <div class="sm:col-span-3">
                             <label for="status" class="block text-sm font-medium text-gray-700">Trạng thái <span class="text-red-500">*</span></label>
@@ -100,4 +123,28 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('image');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = imagePreview.querySelector('img');
+        
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                previewImg.src = '#';
+                imagePreview.classList.add('hidden');
+            }
+        });
+    });
+</script>
 @endsection 

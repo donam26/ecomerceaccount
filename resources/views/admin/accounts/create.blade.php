@@ -95,36 +95,7 @@
                             @enderror
                         </div>
 
-                        <!-- Thuộc tính -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Thuộc tính</label>
-                            <div class="mt-2 space-y-2">
-                                <div class="flex items-center space-x-2">
-                                    <input type="text" name="attributes[0][key]" placeholder="Tên thuộc tính" value="{{ old('attributes.0.key') }}"
-                                           class="block w-1/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                    <input type="text" name="attributes[0][value]" placeholder="Giá trị" value="{{ old('attributes.0.value') }}"
-                                           class="block w-2/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <input type="text" name="attributes[1][key]" placeholder="Tên thuộc tính" value="{{ old('attributes.1.key') }}"
-                                           class="block w-1/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                    <input type="text" name="attributes[1][value]" placeholder="Giá trị" value="{{ old('attributes.1.value') }}"
-                                           class="block w-2/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <input type="text" name="attributes[2][key]" placeholder="Tên thuộc tính" value="{{ old('attributes.2.key') }}"
-                                           class="block w-1/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                    <input type="text" name="attributes[2][value]" placeholder="Giá trị" value="{{ old('attributes.2.value') }}"
-                                           class="block w-2/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <input type="text" name="attributes[3][key]" placeholder="Tên thuộc tính" value="{{ old('attributes.3.key') }}"
-                                           class="block w-1/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                    <input type="text" name="attributes[3][value]" placeholder="Giá trị" value="{{ old('attributes.3.value') }}"
-                                           class="block w-2/3 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                </div>
-                            </div>
-                        </div>
+                    
 
                         <!-- Hình ảnh -->
                         <div>

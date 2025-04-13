@@ -51,7 +51,13 @@
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-700">{{ $order->created_at->format('d/m/Y H:i') }}</td>
                                     <td class="px-6 py-4 text-sm">
-                                        <a href="{{ route('orders.show', $order->order_number) }}" class="text-blue-600 hover:text-blue-800 mr-3">Chi tiết</a>
+                                        @if(strpos($order->order_number, 'SRV-') === 0)
+                                            <a href="{{ route('services.view_order', $order->order_number) }}" class="text-blue-600 hover:text-blue-800 mr-3">Chi tiết</a>
+                                        @elseif(strpos($order->order_number, 'BST-') === 0)
+                                            <a href="{{ route('boosting.orders.show', $order->order_number) }}" class="text-blue-600 hover:text-blue-800 mr-3">Chi tiết</a>
+                                        @else
+                                            <a href="{{ route('orders.show', $order->order_number) }}" class="text-blue-600 hover:text-blue-800 mr-3">Chi tiết</a>
+                                        @endif
                                         
                                         @if($order->status == 'pending')
                                             <a href="{{ route('payment.checkout', $order->order_number) }}" class="text-green-600 hover:text-green-800 mr-3">Thanh toán</a>

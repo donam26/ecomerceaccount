@@ -113,25 +113,6 @@
                         </div>
                     </div>
 
-                    @if(isset($accountInfo['extra_info']) && is_array($accountInfo['extra_info']))
-                        <div class="mt-4">
-                            <p class="text-gray-600 font-medium mb-2">Thông tin bổ sung:</p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                @foreach($accountInfo['extra_info'] as $key => $value)
-                                    <div>
-                                        <p class="text-gray-600 text-sm">{{ ucfirst($key) }}:</p>
-                                        <p class="font-medium">
-                                            @if(is_array($value) || is_object($value))
-                                                {{ json_encode($value) }}
-                                            @else
-                                                {{ $value }}
-                                            @endif
-                                        </p>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
                 </div>
             @elseif($order->status == 'completed')
                 <div class="bg-yellow-50 p-4 rounded-lg">

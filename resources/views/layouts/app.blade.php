@@ -47,11 +47,9 @@
                             <a href="{{ route('accounts.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('accounts.*') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
                                 Tài khoản
                             </a>
-                            <a href="{{ route('boosting.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('boosting.*') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
-                                Dịch vụ cày thuê
-                            </a>
+                           
                             <a href="{{ route('services.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('services.*') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
-                                Câu cá bóng 5 6
+                                Dịch vụ
                             </a>
                             <a href="{{ route('topup.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('topup.*') ? 'border-white font-semibold' : 'border-transparent hover:border-gray-200' }}">
                                 Nạp thuê
@@ -118,8 +116,9 @@
                                         Đơn hàng tài khoản
                                     </a>
                                     
-                                    <a href="{{ route('boosting.my_orders') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        Đơn hàng dịch vụ
+                                    
+                                    <a href="{{ route('services.my_orders') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        Lịch sử dịch vụ
                                     </a>
                                     
                                     <!-- Authentication -->
@@ -157,11 +156,9 @@
                     <a href="{{ route('accounts.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('accounts.*') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
                         Tài khoản
                     </a>
-                    <a href="{{ route('boosting.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('boosting.*') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
-                        Dịch vụ cày thuê
-                    </a>
+                   
                     <a href="{{ route('services.index') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('services.*') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
-                        Câu cá bóng 5 6
+                        Dịch vụ
                     </a>
                     <a href="{{ route('about') }}" class="block px-3 py-2 rounded-md text-white {{ request()->routeIs('about') ? 'bg-blue-700 font-semibold' : 'hover:bg-blue-700' }}">
                         Về chúng tôi
@@ -185,7 +182,10 @@
                             Đơn hàng tài khoản
                         </a>
                         <a href="{{ route('boosting.my_orders') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
-                            Đơn hàng dịch vụ
+                            Đơn hàng cày thuê
+                        </a>
+                        <a href="{{ route('services.my_orders') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">
+                            Lịch sử dịch vụ
                         </a>
                         @if(Auth::user()->isAdmin())
                             <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 rounded-md text-white hover:bg-blue-700">

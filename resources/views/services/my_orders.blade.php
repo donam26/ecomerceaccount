@@ -113,7 +113,7 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ route('services.view_order', $order->id) }}" class="text-blue-600 hover:text-blue-900">Xem chi tiết</a>
+                                <a href="{{ route('services.view_order', $order->order_number) }}" class="text-blue-600 hover:text-blue-900">Xem chi tiết</a>
                                 
                                 @if($order->status == 'pending')
                                 <a href="{{ route('payment.checkout', $order->order_number) }}" class="ml-3 text-green-600 hover:text-green-900">Thanh toán</a>
